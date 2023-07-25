@@ -207,7 +207,7 @@ class Card(Plugin):
                     title='LookupMode', 
                     message='Could not be submitted to Anki')
 
-    @register('c')
+    @register('C')
     def clear(self, force=False):
 
         flds=self.fields[self.model]
