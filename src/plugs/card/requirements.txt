@@ -1,0 +1,2 @@
+plyer==2.1.0
+ankipulator==0.0.1
