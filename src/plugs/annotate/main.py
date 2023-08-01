@@ -1,10 +1,10 @@
-import os
-import functools
+from PyQt5 import QtGui
 
 from qapp.app.plug import Plug 
 from qapp.utils import register
 
 from lura.utils import getBoundaries
+from tables import Annotation as Table
 
 from .annotate import Annotate
 from .annotations import Annotations
@@ -16,6 +16,7 @@ class Annotation(Plug):
         super().__init__(app, mode_keys={'command': 'a'})
 
         self.functions={}
+        self.table=Table()
         self.annotate=Annotate(app, self)
         self.annotations=Annotations(app, self)
 
@@ -54,9 +55,8 @@ class Annotation(Plug):
 
     def add(self, document, annotation):
 
-        dhash = document.hash()
         page=document.page(annotation['page'])
-        annotation['color'] = QColor(
+        annotation['color'] = QtGui.QColor(
                 self.functions.get(annotation['function'], 'cyan'))
         annotation['boundaries']=getBoundaries(
                 annotation['position'])
@@ -72,5 +72,5 @@ class Annotation(Plug):
         if document:
 
             dhash = document.hash()
-            aData=self.app.tables.annotation.getRow({'hash':dhash})
+            aData=self.table.getRow({'hash':dhash})
             for annotation in aData: self.add(document, annotation)
