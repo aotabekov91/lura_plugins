@@ -6,7 +6,7 @@ class Autosave(Plug):
 
     def __init__(self, app):
 
-        super(Autosave, self).__init__(app)
+        super(Autosave, self).__init__(app=app, listen_port=False)
 
         self.table=Table()
         self.app.main.display.itemChanged.connect(self.on_itemChanged)

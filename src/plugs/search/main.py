@@ -6,11 +6,13 @@ class Search(Mode):
 
     def __init__(self, app):
 
-        super(Search, self).__init__(app=app, 
-                                     listen_leader='/', 
-                                     show_statusbar=True,
-                                     delisten_on_exec=False,
-                                     )
+        super(Search, self).__init__(
+                app=app, 
+                listen_leader='/', 
+                listen_port=False,
+                show_statusbar=True, 
+                delisten_on_exec=False
+                )
 
         self.index=-1
         self.matches=[]

@@ -13,12 +13,14 @@ class Annotation(Plug):
 
     def __init__(self, app):
 
-        super().__init__(app, mode_keys={'command': 'a'})
+        super().__init__(app=app, 
+                         listen_port=False,
+                         mode_keys={'command': 'a'})
 
         self.functions={}
         self.table=Table()
-        self.annotate=Annotate(app, self)
-        self.annotations=Annotations(app, self)
+        self.annotate=Annotate(app=app, annotation=self)
+        self.annotations=Annotations(app=app, annotation=self)
 
         self.paint()
         self.app.buffer.bufferCreated.connect(self.paint)

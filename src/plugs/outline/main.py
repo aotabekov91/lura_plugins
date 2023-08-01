@@ -6,7 +6,10 @@ class Outline(TreePlug):
 
     def __init__(self, app): 
 
-        super().__init__(app, position='left', mode_keys={'command':'o'})
+        super().__init__(app=app, 
+                         position='left', 
+                         listen_port=False,
+                         mode_keys={'command':'o'})
 
     def setUI(self):
 

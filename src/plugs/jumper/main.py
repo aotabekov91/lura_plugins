@@ -8,7 +8,9 @@ class Leaper(Plug):
     # TODO
     def __init__(self, app):
 
-        super(Leaper, self).__init__(app, mode_keys={'command': 'j'})
+        super(Leaper, self).__init__(app=app, 
+                                     listen_port=False,
+                                     mode_keys={'command': 'j'})
 
         self.index=0
         self.jumps={}

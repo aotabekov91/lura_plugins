@@ -8,7 +8,10 @@ class Quickmark(Plug):
 
     def __init__(self, app):
 
-        super().__init__(app, position='right', mode_keys={'command': 't'})
+        super().__init__(app=app, 
+                         position='right', 
+                         listen_port=False,
+                         mode_keys={'command': 't'})
 
         self.marks = Table() 
 

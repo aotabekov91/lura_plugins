@@ -15,7 +15,11 @@ class Annotations(Plug):
 
         self.annotation=annotation
 
-        super().__init__(app, position='right', mode_keys={'command': 'a'})
+        super().__init__(app=app, 
+                         position='right', 
+                         listen_port=False,
+                         mode_keys={'command': 'a'}
+                         )
 
         self.app.main.display.viewSelection.connect(
                 self.on_viewSelection)

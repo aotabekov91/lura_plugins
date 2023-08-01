@@ -10,7 +10,10 @@ class Part(Plug):
 
     def __init__(self, app):
 
-        super(Part, self).__init__(app, position='left', mode_keys={'command': 'p'})
+        super(Part, self).__init__(app=app, 
+                                   position='left', 
+                                   listen_port=False,
+                                   mode_keys={'command': 'p'})
 
         self.follow=False
         self.part=Table()

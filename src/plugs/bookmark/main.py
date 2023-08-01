@@ -12,7 +12,10 @@ class Bookmark(Plug):
 
     def __init__(self, app):
 
-        super().__init__(app, position='right', mode_keys={'command':'b'}) 
+        super().__init__(app=app, 
+                         position='right', 
+                         listen_port=False,
+                         mode_keys={'command':'b'}) 
 
         self.table=Table()
         self.setUI()

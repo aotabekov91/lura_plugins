@@ -11,8 +11,9 @@ class Annotate(Mode):
 
         self.annotation=annotation
 
-        super().__init__(app,
+        super().__init__(app=app,
                          listen_leader='a',
+                         listen_port=False,
                          show_commands=True,
                          show_statusbar=True,
                          )

@@ -8,9 +8,11 @@ class Documents(Plug):
 
     def __init__(self, app):
 
-        super().__init__(app, 
-                         position='right', 
-                         mode_keys={'command': 'd'})
+        super(Documents, self).__init__(
+                app=app, 
+                position='right', 
+                listen_port=None,
+                mode_keys={'command': 'd'})
 
         self.hash=Hash()
         self.meta=Metadata()

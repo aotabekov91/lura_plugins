@@ -5,6 +5,10 @@ from qapp.app.plug import Plug
 
 class Lookup(Plug):
 
+    def __init__(self, app):
+
+        super().__init__(app=app, listen_port=False)
+
     def setConnection(self):
 
         super().setConnection()

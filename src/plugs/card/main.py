@@ -12,8 +12,9 @@ class Card(Plug):
     def __init__(self, app):
 
         super(Card, self).__init__(
-                app,
+                app=app,
                 position='right',
+                listen_port=False,
                 mode_keys={'command':'c'})
 
         self.decks=[]

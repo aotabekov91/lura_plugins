@@ -8,7 +8,10 @@ class Metadata(Plug):
 
     def __init__(self, app):
 
-        super().__init__(app, position='right', name='metadata', mode_keys={'command': 'm'})
+        super().__init__(app=app, 
+                         position='right', 
+                         listen_port=False,
+                         mode_keys={'command': 'm'})
 
         self.setUI()
 

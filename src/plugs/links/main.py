@@ -12,7 +12,9 @@ class Links(Mode):
 
     def __init__(self, app):
 
-        super().__init__(app, show_statusbar=True)
+        super().__init__(app=app, 
+                         listen_port=None,
+                         show_statusbar=True)
 
         self.links=None
         self.selection=None
