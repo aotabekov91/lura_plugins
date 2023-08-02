@@ -1,18 +1,17 @@
 from tables import Part as Table
 
-from qapp.app.plug import Plug 
+from qapp.plug import PlugObj 
 from qapp.utils import register
 from qapp.widget import Item, InputList
 
 from .widget import PartTree
 
-class Part(Plug):
+class Part(PlugObj):
 
     def __init__(self, app):
 
         super(Part, self).__init__(app=app, 
                                    position='left', 
-                                   listen_port=False,
                                    mode_keys={'command': 'p'})
 
         self.follow=False

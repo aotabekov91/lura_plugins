@@ -2,8 +2,8 @@ import subprocess
 
 from PyQt5 import QtCore
 
-from qapp.app.mode import Mode
 from qapp.utils import register
+from qapp.core.modes import Mode
 from qapp.widget import ListWidget, Item
 
 class Links(Mode):
@@ -13,7 +13,6 @@ class Links(Mode):
     def __init__(self, app):
 
         super().__init__(app=app, 
-                         listen_port=None,
                          show_statusbar=True)
 
         self.links=None

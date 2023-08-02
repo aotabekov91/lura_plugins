@@ -1,6 +1,6 @@
 from PyQt5 import QtGui
 
-from qapp.app.plug import Plug 
+from qapp.plug import PlugObj 
 from qapp.utils import register
 
 from lura.utils import getBoundaries
@@ -9,12 +9,11 @@ from tables import Annotation as Table
 from .annotate import Annotate
 from .annotations import Annotations
 
-class Annotation(Plug):
+class Annotation(PlugObj):
 
     def __init__(self, app):
 
         super().__init__(app=app, 
-                         listen_port=False,
                          mode_keys={'command': 'a'})
 
         self.functions={}

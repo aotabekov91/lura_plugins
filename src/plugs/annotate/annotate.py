@@ -1,6 +1,6 @@
 import functools
 
-from qapp.app.mode import Mode
+from qapp.core.modes import Mode
 from qapp.widget import ListWidget, UpDown
 
 from lura.utils import getPosition 
@@ -13,7 +13,6 @@ class Annotate(Mode):
 
         super().__init__(app=app,
                          listen_leader='a',
-                         listen_port=False,
                          show_commands=True,
                          show_statusbar=True,
                          )

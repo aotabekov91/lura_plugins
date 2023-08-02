@@ -1,12 +1,12 @@
 from tables import Autosave as Table
 
-from qapp.app.plug import Plug
+from qapp.plug import PlugObj
 
-class Autosave(Plug):
+class Autosave(PlugObj):
 
     def __init__(self, app):
 
-        super(Autosave, self).__init__(app=app, listen_port=False)
+        super(Autosave, self).__init__(app=app)
 
         self.table=Table()
         self.app.main.display.itemChanged.connect(self.on_itemChanged)

@@ -1,4 +1,4 @@
-from qapp.app.mode import Mode
+from qapp.core.modes import Mode
 from qapp.utils import register
 from qapp.widget import ListWidget, Item
 
@@ -9,7 +9,6 @@ class Search(Mode):
         super(Search, self).__init__(
                 app=app, 
                 listen_leader='/', 
-                listen_port=False,
                 show_statusbar=True, 
                 delisten_on_exec=False
                 )

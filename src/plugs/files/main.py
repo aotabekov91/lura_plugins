@@ -1,4 +1,4 @@
-from qapp.app.plug import FileBrowser as Plug
+from qapp.core.plugs import FileBrowser as Plug
 
 class FileBrowser(Plug):
 
@@ -6,5 +6,4 @@ class FileBrowser(Plug):
 
         super().__init__(app=app, 
                          position='left', 
-                         listen_port=False,
                          mode_keys={'command':'f'})

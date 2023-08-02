@@ -1,17 +1,16 @@
 from tables import Hash, Metadata
 
 from qapp.utils import register
-from qapp.app.plug import Plug 
+from qapp.plug import PlugObj 
 from qapp.widget import UpDown, InputList
 
-class Documents(Plug):
+class Documents(PlugObj):
 
     def __init__(self, app):
 
         super(Documents, self).__init__(
                 app=app, 
                 position='right', 
-                listen_port=None,
                 mode_keys={'command': 'd'})
 
         self.hash=Hash()

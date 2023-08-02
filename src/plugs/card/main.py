@@ -3,18 +3,17 @@ from threading import Thread
 from plyer import notification
 from ankipulator import Submitter
 
-from qapp.app.plug import Plug
+from qapp.plug import PlugObj
 from qapp.utils import register
 from qapp.widget import InputList, UpDownEdit
 
-class Card(Plug):
+class Card(PlugObj):
 
     def __init__(self, app):
 
         super(Card, self).__init__(
                 app=app,
                 position='right',
-                listen_port=False,
                 mode_keys={'command':'c'})
 
         self.decks=[]

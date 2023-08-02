@@ -1,6 +1,6 @@
 from PyQt5 import QtCore, QtWidgets
 
-from qapp.app.plug import TreePlug
+from qapp.core.plugs import TreePlug
 
 class Outline(TreePlug):
 
@@ -8,7 +8,6 @@ class Outline(TreePlug):
 
         super().__init__(app=app, 
                          position='left', 
-                         listen_port=False,
                          mode_keys={'command':'o'})
 
     def setUI(self):

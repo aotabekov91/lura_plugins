@@ -1,13 +1,13 @@
 import zmq
 
 from qapp.utils import register
-from qapp.app.plug import Plug 
+from qapp.plug import PlugObj 
 
-class Lookup(Plug):
+class Lookup(PlugObj):
 
     def __init__(self, app):
 
-        super().__init__(app=app, listen_port=False)
+        super().__init__(app=app)
 
     def setConnection(self):
 

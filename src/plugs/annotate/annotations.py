@@ -1,12 +1,12 @@
 import functools
 
-from qapp.app.plug import Plug
+from qapp.plug import PlugObj
 from qapp.utils import register
 from qapp.widget import InputList, ListWidget, UpDownEdit
 
 from lura.utils import getPosition, getBoundaries
 
-class Annotations(Plug):
+class Annotations(PlugObj):
 
     def __init__(self, app, annotation):
 
@@ -17,7 +17,6 @@ class Annotations(Plug):
 
         super().__init__(app=app, 
                          position='right', 
-                         listen_port=False,
                          mode_keys={'command': 'a'}
                          )
 

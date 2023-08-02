@@ -1,16 +1,15 @@
 from tables import Quickmark as Table
 
-from qapp.app.plug import Plug
+from qapp.plug import PlugObj
 from qapp.utils import register
 from qapp.widget import Item, InputList 
 
-class Quickmark(Plug):
+class Quickmark(PlugObj):
 
     def __init__(self, app):
 
         super().__init__(app=app, 
                          position='right', 
-                         listen_port=False,
                          mode_keys={'command': 't'})
 
         self.marks = Table() 

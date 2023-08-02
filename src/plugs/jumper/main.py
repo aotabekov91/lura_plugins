@@ -1,15 +1,14 @@
 from tables import Jumper as Table
 
-from qapp.app.plug import Plug
+from qapp.plug import PlugObj
 from qapp.utils import register
 
-class Leaper(Plug):
+class Leaper(PlugObj):
 
     # TODO
     def __init__(self, app):
 
         super(Leaper, self).__init__(app=app, 
-                                     listen_port=False,
                                      mode_keys={'command': 'j'})
 
         self.index=0
