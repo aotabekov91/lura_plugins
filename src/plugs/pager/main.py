@@ -1,7 +1,7 @@
 from qapp.plug import PlugObj
 from qapp.utils import register
 
-from .widget import OverlayedWidget
+from .widget import PagerWidget
 
 class Pager(PlugObj):
 
@@ -16,8 +16,21 @@ class Pager(PlugObj):
         self.app.main.display.viewChanged.connect(
                 self.on_itemChanged
                 )
+        self.app.main.bar.toggled.connect(
+                self.on_barToggled
+                )
 
-    def on_viewChanged(self, view): self.on_itemChanged(view) 
+    def on_barToggled(self, visible):
+
+        if visible:
+            self.ui.paddingBottom=35
+        else:
+            self.ui.paddingBottom=15
+        self.ui.updatePosition()
+
+    def on_viewChanged(self, view): 
+
+        self.on_itemChanged(view) 
 
     def on_itemChanged(self, view, item=None): 
 
@@ -27,10 +40,9 @@ class Pager(PlugObj):
 
     def setUI(self):
 
-        self.ui=OverlayedWidget(self.app.main)
+        self.ui=PagerWidget(self.app.main)
         self.ui.hide()
 
     @register('p', modes=['normal', 'command'])
     def toggle(self): super().toggle()
-
 

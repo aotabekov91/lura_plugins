@@ -1,8 +1,9 @@
 from PyQt5 import QtWidgets, QtCore
 
-class OverlayedWidget(QtWidgets.QLabel):
+class PagerWidget(QtWidgets.QLabel):
 
     def __init__(self, parent):
+
         super().__init__(parent)
 
         self.paddingBottom = 35
@@ -19,10 +20,7 @@ class OverlayedWidget(QtWidgets.QLabel):
 
     def updatePosition(self):
 
-        if hasattr(self.parent(), 'viewport'):
-            parent_rect = self.parent().viewport().rect()
-        else:
-            parent_rect = self.parent().rect()
+        parent_rect = self.parent().rect()
 
         if not parent_rect: return
 
