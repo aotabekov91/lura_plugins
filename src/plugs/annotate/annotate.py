@@ -87,7 +87,6 @@ class Annotate(Mode):
 
             pageItem.select()
             pageItem.refresh(dropCachedPixmap=True)
-            # self.update()
 
     def write(self, dhash, pageNumber, text, boundaries, function):
 
@@ -106,15 +105,14 @@ class Annotate(Mode):
         for f in ['function', 'kind', 'content']: data.pop(f)
         return self.app.tables.annotation.getRow(data)[0]
 
-    def activateCheck(self, event): 
+    def checkKey(self, event, leader): 
 
-        if super().activateCheck(event):
+        if super().checkKey(event, leader):
 
-            view=self.app.main.display.view
-            if view:
-                v=self.app.modes.visual
-                visual=v.listening and not v.hinting
-                normal=self.app.modes.normal.listening
-                return normal or visual
+            v=self.app.modes.visual
+            if v.listening and not v.hinting: 
+                return True
             else:
-                return False
+                view=self.app.main.display.view
+                if view and self.app.modes.normal.listening:
+                    return True

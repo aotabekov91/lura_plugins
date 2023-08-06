@@ -1,12 +1,8 @@
-import os
-
 from tables import Bookmark as Table
 
 from qapp.plug import PlugObj 
 from qapp.utils import register
-from qapp.widget import UpDownEdit, InputList, BaseInputListStack
-
-from lura.utils import getPosition, getBoundaries
+from qapp.widget import UpDownEdit, InputList
 
 class Bookmark(PlugObj):
 

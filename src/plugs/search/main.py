@@ -63,7 +63,7 @@ class Search(Mode):
         self.app.main.bar.edit.setFocus()
         self.app.main.bar.edit.returnPressed.connect(self.find)
 
-        self.app.main.bar.hideWanted.connect(lambda: self.delistenWanted.emit('normal'))
+        self.app.main.bar.hideWanted.connect(self.delistenWanted)
 
     def delisten(self, *args, **kwargs):
 
@@ -146,6 +146,6 @@ class Search(Mode):
         replacement=f'<font color="red">{text}</font>'
         return line.replace(text, replacement)
 
-    def activateCheck(self, event): 
-        if super().activateCheck(event):
+    def checkListen(self, event): 
+        if super().checkListen(event):
             return self.app.modes.normal.listening
