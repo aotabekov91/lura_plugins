@@ -37,7 +37,6 @@ class Pager(PlugObj):
         cpage=view.currentPage()
         pages=view.totalPages()
         self.ui.setText(f'{cpage}/{pages}')
-        self.ui.updatePosition()
 
     def setUI(self):
 
@@ -45,4 +44,7 @@ class Pager(PlugObj):
         self.ui.hide()
 
     @register('p', modes=['normal', 'command'])
-    def toggle(self): super().toggle()
+    def toggle(self): 
+
+        self.ui.updatePosition()
+        super().toggle()
