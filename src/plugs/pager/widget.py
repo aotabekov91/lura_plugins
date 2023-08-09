@@ -37,6 +37,7 @@ class PagerWidget(QtWidgets.QLabel):
 
         c1=event.type()==QtCore.QEvent.Resize
         if c1:
+            raise
             if widget==self.parent():
                 self.updatePosition()
                 event.accept()

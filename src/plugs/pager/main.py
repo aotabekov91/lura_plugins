@@ -37,6 +37,7 @@ class Pager(PlugObj):
         cpage=view.currentPage()
         pages=view.totalPages()
         self.ui.setText(f'{cpage}/{pages}')
+        self.ui.updatePosition()
 
     def setUI(self):
 
