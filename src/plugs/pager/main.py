@@ -45,4 +45,3 @@ class Pager(PlugObj):
 
     @register('p', modes=['normal', 'command'])
     def toggle(self): super().toggle()
-

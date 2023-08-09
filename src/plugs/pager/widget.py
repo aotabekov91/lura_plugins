@@ -10,10 +10,11 @@ class PagerWidget(QtWidgets.QLabel):
         self.setAlignment(QtCore.Qt.AlignCenter)
         self.setStyleSheet('''
             QLabel{
+                font-size: 16px;
                 color: white;
                 border-radius: 15px;
                 border-style: outset;
-                background-color: black; 
+                background-color: rgba(0, 0, 0, .8); 
                 }
             ''')
         self.parent().installEventFilter(self)

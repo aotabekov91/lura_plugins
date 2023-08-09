@@ -25,7 +25,6 @@ class Card(PlugObj):
         self.model='No model chosen'
 
         self.submitter=Submitter()
-
         self.setUI()
 
     def setUI(self):
@@ -33,25 +32,75 @@ class Card(PlugObj):
         super().setUI()
 
         self.ui.addWidget(
-                InputList(item_widget=UpDownEdit), 'main', main=True)
+                InputList(item_widget=UpDownEdit),
+                'main', 
+                main=True)
+
         self.ui.main.input.setLabel('Card')
-        self.ui.main.returnPressed.connect(self.confirm)
-        self.ui.main.list.widgetDataChanged.connect(self.on_contentChanged)
+        self.ui.main.returnPressed.connect(
+                self.confirm)
+        self.ui.main.list.widgetDataChanged.connect(
+                self.on_contentChanged)
 
         self.ui.addWidget(InputList(), 'decks')
         self.ui.decks.input.setLabel('Decks')
-        self.ui.decks.returnPressed.connect(self.on_decksReturnPressed)
+        self.ui.decks.returnPressed.connect(
+                self.on_decksReturnPressed)
 
         self.ui.addWidget(InputList(), 'models')
         self.ui.models.input.setLabel('Models')
-        self.ui.models.returnPressed.connect(self.on_modelsReturnPressed)
+        self.ui.models.returnPressed.connect(
+                self.on_modelsReturnPressed)
 
-        self.ui.addWidget(InputList(item_widget=UpDownEdit), 'info')
+        self.ui.addWidget(
+                InputList(item_widget=UpDownEdit),
+                'info')
+
         self.ui.info.input.setLabel('Info')
-        self.ui.info.returnPressed.connect(self.on_modelsReturnPressed)
+        self.ui.info.returnPressed.connect(
+                self.on_modelsReturnPressed)
 
         self.ui.hideWanted.connect(self.deactivate)
         self.ui.installEventFilter(self)
+
+    @register('cu', modes=['command', 'normal'])
+    def inputField(self, digit=1):
+
+        self.app.modes.input.returnPressed.connect(
+                self.on_inputReturnPressed)
+        self.app.modes.input.forceDelisten.connect(
+                self.on_inputEscapePressed)
+
+        self.app.modes.setMode('input')
+        self.app.modes.input.showField()
+
+        digit-=1
+
+        self.inputField=None
+        if hasattr(self.ui.current, 'list'):
+            self.inputField=self.ui.current.list.getWidget(digit)
+            label=self.inputField.textUp()
+            self.app.modes.input.widget.label.setText(label)
+            self.app.modes.input.showField(field=True, label=True)
+
+
+    def on_inputEscapePressed(self):
+
+        self.app.modes.input.returnPressed.disconnect(
+                self.on_inputReturnPressed)
+        self.app.modes.input.forceDelisten.disconnect(
+                self.on_inputEscapePressed)
+
+    def on_inputReturnPressed(self):
+
+        self.on_inputEscapePressed()
+
+        text=self.app.modes.input.widget.field.toPlainText()
+        self.app.modes.input.hideClearField()
+        self.app.modes.setMode('normal')
+
+        if self.inputField:
+            self.inputField.setTextDown(text)
 
     @register(key='u')
     def update(self):
@@ -130,7 +179,7 @@ class Card(PlugObj):
         digit-=1
 
         if hasattr(self.ui.current, 'list'):
-            self.actOnFocus()
+            self.modeWanted(self)
             self.ui.current.list.focusItem(digit)
 
     @register('t', modes=['command'])
