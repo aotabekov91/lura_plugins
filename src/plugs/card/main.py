@@ -147,21 +147,38 @@ class Card(PlugObj):
             self.ui.models.clear()
             self.ui.show(self.ui.main)
 
+    @register('Y', modes=['command'])
+    def yankToFieldSaveStructure(self, digit=1):
+
+        view=self.app.main.display.view
+        if view.selected(): 
+            text=[]
+            for s in view.selected(): text+=['\n'.join(s['text_data'])]
+            text='\n'.join(text)
+
+        self.yankToField(digit, separator='\n\n', text=text) 
+
     @register('y', modes=['command'])
-    def yankToField(self, digit=1, append=False, separator=' '):
+    def yankToField(self, digit=1, append=False, separator=' ', text=None):
 
         digit-=1
 
         if hasattr(self.ui.current, 'list'):
             widget=self.ui.current.list.getWidget(digit)
             view=self.app.main.display.view
-            if view.selected() and widget: 
-                text=[]
-                for s in view.selected(): text+=[s['text']]
-                text=' '.join(text)
-                if append:
+            if widget: 
+                if not text:
+                    if view.selected():
+                        text=[]
+                        for s in view.selected(): text+=[s['text']]
+                        text=' '.join(text)
+                    else:
+                        return
+
+                if append: 
                     wtext=widget.textDown()
                     text=f'{wtext}{separator}{text}'
+
                 widget.setTextDown(text)
                 view.select()
 
