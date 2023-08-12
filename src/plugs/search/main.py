@@ -62,7 +62,6 @@ class Search(Mode):
         self.app.main.bar.edit.show()
         self.app.main.bar.edit.setFocus()
         self.app.main.bar.edit.returnPressed.connect(self.find)
-
         self.app.main.bar.hideWanted.connect(self.delistenWanted)
 
     def delisten(self, *args, **kwargs):

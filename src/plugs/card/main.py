@@ -26,6 +26,7 @@ class Card(PlugObj):
 
         self.submitter=Submitter()
         self.setUI()
+        self.update()
 
     def setUI(self):
 
@@ -109,12 +110,13 @@ class Card(PlugObj):
 
             for d in self.submitter.getDecks():
                 self.decks+=[{'up':d}]
-                self.ui.decks.setList(self.decks)
 
             for m, flds in self.submitter.getModels().items():
                 self.models+=[{'up':m}]
-                self.ui.models.setList(self.models)
                 self.fields[m]=flds
+
+            self.ui.decks.setList(self.decks)
+            self.ui.models.setList(self.models)
 
         t=Thread(target=_update)
         t.run()
@@ -203,8 +205,8 @@ class Card(PlugObj):
     def toggle(self): 
 
         super().toggle()
-        if self.model=='No model chosen': self.toggleModels()
-        if not self.decks: self.update()
+        if self.model=='No model chosen': 
+            self.toggleModels()
 
     @register('p')
     def togglePin(self):
