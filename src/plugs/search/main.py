@@ -1,6 +1,6 @@
-from qapp.core.modes import Mode
-from qapp.utils import register
-from qapp.widget import ListWidget, Item
+from qplug.modes import Mode
+from qplug.utils import register
+from gizmo.widget import ListWidget, Item
 
 class Search(Mode):
 

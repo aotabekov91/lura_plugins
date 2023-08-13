@@ -2,7 +2,7 @@ from PyQt5.QtGui import *
 from PyQt5.QtCore import *
 from PyQt5.QtWidgets import *
 
-from qapp.widget import TreeWidget
+from gizmo.widget import TreeWidget
 
 class PartTree(TreeWidget):
     

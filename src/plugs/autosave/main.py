@@ -1,6 +1,6 @@
 from tables import Autosave as Table
 
-from qapp.plug import PlugObj
+from qplug import PlugObj
 
 class Autosave(PlugObj):
 

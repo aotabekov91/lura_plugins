@@ -1,4 +1,4 @@
-from qapp.core.plugs import FileBrowser as Plug
+from qplug.plugs import FileBrowser as Plug
 
 class FileBrowser(Plug):
 

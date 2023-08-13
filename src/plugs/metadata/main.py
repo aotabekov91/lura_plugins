@@ -1,6 +1,6 @@
-from qapp.plug import PlugObj 
-from qapp.utils import register
-from qapp.widget import UpDownEdit, InputList
+from qplug import PlugObj 
+from qplug.utils import register
+from gizmo.widget import UpDownEdit, InputList
 
 class Metadata(PlugObj):
 

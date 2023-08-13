@@ -1,8 +1,8 @@
 from tables import Hash, Metadata
 
-from qapp.utils import register
-from qapp.plug import PlugObj 
-from qapp.widget import UpDown, InputList
+from qplug.utils import register
+from qplug import PlugObj 
+from gizmo.widget import UpDown, InputList
 
 class Documents(PlugObj):
 
