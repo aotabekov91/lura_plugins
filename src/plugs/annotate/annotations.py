@@ -31,11 +31,11 @@ class Annotations(PlugObj):
         self.functions={}
         self.annotateActions={(self.__class__.__name__, 'toggle'): self.toggle}
 
-        if self.config.has_section('Colors'):
-            self.colors = dict(self.config.items('Colors'))
+        if self.config.get('Colors', None):
+            self.colors = self.config.get('Colors')
             for key, col in self.colors.items():
 
-                color, function= tuple(col.split(' '))
+                color, function= col[0], col[1]
                 func=functools.partial(self.update, function=function)
                 func.key=f'{key.title()}'
                 func.info=None

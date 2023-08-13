@@ -24,12 +24,12 @@ class Annotate(Mode):
         super().setActions()
         self.annotateActions={(self.__class__.__name__, 'toggle'): self.toggle}
 
-        if self.config.has_section('Colors'):
-            self.colors = dict(self.config.items('Colors'))
+        if self.config.get('Colors', None):
+            self.colors = self.config.get('Colors', {})
             self.colorList=[]
             for key, col in self.colors.items():
 
-                color, function= tuple(col.split(' '))
+                color, function= col[0], col[1]
 
                 up=f'{key} - {function}'
                 self.colorList+=[{'up': up, 'up_color':color}]
@@ -105,9 +105,9 @@ class Annotate(Mode):
         for f in ['function', 'kind', 'content']: data.pop(f)
         return self.app.tables.annotation.getRow(data)[0]
 
-    def checkKey(self, event, leader): 
+    def checkKey(self, event): 
 
-        if super().checkKey(event, leader):
+        if super().checkKey(event):
 
             v=self.app.modes.visual
             if v.listening and not v.hinting: 
