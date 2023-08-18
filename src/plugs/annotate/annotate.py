@@ -42,7 +42,7 @@ class Annotate(Mode):
                 self.actions[(self.__class__.__name__, function)]=func
                 self.annotateActions[(self.__class__.__name__, function)]=func
 
-        self.app.manager.register(self, self.actions)
+        self.app.plugman.register(self, self.actions)
 
     def setUI(self):
 

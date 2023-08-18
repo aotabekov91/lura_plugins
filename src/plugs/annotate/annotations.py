@@ -47,7 +47,7 @@ class Annotations(PlugObj):
                 self.functions[function]=color
                 self.actions[(self.__class__.__name__, function)]=func
 
-        self.app.manager.register(self, self.actions)
+        self.app.plugman.register(self, self.actions)
 
     @register('st')
     def selectTerm(self): self.update(function='Term')

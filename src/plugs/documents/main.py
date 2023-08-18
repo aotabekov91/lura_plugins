@@ -1,7 +1,7 @@
 from tables import Hash, Metadata
 
-from plug.qt.utils import register
 from plug.qt import PlugObj 
+from plug.qt.utils import register
 from gizmo.widget import UpDown, InputList
 
 class Documents(PlugObj):
