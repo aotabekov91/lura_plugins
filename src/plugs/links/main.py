@@ -2,8 +2,8 @@ import subprocess
 
 from PyQt5 import QtCore
 
-from qplug.utils import register
-from qplug.modes import Mode
+from plug.qt.utils import register
+from plug.qt.modes import Mode
 from gizmo.widget import ListWidget, Item
 
 class Links(Mode):

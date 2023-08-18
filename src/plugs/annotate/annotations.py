@@ -1,7 +1,7 @@
 import functools
 
-from qplug import PlugObj
-from qplug.utils import register
+from plug.qt import PlugObj
+from plug.qt.utils import register
 from gizmo.widget import InputList, ListWidget, UpDownEdit
 
 from lura.utils import getPosition, getBoundaries

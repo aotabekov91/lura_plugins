@@ -1,5 +1,5 @@
-from qplug.modes import Mode
-from qplug.utils import register
+from plug.qt.modes import Mode
+from plug.qt.utils import register
 from gizmo.widget import ListWidget, Item
 
 class Search(Mode):

@@ -1,1 +1,1 @@
-plug[qplug]==0.0.1
+plug[qt]==0.0.1

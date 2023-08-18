@@ -1,7 +1,7 @@
 from PyQt5 import QtGui
 
-from qplug import PlugObj 
-from qplug.utils import register
+from plug.qt import PlugObj 
+from plug.qt.utils import register
 
 from lura.utils import getBoundaries
 from tables import Annotation as Table

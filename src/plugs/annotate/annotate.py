@@ -1,6 +1,6 @@
 import functools
 
-from qplug.modes import Mode
+from plug.qt.modes import Mode
 from gizmo.widget import ListWidget, UpDown
 
 from lura.utils import getPosition 

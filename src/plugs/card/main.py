@@ -3,8 +3,8 @@ from threading import Thread
 from plyer import notification
 from ankipulator import Submitter
 
-from qplug import PlugObj
-from qplug.utils import register
+from plug.qt import PlugObj
+from plug.qt.utils import register
 from gizmo.widget import InputList, UpDownEdit
 
 class Card(PlugObj):
