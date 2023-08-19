@@ -29,9 +29,9 @@ class Outline(TreePlug):
             left=index.data(QtCore.Qt.UserRole+2)
             top=index.data(QtCore.Qt.UserRole+3)
 
-            self.app.main.display.itemChanged.disconnect(self.on_viewItemChanged)
-            self.app.main.display.currentView().goto(page, left, top)
-            self.app.main.display.itemChanged.connect(self.on_viewItemChanged)
+            self.app.window.main.display.itemChanged.disconnect(self.on_viewItemChanged)
+            self.app.window.main.display.currentView().goto(page, left, top)
+            self.app.window.main.display.itemChanged.connect(self.on_viewItemChanged)
 
     def on_viewItemChanged(self, model, pageItem):
 
@@ -45,24 +45,24 @@ class Outline(TreePlug):
 
     def open(self, how='reset', focus=True):
 
-        self.app.main.display.viewChanged.disconnect(self.on_viewChanged)
-        self.app.main.display.itemChanged.disconnect(self.on_viewItemChanged)
+        self.app.window.main.display.viewChanged.disconnect(self.on_viewChanged)
+        self.app.window.main.display.itemChanged.disconnect(self.on_viewItemChanged)
 
         index=self.ui.main.tree.currentIndex()
         if index:
             page=index.data(QtCore.Qt.UserRole+1)
             left=index.data(QtCore.Qt.UserRole+2)
             top=index.data(QtCore.Qt.UserRole+3)
-            self.app.main.display.currentView().goto(page, left, top)
+            self.app.window.main.display.currentView().goto(page, left, top)
             super().open(how, focus)
 
-        self.app.main.display.viewChanged.connect(self.on_viewChanged)
-        self.app.main.display.itemChanged.connect(self.on_viewItemChanged)
+        self.app.window.main.display.viewChanged.connect(self.on_viewChanged)
+        self.app.window.main.display.itemChanged.connect(self.on_viewItemChanged)
 
     def setData(self):
 
         self.outline=None
-        view=self.app.main.display.view
+        view=self.app.window.main.display.view
         if view:
             document=view.model()
             self.outline=document.loadOutline()
@@ -72,14 +72,14 @@ class Outline(TreePlug):
 
         self.setData()
 
-        self.app.main.display.viewChanged.connect(self.on_viewChanged)
-        self.app.main.display.itemChanged.connect(self.on_viewItemChanged)
+        self.app.window.main.display.viewChanged.connect(self.on_viewChanged)
+        self.app.window.main.display.itemChanged.connect(self.on_viewItemChanged)
 
         super().activate()
 
     def deactivate(self):
 
-        self.app.main.display.viewChanged.disconnect(self.on_viewChanged)
-        self.app.main.display.itemChanged.disconnect(self.on_viewItemChanged)
+        self.app.window.main.display.viewChanged.disconnect(self.on_viewChanged)
+        self.app.window.main.display.itemChanged.disconnect(self.on_viewItemChanged)
 
         super().deactivate()

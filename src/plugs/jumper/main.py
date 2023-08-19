@@ -14,7 +14,7 @@ class Leaper(PlugObj):
         self.index=0
         self.jumps={}
         self.table=Table()
-        self.app.main.display.itemChanged.connect(self.on_itemChanged)
+        self.app.window.main.display.itemChanged.connect(self.on_itemChanged)
 
     def on_itemChanged(self, view, item):
 
@@ -49,5 +49,5 @@ class Leaper(PlugObj):
         data=self.jumps[self.index]
         pos=data['position'].split(':')
         left, top =float(pos[0]), float(pos[1])
-        view=self.app.main.display.view
+        view=self.app.window.main.display.view
         view.goto(data['page'], left, top) 

@@ -59,13 +59,13 @@ class Annotate(Mode):
 
     def listen(self):
 
-        if self.app.main.display.view: super().listen()
+        if self.app.window.main.display.view: super().listen()
 
     def annotate(self, function):
 
         self.deactivate()
 
-        selections=self.app.main.display.view.selected()
+        selections=self.app.window.main.display.view.selected()
 
         if selections:
 
@@ -113,6 +113,6 @@ class Annotate(Mode):
             if v.listening and not v.hinting: 
                 return True
             else:
-                view=self.app.main.display.view
+                view=self.app.window.main.display.view
                 if view and self.app.modes.normal.listening:
                     return True

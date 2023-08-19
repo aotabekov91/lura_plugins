@@ -10,13 +10,13 @@ class Pager(PlugObj):
         super().__init__(position='overlay', **kwargs)
 
         self.setUI()
-        self.app.main.display.itemChanged.connect(
+        self.app.window.main.display.itemChanged.connect(
                 self.on_itemChanged
                 )
-        self.app.main.display.viewChanged.connect(
+        self.app.window.main.display.viewChanged.connect(
                 self.on_itemChanged
                 )
-        self.app.main.bar.toggled.connect(
+        self.app.window.bar.toggled.connect(
                 self.on_barToggled
                 )
 
@@ -40,7 +40,7 @@ class Pager(PlugObj):
 
     def setUI(self):
 
-        self.ui=PagerWidget(self.app.main)
+        self.ui=PagerWidget(self.app.window.main)
         self.ui.hide()
 
     @register('p', modes=['normal', 'command'])

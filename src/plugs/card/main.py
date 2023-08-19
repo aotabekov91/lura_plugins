@@ -152,7 +152,7 @@ class Card(PlugObj):
     @register('Y', modes=['command'])
     def yankToFieldSaveStructure(self, digit=1):
 
-        view=self.app.main.display.view
+        view=self.app.window.main.display.view
         if view.selected(): 
             text=[]
             for s in view.selected(): text+=['\n'.join(s['text_data'])]
@@ -167,7 +167,7 @@ class Card(PlugObj):
 
         if hasattr(self.ui.current, 'list'):
             widget=self.ui.current.list.getWidget(digit)
-            view=self.app.main.display.view
+            view=self.app.window.main.display.view
             if widget: 
                 if not text:
                     if view.selected():

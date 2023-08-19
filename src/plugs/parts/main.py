@@ -51,7 +51,7 @@ class Part(PlugObj):
     @register('r')
     def refresh(self):
 
-        view=self.app.main.display.view
+        view=self.app.window.main.display.view
         if view:
             dhash=view.model().hash()
             data=self.part.getTreeDict(dhash)
@@ -102,7 +102,7 @@ class Part(PlugObj):
 
         if not self.activated: self.activate()
 
-        view=self.app.main.display.currentView()
+        view=self.app.window.main.display.currentView()
         if view: 
             dhash=view.model().hash() 
             data=self.part.search(f'hash:{dhash} kind:{kind}')
@@ -115,8 +115,8 @@ class Part(PlugObj):
     @register('p')
     def parse(self):
 
-        if self.app.main.display.view:
-            path=self.app.main.display.view.model().filePath()
+        if self.app.window.main.display.view:
+            path=self.app.window.main.display.view.model().filePath()
             self.app.tables.hash.hash(path, force_parse=True)
 
     @register('o')
@@ -134,7 +134,7 @@ class Part(PlugObj):
         if item:
             page=item.itemData['page']+1
             y=item.itemData['y1']-0.05
-            view=self.app.main.display.currentView()
+            view=self.app.window.main.display.currentView()
             if view: 
                 view.goto(page, 0, y)
                 if focus: self.app.modes.setMode('normal')

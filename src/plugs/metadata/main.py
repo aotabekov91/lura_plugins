@@ -38,19 +38,19 @@ class Metadata(PlugObj):
 
         super().activate()
         self.update()
-        self.app.main.display.viewChanged.connect(self.update)
+        self.app.window.main.display.viewChanged.connect(self.update)
 
     def deactivate(self):
 
         super().deactivate()
-        self.app.main.display.viewChanged.disconnect(self.update)
+        self.app.window.main.display.viewChanged.disconnect(self.update)
 
     @register('t', modes=['command'])
     def toggle(self): super().toggle()
 
     def update(self):
 
-        view=self.app.main.display.view
+        view=self.app.window.main.display.view
         if view and view.model():
 
             dhash=view.model().hash()

@@ -23,14 +23,14 @@ class Annotation(PlugObj):
 
         self.paint()
         self.app.buffer.bufferCreated.connect(self.paint)
-        # self.app.main.display.mousePressOccured.connect(self.on_mousePressEvent)
+        # self.app.window.main.display.mousePressOccured.connect(self.on_mousePressEvent)
 
     def select(self, function): return
 
     def on_mousePressEvent(self, event, pageItem, view): return
 
         # boundaries=[]
-        # text, area=self.app.main.display.currentView().getCursorSelection(clear=True)
+        # text, area=self.app.window.main.display.currentView().getCursorSelection(clear=True)
         # for rectF in area: boundaries += [pageItem.mapToPage(rectF)[1]]
         # print(text, area, boundaries, pageItem.m_boundingRect)
 
@@ -67,7 +67,7 @@ class Annotation(PlugObj):
 
         if not document: 
 
-            view=self.app.main.display.view
+            view=self.app.window.main.display.view
             if view: document=view.model()
 
         if document:

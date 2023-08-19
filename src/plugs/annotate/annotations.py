@@ -20,7 +20,7 @@ class Annotations(PlugObj):
                          mode_keys={'command': 'a'}
                          )
 
-        self.app.main.display.viewSelection.connect(
+        self.app.window.main.display.viewSelection.connect(
                 self.on_viewSelection)
 
         self.setUI()
@@ -137,7 +137,7 @@ class Annotations(PlugObj):
 
     def update(self, function=None):
 
-        view=self.app.main.display.currentView()
+        view=self.app.window.main.display.currentView()
         annotations=view.model().annotations()
         native=view.model().nativeAnnotations()
 
@@ -218,7 +218,7 @@ class Annotations(PlugObj):
         topLeft=boundary.topLeft() 
         x, y = topLeft.x(), topLeft.y()
         page=pAnn.page().pageNumber()
-        view=self.app.main.display.currentView()
+        view=self.app.window.main.display.currentView()
         if view: view.goto(page, x, y-0.05)
 
     def openById(self, aid):
@@ -232,7 +232,7 @@ class Annotations(PlugObj):
             boundary=boundaries[0]
             topLeft=boundary.topLeft() 
             x, y = topLeft.x(), topLeft.y()
-            view=self.app.main.display.currentView()
+            view=self.app.window.main.display.currentView()
             if view: view.goto(page, x, y-0.05)
 
     def on_contentChanged(self, widget):
@@ -259,7 +259,7 @@ class Annotations(PlugObj):
             self.app.tables.annotation.removeRow(
                     {'id': item.itemData.get('id', None)})
 
-            page=self.app.main.display.view.model().page(
+            page=self.app.window.main.display.view.model().page(
                 item.itemData['page'])
 
             page.removeAnnotation(item.itemData)
@@ -275,11 +275,11 @@ class Annotations(PlugObj):
     def activate(self):
 
         self.update()
-        self.app.main.display.viewChanged.connect(self.update)
+        self.app.window.main.display.viewChanged.connect(self.update)
 
         super().activate()
 
     def deactivate(self):
 
-        self.app.main.display.viewChanged.disconnect(self.update)
+        self.app.window.main.display.viewChanged.disconnect(self.update)
         super().deactivate()

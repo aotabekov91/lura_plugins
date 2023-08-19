@@ -36,7 +36,7 @@ class Search(Mode):
             self.ui.deactivate()
         else:
             self.ui.activate()
-            self.app.main.setFocus()
+            self.app.window.main.setFocus()
 
     @register('j')
     def next(self): self.jump(+1)
@@ -47,22 +47,22 @@ class Search(Mode):
     @register('f')
     def focusSearch(self): 
 
-        self.listen_widget=[self.app.main.display]
-        self.exclude_widget=[self.app.main.bar.edit]
+        self.listen_widget=[self.app.window.main.display]
+        self.exclude_widget=[self.app.window.bar.edit]
 
-        self.app.main.bar.edit.setFocus()
+        self.app.window.bar.edit.setFocus()
 
     def listen(self): 
 
         super().listen()
 
-        self.listen_widget=[self.app.main.display]
-        self.exclude_widget=[self.app.main.bar.edit]
+        self.listen_widget=[self.app.window.main.display]
+        self.exclude_widget=[self.app.window.bar.edit]
 
-        self.app.main.bar.edit.show()
-        self.app.main.bar.edit.setFocus()
-        self.app.main.bar.edit.returnPressed.connect(self.find)
-        self.app.main.bar.hideWanted.connect(self.delistenWanted)
+        self.app.window.bar.edit.show()
+        self.app.window.bar.edit.setFocus()
+        self.app.window.bar.edit.returnPressed.connect(self.find)
+        self.app.window.bar.hideWanted.connect(self.delistenWanted)
 
     def delisten(self, *args, **kwargs):
 
@@ -70,9 +70,9 @@ class Search(Mode):
 
             self.clear()
             self.ui.deactivate()
-            self.app.main.bar.hideWanted.disconnect()
-            self.app.main.bar.edit.returnPressed.disconnect(self.find)
-            self.app.main.display.cleanUp()
+            self.app.window.bar.hideWanted.disconnect()
+            self.app.window.bar.edit.returnPressed.disconnect(self.find)
+            self.app.window.main.display.cleanUp()
 
         super().delisten(*args, **kwargs)
 
@@ -98,13 +98,13 @@ class Search(Mode):
                             found+=[{'page': page.pageNumber(), 'rect': rect, 'up': line}]
             return found
 
-        text=self.app.main.bar.edit.text()
+        text=self.app.window.bar.edit.text()
 
         self.clear()
-        self.app.main.setFocus()
+        self.app.window.main.setFocus()
 
         if text:
-            self.matches=search(text, self.app.main.display.view)
+            self.matches=search(text, self.app.window.main.display.view)
             if len(self.matches) > 0: 
                 self.ui.main.setList(self.matches)
                 self.jump()
@@ -129,13 +129,13 @@ class Search(Mode):
         page=match['page']
         rect=match['rect']
 
-        pageItem=self.app.main.display.view.pageItem(page-1)
+        pageItem=self.app.window.main.display.view.pageItem(page-1)
         matchMapped=pageItem.mapToItem(rect)
         pageItem.setSearched([matchMapped])
         sceneRect=pageItem.mapRectToScene(matchMapped)
 
-        self.app.main.display.view.goto(page)
-        self.app.main.display.view.centerOn(0, sceneRect.y())
+        self.app.window.main.display.view.goto(page)
+        self.app.window.main.display.view.centerOn(0, sceneRect.y())
 
     def getLine(self, text, page, rectF):
 

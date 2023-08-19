@@ -12,7 +12,7 @@ class Lookup(PlugObj):
     @register('ll', modes=['command'])
     def open(self):
 
-        view=self.app.main.display.view
+        view=self.app.window.main.display.view
         if view and view.selected():
 
             text=[]

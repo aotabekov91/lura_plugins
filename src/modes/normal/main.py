@@ -6,7 +6,7 @@ class Normal(Mode):
     @register(key='yy')
     def yank(self):
 
-        view=self.app.main.display.view
+        view=self.app.window.main.display.view
         if view and view.selected(): 
             text=[]
             for s in view.selected(): text+=[s['text']]
@@ -17,34 +17,34 @@ class Normal(Mode):
     @register(key='w')
     def fitToPageWidth(self): 
 
-        view=self.app.main.display.view
+        view=self.app.window.main.display.view
         if view: view.fitToPageWidth()
 
     @register(key='s')
     def fitToPageHeight(self): 
 
-        view=self.app.main.display.view
+        view=self.app.window.main.display.view
         if view: view.fitToPageHeight()
 
     @register(key='c')
     def toggleContinuousMode(self): 
 
-        view=self.app.main.display.view
+        view=self.app.window.main.display.view
         if view: view.toggleContinuousMode()
 
     @register('C')
     def cleanUp(self): 
 
-        view=self.app.main.display.view
+        view=self.app.window.main.display.view
         if view: view.cleanUp()
 
     @register('sp')
     def splitHorizontally(self):
 
-        view=self.app.main.display.view
+        view=self.app.window.main.display.view
         if view:
             filePath=view.model().filePath()
             pageNumber=view.currentPage()
             left, top =view.saveLeftAndTop()
-            self.app.main.open(filePath)
-            self.app.main.display.view.goto(pageNumber, left, top)
+            self.app.window.main.open(filePath)
+            self.app.window.main.display.view.goto(pageNumber, left, top)

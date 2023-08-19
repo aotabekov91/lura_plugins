@@ -24,13 +24,13 @@ class Visual(Mode):
     def listen(self):
 
         super().listen()
-        if self.app.main.display.view:
-            selection=self.app.main.display.view.selected()
+        if self.app.window.main.display.view:
+            selection=self.app.window.main.display.view.selected()
             if not selection: self.hint()
 
     def jump(self):
 
-        selection=self.app.main.display.view.selected()
+        selection=self.app.window.main.display.view.selected()
         
         item=selection[-1]['item']
         page=item.page()
@@ -52,13 +52,13 @@ class Visual(Mode):
     @register('o')
     def gotoStart(self): 
 
-        selection=self.app.main.display.view.selected()
+        selection=self.app.window.main.display.view.selected()
         if selection: self.getWord(selection, word='first')
 
     @register('$')
     def gotoEnd(self):
 
-        selection=self.app.main.display.view.selected()
+        selection=self.app.window.main.display.view.selected()
         if selection: self.getWord(selection, word='last')
 
     @register('j') 
@@ -83,7 +83,7 @@ class Visual(Mode):
 
     def getRow(self, direction='next', kind='select'):
 
-        selection=self.app.main.display.view.selected()
+        selection=self.app.window.main.display.view.selected()
         if selection:
 
             item=selection[-1]['item']
@@ -132,7 +132,7 @@ class Visual(Mode):
     @register('e')
     def jumpSelect(self):
 
-        selection=self.app.main.display.view.selected()
+        selection=self.app.window.main.display.view.selected()
 
         if selection:
             self.selection=selection
@@ -144,7 +144,7 @@ class Visual(Mode):
         
         for d in range(digit):
 
-            selection=self.app.main.display.view.selected()
+            selection=self.app.window.main.display.view.selected()
             if selection: self.getWord(selection, kind='select')
 
     @register('W')
@@ -152,7 +152,7 @@ class Visual(Mode):
 
         for d in range(digit):
 
-            selection=self.app.main.display.view.selected()
+            selection=self.app.window.main.display.view.selected()
             if selection: self.getWord(selection, kind='deselect')
 
     @register('b') 
@@ -160,7 +160,7 @@ class Visual(Mode):
         
         for d in range(digit):
 
-            selection=self.app.main.display.view.selected()
+            selection=self.app.window.main.display.view.selected()
             if selection: self.getWord(selection, kind='select', direction='backward')
 
     @register('B') 
@@ -168,7 +168,7 @@ class Visual(Mode):
         
         for d in range(digit):
 
-            selection=self.app.main.display.view.selected()
+            selection=self.app.window.main.display.view.selected()
             if selection: self.getWord(selection, kind='deselect', direction='backward')
 
     def getWord(self, selection, kind='select', direction='forward', word=None):
@@ -276,7 +276,7 @@ class Visual(Mode):
                     hints[item][i]=h
 
         self.hints=hints
-        self.app.main.display.view.updateAll()
+        self.app.window.main.display.view.updateAll()
 
         keys=list(self.hints.keys())
 
@@ -311,16 +311,16 @@ class Visual(Mode):
         self.hinting=True
         self.clearKeys()
 
-        self.app.main.display.itemPainted.connect(self.paint)
-        self.app.main.display.view.updateAll()
+        self.app.window.main.display.itemPainted.connect(self.paint)
+        self.app.window.main.display.view.updateAll()
 
     def hint(self):
 
         self.hinting=True
         self.clearKeys()
 
-        self.app.main.display.itemPainted.connect(self.paint)
-        self.app.main.display.view.updateAll()
+        self.app.window.main.display.itemPainted.connect(self.paint)
+        self.app.window.main.display.view.updateAll()
 
     def generate(self, view):
 

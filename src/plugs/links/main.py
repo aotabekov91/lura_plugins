@@ -40,7 +40,7 @@ class Links(Mode):
 
         self.links=links
 
-        self.app.main.display.view.updateAll()
+        self.app.window.main.display.view.updateAll()
 
         if len(self.links)<=1:
 
@@ -55,7 +55,7 @@ class Links(Mode):
         elif 'page' in link:
             y=link['top']
             page=link['page']
-            self.app.main.display.view.goto(page, changeTop=y)
+            self.app.window.main.display.view.goto(page, changeTop=y)
 
     @register('l')
     def delisten(self, *args, **kwargs): 
@@ -69,8 +69,8 @@ class Links(Mode):
 
             self.ui.deactivate()
 
-            self.app.main.display.itemPainted.disconnect(self.paint)
-            self.app.main.display.view.updateAll()
+            self.app.window.main.display.itemPainted.disconnect(self.paint)
+            self.app.window.main.display.view.updateAll()
 
     @register('l', modes=['command'])
     def listen(self):
@@ -80,8 +80,8 @@ class Links(Mode):
         self.links=None
         self.activated=True
 
-        self.app.main.display.itemPainted.connect(self.paint)
-        self.app.main.display.view.updateAll()
+        self.app.window.main.display.itemPainted.connect(self.paint)
+        self.app.window.main.display.view.updateAll()
 
     def generate(self, item):
 

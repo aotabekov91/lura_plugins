@@ -68,7 +68,7 @@ class Documents(PlugObj):
             item=self.ui.main.list.currentItem()
             if item:
                 path=self.hash.getPath(item.itemData['hash'])
-                if path: self.app.main.open(path, how=how)
+                if path: self.app.window.main.open(path, how=how)
 
     def openAndHide(self): 
 

@@ -16,7 +16,7 @@ class Quickmark(PlugObj):
 
         self.setUI()
 
-        self.app.main.display.viewChanged.connect(self.setData)
+        self.app.window.main.display.viewChanged.connect(self.setData)
 
     def setUI(self):
 
@@ -54,26 +54,26 @@ class Quickmark(PlugObj):
 
         self.activated=False
 
-        self.app.main.bar.hide()
-        self.app.main.bar.edit.hide()
-        self.app.main.bar.edit.textChanged.disconnect(self.write)
-        self.app.main.bar.hideWanted.disconnect(self.deactivate)
+        self.app.window.bar.hide()
+        self.app.window.bar.edit.hide()
+        self.app.window.bar.edit.textChanged.disconnect(self.write)
+        self.app.window.bar.hideWanted.disconnect(self.deactivate)
 
     @register('m', modes=['normal', 'command'])
     def mark(self):
 
-        view=self.app.main.display.currentView()
+        view=self.app.window.main.display.currentView()
 
         if view:
 
             self.activated=True
 
-            self.app.main.bar.show()
-            self.app.main.bar.edit.show()
-            self.app.main.bar.edit.setFocus()
+            self.app.window.bar.show()
+            self.app.window.bar.edit.show()
+            self.app.window.bar.edit.setFocus()
 
-            self.app.main.bar.hideWanted.connect(self.deactivate)
-            self.app.main.bar.edit.textChanged.connect(self.write)
+            self.app.window.bar.hideWanted.connect(self.deactivate)
+            self.app.window.bar.edit.textChanged.connect(self.write)
 
     @register('t', modes=['normal', 'command'])
     def goto(self): 
@@ -83,7 +83,7 @@ class Quickmark(PlugObj):
 
     def setData(self):
 
-        document= self.app.main.display.view.model()
+        document= self.app.window.main.display.view.model()
         if document:
             dhash = document.hash()
             rows=self.marks.getRow({'hash': dhash})
@@ -101,14 +101,14 @@ class Quickmark(PlugObj):
 
     def write(self):
 
-        mark=self.app.main.bar.edit.text()
+        mark=self.app.window.bar.edit.text()
         self.deactivate()
 
         if mark: 
-            view = self.app.main.display.currentView()
-            dhash= self.app.main.display.currentView().document().hash()
-            page = self.app.main.display.currentView().currentPage()
-            left, top = self.app.main.display.currentView().saveLeftAndTop()
+            view = self.app.window.main.display.currentView()
+            dhash= self.app.window.main.display.currentView().document().hash()
+            page = self.app.window.main.display.currentView().currentPage()
+            left, top = self.app.window.main.display.currentView().saveLeftAndTop()
             position=f'{page}:{left}:{top}'
             data={'hash':dhash, 'position': position, 'mark':mark}
             self.marks.writeRow(data)
@@ -117,6 +117,6 @@ class Quickmark(PlugObj):
     def jump(self, mark):
 
         page, left, top = tuple(mark['position'].split(':'))
-        self.app.main.display.currentView().goto(
+        self.app.window.main.display.currentView().goto(
                 int(page), float(left), float(top))
-        self.app.main.display.currentView().setFocus()
+        self.app.window.main.display.currentView().setFocus()

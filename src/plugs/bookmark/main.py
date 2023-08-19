@@ -33,7 +33,7 @@ class Bookmark(PlugObj):
     def open(self):
 
         item=self.ui.main.list.currentItem()
-        if item: self.app.main.openBy('bookmark', item.itemData['id'])
+        if item: self.app.window.main.openBy('bookmark', item.itemData['id'])
 
     def on_contentChanged(self, widget):
 
@@ -61,7 +61,7 @@ class Bookmark(PlugObj):
     @register('u')
     def updateData(self, view=None):
 
-        if not view: view=self.app.main.display.currentView()
+        if not view: view=self.app.window.main.display.currentView()
 
         if view:
             criteria={'hash': view.model().hash()}
@@ -96,33 +96,33 @@ class Bookmark(PlugObj):
     @register('b', modes=['normal', 'command'])
     def bookmark(self):
 
-        view=self.app.main.display.currentView()
+        view=self.app.window.main.display.currentView()
         if view:
 
             self.activated=True
 
-            self.app.main.bar.show()
-            self.app.main.bar.edit.show()
-            self.app.main.bar.edit.setFocus()
-            self.app.main.bar.edit.returnPressed.connect(self.writeBookmark)
-            self.app.main.bar.hideWanted.connect(self.deactivate)
+            self.app.window.bar.show()
+            self.app.window.bar.edit.show()
+            self.app.window.bar.edit.setFocus()
+            self.app.window.bar.edit.returnPressed.connect(self.writeBookmark)
+            self.app.window.bar.hideWanted.connect(self.deactivate)
 
             data=self.getBookmark()
-            if data: self.app.main.bar.edit.setText(data[0]['text'])
+            if data: self.app.window.bar.edit.setText(data[0]['text'])
 
     def deactivate(self):
 
         self.activated=False
 
-        self.app.main.bar.hide()
-        self.app.main.bar.edit.hide()
+        self.app.window.bar.hide()
+        self.app.window.bar.edit.hide()
 
-        self.app.main.bar.edit.returnPressed.disconnect(self.writeBookmark)
-        self.app.main.bar.hideWanted.disconnect(self.deactivate)
+        self.app.window.bar.edit.returnPressed.disconnect(self.writeBookmark)
+        self.app.window.bar.hideWanted.disconnect(self.deactivate)
 
     def getBookmark(self):
 
-        view=self.app.main.display.currentView()
+        view=self.app.window.main.display.currentView()
         if view:
             data={}
             data['hash']=view.model().hash()
@@ -132,10 +132,10 @@ class Bookmark(PlugObj):
 
     def writeBookmark(self):
 
-        text=self.app.main.bar.edit.text()
+        text=self.app.window.bar.edit.text()
         self.deactivate()
 
-        view=self.app.main.display.currentView()
+        view=self.app.window.main.display.currentView()
 
         if view:
             data=self.getBookmark()

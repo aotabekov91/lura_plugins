@@ -9,8 +9,8 @@ class Autosave(PlugObj):
         super(Autosave, self).__init__(app=app)
 
         self.table=Table()
-        self.app.main.display.itemChanged.connect(self.on_itemChanged)
-        self.app.main.display.viewChanged.connect(self.on_viewChanged)
+        self.app.window.main.display.itemChanged.connect(self.on_itemChanged)
+        self.app.window.main.display.viewChanged.connect(self.on_viewChanged)
 
     def on_viewChanged(self, view):
 
