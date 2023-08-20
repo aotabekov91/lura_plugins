@@ -11,10 +11,14 @@ from .annotations import Annotations
 
 class Annotation(PlugObj):
 
-    def __init__(self, app):
+    def __init__(self, 
+                 app,
+                 **kwargs):
 
-        super().__init__(app=app, 
-                         mode_keys={'command': 'a'})
+        super().__init__(
+                app=app, 
+                mode_keys={'command': 'a'},
+                **kwargs)
 
         self.functions={}
         self.table=Table()

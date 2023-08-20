@@ -9,12 +9,15 @@ from gizmo.widget import InputList, UpDownEdit
 
 class Card(PlugObj):
 
-    def __init__(self, app):
+    def __init__(self, 
+                 app,
+                 **kwargs):
 
         super(Card, self).__init__(
                 app=app,
                 position='right',
-                mode_keys={'command':'c'})
+                mode_keys={'command':'c'},
+                **kwargs)
 
         self.decks=[]
         self.models=[]
@@ -79,11 +82,12 @@ class Card(PlugObj):
 
         self.inputField=None
         if hasattr(self.ui.current, 'list'):
-            self.inputField=self.ui.current.list.getWidget(digit)
+            self.inputField=self.ui.current.list.getWidget(
+                    digit)
             label=self.inputField.textUp()
             self.app.modes.input.widget.label.setText(label)
-            self.app.modes.input.showField(field=True, label=True)
-
+            self.app.modes.input.showField(
+                    field=True, label=True)
 
     def on_inputEscapePressed(self):
 

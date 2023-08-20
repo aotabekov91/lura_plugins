@@ -6,12 +6,14 @@ from gizmo.widget import UpDown, InputList
 
 class Documents(PlugObj):
 
-    def __init__(self, app):
+    def __init__(self, app, **kwargs):
 
         super(Documents, self).__init__(
                 app=app, 
                 position='right', 
-                mode_keys={'command': 'd'})
+                mode_keys={'command': 'd'},
+                **kwargs
+                )
 
         self.hash=Hash()
         self.meta=Metadata()

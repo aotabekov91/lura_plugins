@@ -6,10 +6,13 @@ from plug.qt.utils import register
 class Leaper(PlugObj):
 
     # TODO
-    def __init__(self, app):
+    def __init__(self, app, **kwargs):
 
-        super(Leaper, self).__init__(app=app, 
-                                     mode_keys={'command': 'j'})
+        super(Leaper, self).__init__(
+                app=app, 
+                mode_keys={'command': 'j'},
+                **kwargs
+                )
 
         self.index=0
         self.jumps={}

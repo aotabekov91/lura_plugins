@@ -6,11 +6,16 @@ from gizmo.widget import UpDownEdit, InputList
 
 class Bookmark(PlugObj):
 
-    def __init__(self, app):
+    def __init__(self, 
+                 app,
+                 **kwargs,
+                 ):
 
-        super().__init__(app=app, 
-                         position='right', 
-                         mode_keys={'command':'b'}) 
+        super().__init__(
+                app=app, 
+                position='right', 
+                mode_keys={'command':'b'},
+                **kwargs) 
 
         self.table=Table()
         self.setUI()

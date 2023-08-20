@@ -4,11 +4,14 @@ from plug.qt.plugs import TreePlug
 
 class Outline(TreePlug):
 
-    def __init__(self, app): 
+    def __init__(self, app, **kwargs): 
 
-        super().__init__(app=app, 
-                         position='left', 
-                         mode_keys={'command':'o'})
+        super().__init__(
+                app=app, 
+                position='left', 
+                mode_keys={'command':'o'},
+                **kwargs,
+                )
 
     def setUI(self):
 

@@ -10,10 +10,13 @@ class Links(Mode):
 
     hintSelected=QtCore.pyqtSignal()
 
-    def __init__(self, app):
+    def __init__(self, app, **kwargs):
 
-        super().__init__(app=app, 
-                         show_statusbar=True)
+        super().__init__(
+                app=app, 
+                show_statusbar=True,
+                **kwargs,
+                )
 
         self.links=None
         self.selection=None

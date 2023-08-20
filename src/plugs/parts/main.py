@@ -8,11 +8,13 @@ from .widget import PartTree
 
 class Part(PlugObj):
 
-    def __init__(self, app):
+    def __init__(self, app, **kwargs):
 
-        super(Part, self).__init__(app=app, 
-                                   position='left', 
-                                   mode_keys={'command': 'p'})
+        super(Part, self).__init__(
+                app=app, 
+                position='left', 
+                mode_keys={'command': 'p'},
+                **kwargs)
 
         self.follow=False
         self.part=Table()

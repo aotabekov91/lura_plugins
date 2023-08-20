@@ -6,11 +6,13 @@ from gizmo.widget import Item, InputList
 
 class Quickmark(PlugObj):
 
-    def __init__(self, app):
+    def __init__(self, app, **kwargs):
 
-        super().__init__(app=app, 
-                         position='right', 
-                         mode_keys={'command': 't'})
+        super().__init__(
+                app=app, 
+                position='right', 
+                mode_keys={'command': 't'},
+                **kwargs)
 
         self.marks = Table() 
 

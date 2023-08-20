@@ -8,17 +8,21 @@ from lura.utils import getPosition, getBoundaries
 
 class Annotations(PlugObj):
 
-    def __init__(self, app, annotation):
+    def __init__(self, 
+                 app, 
+                 annotation,
+                 **kwargs):
 
         self.sort_by='id'
         self.sort_order='descending'
 
         self.annotation=annotation
 
-        super().__init__(app=app, 
-                         position='right', 
-                         mode_keys={'command': 'a'}
-                         )
+        super().__init__(
+                app=app, 
+                position='right', 
+                mode_keys={'command': 'a'},
+                **kwargs)
 
         self.app.window.main.display.viewSelection.connect(
                 self.on_viewSelection)

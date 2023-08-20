@@ -7,9 +7,13 @@ class Visual(Mode):
 
     hintSelected=QtCore.pyqtSignal()
 
-    def __init__(self, app):
+    def __init__(self, app, **kwargs):
 
-        super().__init__(app=app, listen_leader='v')
+        super().__init__(
+                app=app, 
+                listen_leader='v',
+                **kwargs,
+                )
         self.hints=None
         self.hinting=False
         self.selection=None

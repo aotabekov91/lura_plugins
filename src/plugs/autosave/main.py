@@ -4,9 +4,12 @@ from plug.qt import PlugObj
 
 class Autosave(PlugObj):
 
-    def __init__(self, app):
+    def __init__(self, app, **kwargs):
 
-        super(Autosave, self).__init__(app=app)
+        super(Autosave, self).__init__(
+                app=app,
+                **kwargs,
+                )
 
         self.table=Table()
         self.app.window.main.display.itemChanged.connect(self.on_itemChanged)

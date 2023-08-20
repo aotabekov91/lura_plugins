@@ -4,12 +4,14 @@ from gizmo.widget import InputList
 
 class ReadingList(PlugObj):
 
-    def __init__(self, app):
+    def __init__(self, app, **kwargs):
 
         super(ReadingList, self).__init__(
                 app=app,
                 position='window',
-                mode_keys={'command':'r'})
+                mode_keys={'command':'r'},
+                **kwargs,
+                )
 
         self.setUI()
         # TODO: to finish

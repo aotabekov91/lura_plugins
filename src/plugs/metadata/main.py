@@ -6,11 +6,14 @@ class Metadata(PlugObj):
 
     excludeFields=['id', 'hash', 'url', 'kind']
 
-    def __init__(self, app):
+    def __init__(self, app, **kwargs):
 
-        super().__init__(app=app, 
-                         position='right', 
-                         mode_keys={'command': 'm'})
+        super().__init__(
+                app=app, 
+                position='right', 
+                mode_keys={'command': 'm'},
+                **kwargs,
+                )
 
         self.setUI()
 
