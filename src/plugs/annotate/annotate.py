@@ -1,11 +1,11 @@
 import functools
 
-from plug.qt.modes import Mode
+from plug.qt import PlugObj
 from gizmo.widget import ListWidget, UpDown
 
 from lura.utils import getPosition 
 
-class Annotate(Mode):
+class Annotate(PlugObj):
 
     def __init__(self, app, annotation):
 

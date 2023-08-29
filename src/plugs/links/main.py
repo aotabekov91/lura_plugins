@@ -2,11 +2,11 @@ import subprocess
 
 from PyQt5 import QtCore
 
+from plug.qt import PlugObj
 from plug.qt.utils import register
-from plug.qt.modes import Mode
 from gizmo.widget import ListWidget, Item
 
-class Links(Mode):
+class Links(PlugObj):
 
     hintSelected=QtCore.pyqtSignal()
 

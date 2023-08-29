@@ -1,8 +1,8 @@
-from plug.qt.modes import Mode
+from plug.qt import PlugObj
 from plug.qt.utils import register
 from gizmo.widget import ListWidget, Item
 
-class Search(Mode):
+class Search(PlugObj):
 
     def __init__(self, app, **kwargs):
 

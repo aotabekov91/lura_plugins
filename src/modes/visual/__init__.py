@@ -1,3 +1,3 @@
 from .main import Visual
 
-def get_mode_class(): return Visual
+def get_plug_class(): return Visual

@@ -10,7 +10,8 @@ class Annotations(PlugObj):
 
     def __init__(self, 
                  app, 
-                 annotation,
+                 annotation, 
+                 mode_keys={'command': 'a'},
                  **kwargs):
 
         self.sort_by='id'
@@ -21,7 +22,7 @@ class Annotations(PlugObj):
         super().__init__(
                 app=app, 
                 position='right', 
-                mode_keys={'command': 'a'},
+                mode_keys=mode_keys,
                 **kwargs)
 
         self.app.window.main.display.viewSelection.connect(
