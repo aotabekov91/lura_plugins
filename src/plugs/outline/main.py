@@ -19,10 +19,12 @@ class Outline(TreePlug):
 
         self.ui.main.tree.m_expansionRole=QtCore.Qt.UserRole+4
         self.ui.main.tree.m_expansionIDRole=QtCore.Qt.UserRole+5
-
-        self.ui.main.tree.setEditTriggers(QtWidgets.QAbstractItemView.NoEditTriggers)
-        self.ui.main.tree.setVerticalScrollMode(QtWidgets.QAbstractItemView.ScrollPerPixel)
-        self.ui.main.tree.header().setSectionResizeMode(QtWidgets.QHeaderView.Interactive)
+        self.ui.main.tree.setEditTriggers(
+                QtWidgets.QAbstractItemView.NoEditTriggers)
+        self.ui.main.tree.setVerticalScrollMode(
+                QtWidgets.QAbstractItemView.ScrollPerPixel)
+        self.ui.main.tree.header().setSectionResizeMode(
+                QtWidgets.QHeaderView.Interactive)
 
     def on_outlineClicked(self, index=None):
 
@@ -32,9 +34,10 @@ class Outline(TreePlug):
             left=index.data(QtCore.Qt.UserRole+2)
             top=index.data(QtCore.Qt.UserRole+3)
 
-            self.app.window.main.display.itemChanged.disconnect(self.on_viewItemChanged)
-            self.app.window.main.display.currentView().goto(page, left, top)
-            self.app.window.main.display.itemChanged.connect(self.on_viewItemChanged)
+            display=self.app.window.main.display
+            display.itemChanged.disconnect(self.on_viewItemChanged)
+            display.currentView().goto(page, left, top)
+            display.itemChanged.connect(self.on_viewItemChanged)
 
     def on_viewItemChanged(self, model, pageItem):
 
@@ -48,19 +51,22 @@ class Outline(TreePlug):
 
     def open(self, how='reset', focus=True):
 
-        self.app.window.main.display.viewChanged.disconnect(self.on_viewChanged)
-        self.app.window.main.display.itemChanged.disconnect(self.on_viewItemChanged)
+        display=self.app.window.main.display
+        display.viewChanged.disconnect(self.on_viewChanged)
+        display.itemChanged.disconnect(self.on_viewItemChanged)
 
         index=self.ui.main.tree.currentIndex()
         if index:
             page=index.data(QtCore.Qt.UserRole+1)
             left=index.data(QtCore.Qt.UserRole+2)
             top=index.data(QtCore.Qt.UserRole+3)
-            self.app.window.main.display.currentView().goto(page, left, top)
+            self.app.window.main.display.currentView().goto(
+                    page, left, top)
             super().open(how, focus)
 
-        self.app.window.main.display.viewChanged.connect(self.on_viewChanged)
-        self.app.window.main.display.itemChanged.connect(self.on_viewItemChanged)
+        display=self.app.window.main.display
+        display.viewChanged.connect(self.on_viewChanged)
+        display.itemChanged.connect(self.on_viewItemChanged)
 
     def setData(self):
 
@@ -74,15 +80,14 @@ class Outline(TreePlug):
     def activate(self):
 
         self.setData()
-
-        self.app.window.main.display.viewChanged.connect(self.on_viewChanged)
-        self.app.window.main.display.itemChanged.connect(self.on_viewItemChanged)
-
+        display=self.app.window.main.display
+        display.viewChanged.connect(self.on_viewChanged)
+        display.itemChanged.connect(self.on_viewItemChanged)
         super().activate()
 
     def deactivate(self):
 
-        self.app.window.main.display.viewChanged.disconnect(self.on_viewChanged)
-        self.app.window.main.display.itemChanged.disconnect(self.on_viewItemChanged)
-
+        display=self.app.window.main.display
+        display.viewChanged.disconnect(self.on_viewChanged)
+        display.itemChanged.disconnect(self.on_viewItemChanged)
         super().deactivate()

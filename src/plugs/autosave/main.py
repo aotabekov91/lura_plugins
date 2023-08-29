@@ -12,12 +12,15 @@ class Autosave(PlugObj):
                 )
 
         self.table=Table()
-        self.app.window.main.display.itemChanged.connect(self.on_itemChanged)
-        self.app.window.main.display.viewChanged.connect(self.on_viewChanged)
+        app.window.main.display.viewCreated.connect(
+                self.on_viewCreated)
+        app.window.main.display.positionChanged.connect(
+                self.on_positionChanged)
 
-    def on_viewChanged(self, view):
+    def on_viewCreated(self, view):
 
-        row=self.table.getRow({'hash':view.model().hash()})
+        row=self.table.getRow(
+                {'hash':view.model().hash()})
         if row:
             r=row[0]
             page=r['page']
@@ -25,12 +28,12 @@ class Autosave(PlugObj):
             left, top =float(pos[0]), float(pos[1])
             view.goto(page, left, top)
 
-    def on_itemChanged(self, view, item):
+    def on_positionChanged(self, view, item, left, top):
 
         if view.currentPage() in [0, 1]: return
 
-        left, top = view.saveLeftAndTop()
-        data={'page': view.currentPage(), 'position': f'{left}:{top}'}
+        data={'page': view.currentPage(), 
+                'position': f'{left}:{top}'}
 
         if self.table.getRow({'hash':view.model().hash()}):
             self.table.updateRow({'hash': view.model().hash()}, data)
