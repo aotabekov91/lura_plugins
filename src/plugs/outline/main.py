@@ -1,15 +1,20 @@
 from PyQt5 import QtCore, QtWidgets
 
+from plug.qt.utils import register
 from plug.qt.plugs import TreePlug
 
 class Outline(TreePlug):
 
-    def __init__(self, app, **kwargs): 
+    def __init__(self, 
+            app,
+            position='left',
+            mode_keys={'command':'o'},
+            **kwargs): 
 
         super().__init__(
                 app=app, 
-                position='left', 
-                mode_keys={'command':'o'},
+                position=position,
+                mode_keys=mode_keys,
                 **kwargs,
                 )
 
@@ -17,14 +22,15 @@ class Outline(TreePlug):
 
         super().setUI()
 
-        self.ui.main.tree.m_expansionRole=QtCore.Qt.UserRole+4
-        self.ui.main.tree.m_expansionIDRole=QtCore.Qt.UserRole+5
-        self.ui.main.tree.setEditTriggers(
-                QtWidgets.QAbstractItemView.NoEditTriggers)
-        self.ui.main.tree.setVerticalScrollMode(
-                QtWidgets.QAbstractItemView.ScrollPerPixel)
-        self.ui.main.tree.header().setSectionResizeMode(
-                QtWidgets.QHeaderView.Interactive)
+        # tree=self.ui.main.tree
+        # tree.m_expansionRole=QtCore.Qt.UserRole+4
+        # tree.m_expansionIDRole=QtCore.Qt.UserRole+5
+        # tree.setEditTriggers(
+        #         QtWidgets.QAbstractItemView.NoEditTriggers)
+        # tree.setVerticalScrollMode(
+        #         QtWidgets.QAbstractItemView.ScrollPerPixel)
+        # tree.header().setSectionResizeMode(
+        #         QtWidgets.QHeaderView.Interactive)
 
     def on_outlineClicked(self, index=None):
 
