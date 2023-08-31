@@ -12,7 +12,7 @@ class Annotate(PlugObj):
         self.annotation=annotation
 
         super().__init__(app=app,
-                         listen_leader='a',
+                         listen_leader='<c-a>',
                          show_commands=True,
                          show_statusbar=True,
                          )

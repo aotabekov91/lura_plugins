@@ -5,12 +5,16 @@ from plug.qt.plugs import TreePlug
 
 class Outline(TreePlug):
 
-    def __init__(self, app, **kwargs): 
+    def __init__(self, 
+            app,
+            position='left',
+            mode_keys={'command':'o'},
+            **kwargs): 
 
         super().__init__(
                 app=app, 
-                position='right', 
-                mode_keys={'command':'o'},
+                position=position,
+                mode_keys=mode_keys,
                 **kwargs,
                 )
 
@@ -26,6 +30,16 @@ class Outline(TreePlug):
         self.ui.main.tree.header().setSectionResizeMode(
                 QtWidgets.QHeaderView.Interactive)
 
+        # tree=self.ui.main.tree
+        # tree.m_expansionRole=QtCore.Qt.UserRole+4
+        # tree.m_expansionIDRole=QtCore.Qt.UserRole+5
+        # tree.setEditTriggers(
+        #         QtWidgets.QAbstractItemView.NoEditTriggers)
+        # tree.setVerticalScrollMode(
+        #         QtWidgets.QAbstractItemView.ScrollPerPixel)
+        # tree.header().setSectionResizeMode(
+        #         QtWidgets.QHeaderView.Interactive)
+
     def on_outlineClicked(self, index=None):
 
         if index is None: index=self.ui.main.tree.currentIndex()
@@ -35,9 +49,11 @@ class Outline(TreePlug):
             top=index.data(QtCore.Qt.UserRole+3)
 
             display=self.app.window.main.display
-            display.itemChanged.disconnect(self.on_viewItemChanged)
+            display.itemChanged.disconnect(
+                    self.on_viewItemChanged)
             display.currentView().goto(page, left, top)
-            display.itemChanged.connect(self.on_viewItemChanged)
+            display.itemChanged.connect(
+                    self.on_viewItemChanged)
 
     def on_viewItemChanged(self, model, pageItem):
 

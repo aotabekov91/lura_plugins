@@ -1,3 +1,4 @@
+from PyQt5 import QtCore
 from plug.qt import PlugObj
 from plug.qt.utils import register
 from gizmo.widget import ListWidget, Item
@@ -8,74 +9,71 @@ class Search(PlugObj):
 
         super(Search, self).__init__(
                 app=app, 
+                position='bottom',
                 listen_leader='/', 
                 show_statusbar=True, 
                 delisten_on_exec=False,
                 **kwargs,
                 )
-
         self.index=-1
-        self.matches=[]
         self.match=None
-
+        self.matches=[]
         self.setUI()
 
     def setUI(self):
         
         super().setUI()
-        self.ui.addWidget(
-                ListWidget(item_widget=Item, check_fields=['up']), 
-                'main', 
-                main=True)
+        l=ListWidget(item_widget=Item, 
+                     set_base_style=False,
+                     check_fields=['up'])
+        self.ui.addWidget(l, 'main', main=True)
 
-        self.ui.installEventFilter(self)
-
-    @register('l')
+    @register('<c-l>')
     def toggleList(self):
 
         if self.ui.isVisible():
-            self.ui.deactivate()
+            self.deactivateUI()
         else:
-            self.ui.activate()
-            self.app.window.main.setFocus()
+            self.activateUI()
 
-    @register('j')
-    def next(self): self.jump(+1)
+    @register('<c-j>')
+    def next(self, digit=1): 
 
-    @register('k')
-    def prev(self): self.jump(-1)
+        self.jump(digit)
 
-    @register('f')
-    def focusSearch(self): 
+    @register('<c-k>')
+    def prev(self, digit=1): 
 
-        self.listen_widget=[self.app.window.main.display]
-        self.exclude_widget=[self.app.window.bar.edit]
+        self.jump(-digit)
+
+    @register('<c-f>')
+    def toggleFocus(self): 
 
         self.app.window.bar.edit.setFocus()
 
     def listen(self): 
 
         super().listen()
+        bar=self.app.window.bar
+        bar.bottom.show()
+        bar.mode.setText('/')
+        bar.edit.show()
+        bar.edit.setFocus()
+        bar.edit.returnPressed.connect(self.find)
+        bar.hideWanted.connect(self.delistenWanted)
 
-        self.listen_widget=[self.app.window.main.display]
-        self.exclude_widget=[self.app.window.bar.edit]
+    def delisten(self):
 
-        self.app.window.bar.edit.show()
-        self.app.window.bar.edit.setFocus()
-        self.app.window.bar.edit.returnPressed.connect(self.find)
-        self.app.window.bar.hideWanted.connect(self.delistenWanted)
-
-    def delisten(self, *args, **kwargs):
-
-        if self.listening:
-
-            self.clear()
-            self.ui.deactivate()
-            self.app.window.bar.hideWanted.disconnect()
-            self.app.window.bar.edit.returnPressed.disconnect(self.find)
-            self.app.window.main.display.cleanUp()
-
-        super().delisten(*args, **kwargs)
+        super().delisten()
+        self.clear()
+        self.deactivateUI()
+        bar=self.app.window.bar
+        bar.hideWanted.disconnect()
+        bar.edit.returnPressed.disconnect(self.find)
+        self.app.window.main.display.cleanUp()
+        bar.bottom.hide()
+        bar.mode.setText(':')
+        bar.edit.setText('')
 
     def clear(self):
 
@@ -100,7 +98,6 @@ class Search(PlugObj):
             return found
 
         text=self.app.window.bar.edit.text()
-
         self.clear()
         self.app.window.main.setFocus()
 
@@ -141,11 +138,12 @@ class Search(PlugObj):
     def getLine(self, text, page, rectF):
 
         width=page.size().width()
-        lineRectF=QRectF(0, rectF.y(), width, rectF.height())
+        lineRectF=QtCore.QRectF(0, rectF.y(), width, rectF.height())
         line=f'<html>{page.find(lineRectF)}</html>'
         replacement=f'<font color="red">{text}</font>'
         return line.replace(text, replacement)
 
     def checkListen(self, event): 
+
         if super().checkListen(event):
             return self.app.modes.normal.listening

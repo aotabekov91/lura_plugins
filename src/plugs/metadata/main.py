@@ -20,14 +20,11 @@ class Metadata(PlugObj):
     def setUI(self):
 
         super().setUI()
-
         main=InputList(item_widget=UpDownEdit)
         self.ui.addWidget(main, 'main', main=True)
         self.ui.main.input.hideLabel()
         self.ui.hideWanted.connect(self.deactivate)
-
         self.ui.main.list.widgetDataChanged.connect(self.on_contentChanged)
-
         self.ui.installEventFilter(self)
 
     def on_contentChanged(self, widget):
