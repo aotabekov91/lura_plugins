@@ -1,5 +1,6 @@
 from PyQt5 import QtCore, QtWidgets
 
+from plug.qt.utils import register
 from plug.qt.plugs import TreePlug
 
 class Outline(TreePlug):
@@ -8,7 +9,7 @@ class Outline(TreePlug):
 
         super().__init__(
                 app=app, 
-                position='left', 
+                position='right', 
                 mode_keys={'command':'o'},
                 **kwargs,
                 )
@@ -16,7 +17,6 @@ class Outline(TreePlug):
     def setUI(self):
 
         super().setUI()
-
         self.ui.main.tree.m_expansionRole=QtCore.Qt.UserRole+4
         self.ui.main.tree.m_expansionIDRole=QtCore.Qt.UserRole+5
         self.ui.main.tree.setEditTriggers(
@@ -42,29 +42,35 @@ class Outline(TreePlug):
     def on_viewItemChanged(self, model, pageItem):
 
         if self.outline:
-            return
             page=pageItem.page().pageNumber()
             found=self.find(page)
-            if found: self.ui.main.tree.setCurrentIndex(found)
+            if found: 
+                self.ui.main.tree.setCurrentIndex(found)
 
-    def find(self, page): return super().find(page, self.outline)
+    def find(self, page): 
+
+        return False
+        # TODO
+        # return super().find(page, self.outline)
 
     def open(self, how='reset', focus=True):
 
         display=self.app.window.main.display
         display.viewChanged.disconnect(self.on_viewChanged)
         display.itemChanged.disconnect(self.on_viewItemChanged)
-
         index=self.ui.main.tree.currentIndex()
         if index:
             page=index.data(QtCore.Qt.UserRole+1)
             left=index.data(QtCore.Qt.UserRole+2)
             top=index.data(QtCore.Qt.UserRole+3)
-            self.app.window.main.display.currentView().goto(
+            if how!='reset':
+                model=display.view.model()
+                display.open(model=model,
+                             how=how,
+                             focus=focus)
+            display.currentView().goto(
                     page, left, top)
             super().open(how, focus)
-
-        display=self.app.window.main.display
         display.viewChanged.connect(self.on_viewChanged)
         display.itemChanged.connect(self.on_viewItemChanged)
 
