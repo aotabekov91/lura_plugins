@@ -11,7 +11,7 @@ class Visual(Mode):
 
         super().__init__(
                 app=app, 
-                listen_leader='v',
+                listen_leader='<c-v>',
                 **kwargs,
                 )
         self.hints=None
