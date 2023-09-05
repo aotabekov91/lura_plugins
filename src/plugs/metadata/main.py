@@ -48,7 +48,7 @@ class Metadata(PlugObj):
     @register('t', modes=['command'])
     def toggle(self): super().toggle()
 
-    def update(self):
+    def update(self, view, prev):
 
         view=self.app.window.main.display.view
         if view and view.model():

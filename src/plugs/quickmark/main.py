@@ -83,7 +83,7 @@ class Quickmark(PlugObj):
         self.activated=True
         self.ui.activate()
 
-    def setData(self):
+    def setData(self, view, prev):
 
         document= self.app.window.main.display.view.model()
         if document:
