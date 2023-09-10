@@ -18,6 +18,12 @@ class Visual(Mode):
         self.hinting=False
         self.selection=None
 
+    def setup(self):
+
+        super().setup()
+        self.event_listener.keysChanged.connect(
+                self.updateHint)
+
     def delisten(self): 
 
         super().delisten()
@@ -259,36 +265,25 @@ class Visual(Mode):
 
         if selected: item.select(selected)
 
-    def addKeys(self, event, widget):
-
-        self.timer.stop()
-
-        if self.hinting:
-            if self.registerKey(event): self.updateHint()
-        else:
-            super().addKeys(event, widget)
-
-    def updateHint(self):
-
-        key=''.join(self.keys_pressed)
+    def updateHint(self, key):
 
         hints={}
         for item, data in self.hints.items():
             for i, h in data.items():
                 if key==i[:len(key)]: 
-                    if not item in hints: hints[item]={}
+                    if not item in hints: 
+                        hints[item]={}
                     hints[item][i]=h
 
         self.hints=hints
         self.app.window.main.display.view.updateAll()
-
         keys=list(self.hints.keys())
 
         if len(keys)<=1:
 
             if not keys:
 
-                self.clearKeys()
+                self.event_listener.clearKeys()
                 self.hints=None
                 self.hinting=False
 
@@ -304,7 +299,7 @@ class Visual(Mode):
                     item.select([data])
                     self.hintSelected.emit()
                 
-                self.clearKeys()
+                self.event_listener.clearKeys()
                 self.hints=None
                 self.hinting=False
 
@@ -313,17 +308,19 @@ class Visual(Mode):
 
         self.hints=None
         self.hinting=True
-        self.clearKeys()
+        self.event_listener.clearKeys()
 
-        self.app.window.main.display.itemPainted.connect(self.paint)
+        self.app.window.main.display.itemPainted.connect(
+                self.paint)
         self.app.window.main.display.view.updateAll()
 
     def hint(self):
 
         self.hinting=True
-        self.clearKeys()
+        self.event_listener.clearKeys()
 
-        self.app.window.main.display.itemPainted.connect(self.paint)
+        self.app.window.main.display.itemPainted.connect(
+                self.paint)
         self.app.window.main.display.view.updateAll()
 
     def generate(self, view):
@@ -338,7 +335,8 @@ class Visual(Mode):
                 chars.append(alphabet[n % len(alphabet)])
                 n = n // len(alphabet)
             return "".join(reversed(chars))
-        for i in range(len(alphabet)): char_to_pos[alphabet[i]] = i
+        for i in range(len(alphabet)): 
+            char_to_pos[alphabet[i]] = i
 
         i=0
         hints={}
@@ -357,7 +355,8 @@ class Visual(Mode):
 
         if self.hinting:
 
-            if self.hints is None: self.hints=self.generate(view)
+            if self.hints is None: 
+                self.hints=self.generate(view)
 
             painter.save()
             pen=QtGui.QPen(QtCore.Qt.red, 0.0)
@@ -366,7 +365,9 @@ class Visual(Mode):
             item_hints=self.hints.get(pageItem, None)
             if item_hints:
                 for i, data in item_hints.items():
-                    transformed_rect=pageItem.mapToItem(data[0].boundingBox())
-                    painter.drawText(transformed_rect.topLeft(), i)
+                    transformed_rect=pageItem.mapToItem(
+                            data[0].boundingBox())
+                    painter.drawText(
+                            transformed_rect.topLeft(), i)
 
             painter.restore()

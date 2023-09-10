@@ -7,6 +7,9 @@ class Search(PlugObj):
 
     def __init__(self, app, **kwargs):
 
+        self.box_color='green'
+        self.text_color='yellow'
+
         super(Search, self).__init__(
                 app=app, 
                 position='bottom',
@@ -23,10 +26,12 @@ class Search(PlugObj):
     def setUI(self):
         
         super().setUI()
-        l=ListWidget(item_widget=Item, 
+        ui=ListWidget(item_widget=Item, 
                      set_base_style=False,
-                     check_fields=['up'])
-        self.ui.addWidget(l, 'main', main=True)
+                     check_fields=['up'],
+                     objectName='Search'
+                     )
+        self.ui.addWidget(ui, 'main', main=True)
 
     @register('<c-l>')
     def toggleList(self):
@@ -36,12 +41,12 @@ class Search(PlugObj):
         else:
             self.activateUI()
 
-    @register('<c-j>')
+    @register('j')
     def next(self, digit=1): 
 
         self.jump(digit)
 
-    @register('<c-k>')
+    @register('k')
     def prev(self, digit=1): 
 
         self.jump(-digit)
@@ -87,22 +92,27 @@ class Search(PlugObj):
         self.exclude_widget=[]
 
         def search(text, view, found=[]):
-            if view:
-                document=view.model()
-                for page in document.pages().values():
-                    rects=page.search(text)
-                    if rects:
-                        for rect in rects:
-                            line=self.getLine(text, page, rect)
-                            found+=[{'page': page.pageNumber(), 'rect': rect, 'up': line}]
+
+            if not view: return found
+            document=view.model()
+            for page in document.pages().values():
+                rects=page.search(text)
+                if not rects: continue
+                for rect in rects:
+                    line=self.getLine(text, page, rect)
+                    data={'page': page.pageNumber(), 
+                          'rect': rect, 
+                          'up': line}
+                    found+=[data]
             return found
 
-        text=self.app.window.bar.edit.text()
         self.clear()
         self.app.window.main.setFocus()
+        text=self.app.window.bar.edit.text()
 
         if text:
-            self.matches=search(text, self.app.window.main.display.view)
+            view=self.app.window.main.display.view
+            self.matches=search(text, view)
             if len(self.matches) > 0: 
                 self.ui.main.setList(self.matches)
                 self.jump()
@@ -140,7 +150,7 @@ class Search(PlugObj):
         width=page.size().width()
         lineRectF=QtCore.QRectF(0, rectF.y(), width, rectF.height())
         line=f'<html>{page.find(lineRectF)}</html>'
-        replacement=f'<font color="red">{text}</font>'
+        replacement=f'<font color="{self.text_color}">{text}</font>'
         return line.replace(text, replacement)
 
     def checkLeader(self, event, pressed):
