@@ -143,7 +143,8 @@ class Search(PlugObj):
         replacement=f'<font color="red">{text}</font>'
         return line.replace(text, replacement)
 
-    def checkListen(self, event): 
+    def checkLeader(self, event, pressed):
 
-        if super().checkListen(event):
-            return self.app.modes.normal.listening
+        if super().checkLeader(event, pressed):
+            normal=getattr(self.app.plugman.plugs, 'normal', False)
+            return normal and normal.listening
