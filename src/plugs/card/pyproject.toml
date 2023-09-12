@@ -1,0 +1,15 @@
+[tool.poetry]
+name = "Card"
+version = "0.0.1"
+description = "An Anki flashcard adder"
+authors = ["Your Name <you@example.com>"]
+readme = "README.md"
+
+[tool.poetry.dependencies]
+python = ">=3.9"
+plyer = ">=2.1.0"
+ankipulator = {git = "https://github.com/aotabekov91/ankipulator", branch="main"}
+
+[build-system]
+requires = ["poetry-core"]
+build-backend = "poetry.core.masonry.api"
