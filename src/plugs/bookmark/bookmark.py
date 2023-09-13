@@ -4,7 +4,7 @@ from plug.qt import PlugObj
 from plug.qt.utils import register
 from gizmo.widget import UpDownEdit, InputList
 
-class Bookmark(PlugObj):
+class BookmarkCreate(PlugObj):
 
     def __init__(self, app, **kwargs):
 
