@@ -1,8 +1,0 @@
-[Settings.colors]
-
-t = {color = '#EEFC5E', name = 'Term'}  
-d = {color = '#0FF0FC', name = 'Data'}
-f = {color = '#A4DE02', name = 'Focus'}
-q = {color = '#1AA7EC', name = 'Question'}
-l = {color = '#D3D3D3', name = 'Literature'}
-m = {color = '#CC0079', name = 'Methodology'}
