@@ -10,20 +10,17 @@ class Annotate(Plug):
     def __init__(self, app, annotation):
 
         self.annotation=annotation
-
         super().__init__(app=app,
                          listen_leader='<c-a>',
                          show_commands=True,
                          show_statusbar=True,
                          )
-
         self.setUI()
 
     def setActions(self):
 
         super().setActions()
         self.annotateActions={(self.__class__.__name__, 'toggle'): self.toggle}
-
         if self.config.get('Colors', None):
             self.colors = self.config.get('Colors', {})
             self.colorList=[]

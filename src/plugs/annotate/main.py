@@ -3,6 +3,7 @@ import functools
 from PyQt5 import QtGui
 
 from plug.qt import Plug
+from plug.qt.utils import register
 from tables import Annotation as Table
 from lura.utils import getPosition, getBoundaries
 
@@ -11,6 +12,8 @@ class Annotate(Plug):
     def __init__(self, app, *args, **kwargs):
 
         self.colors={}
+        self.func_colors={}
+        self.default_color='cyan'
 
         super().__init__(
                 *args, 
@@ -19,30 +22,58 @@ class Annotate(Plug):
                 **kwargs,
                 )
         self.table=Table()
-        self.app.buffer.bufferCreated.connect(self.paint)
 
     def setup(self):
 
         super().setup()
         self.setColors()
+        self.setConnect()
+
+    def setConnect(self):
+
+        self.display=self.app.window.main.display
+        self.app.buffer.bufferCreated.connect(self.paint)
+        self.display.itemMousePressOccured.connect(
+                self.on_mousePressEvent)
 
     def setColors(self):
 
         for k, v in self.colors.items():
-            function=v['name']
             func=functools.partial(
                     self.annotate, 
-                    function=function)
+                    function=v['name'])
             func.key=f'{k}'
             func.modes=[]
             self.commandKeys[k]=func
-            self.actions[(self.name, function)]=func
+            self.func_colors[v['name']]=v['color']
+            self.actions[(self.name, v['name'])]=func
         self.app.plugman.register(self, self.actions)
+
+    def on_mousePressEvent(self, v, i, e):
+
+        self.selected=None
+        page=i.page().pageNumber()
+        point=i.mapToPage(e.pos(), unify=False)
+        pos=i.mapToPage(point, unify=True)
+        for a in v.model().annotations(): 
+            if page==a['page']:
+                for b in a['boundaries']:
+                    if b.contains(pos):
+                        a['box']=[]
+                        for b in a['boundaries']:
+                            self.selected=a
+                            box = i.mapToItem(b, isUnified=True)
+                            box = i.mapToPage(box, unify=False)
+                            a['box'] += [box]
+                            a['item'] = i
+                            v.select([a])
+                            i.update()
+                            break
 
     def annotate(self, function):
 
-        self.deactivate()
-        selections=self.app.window.main.display.view.selected()
+        self.delistenWanted.emit()
+        selections=self.display.view.selected()
         if selections:
             selection=selections[0]
             text=selection['text']
@@ -60,7 +91,6 @@ class Annotate(Plug):
             self.add(page.document(), aData)
             pageItem.select()
             pageItem.refresh(dropCachedPixmap=True)
-        self.delistenWanted.emit()
 
     def write(self, 
               dhash, 
@@ -82,22 +112,27 @@ class Annotate(Plug):
             data.pop(f)
         return self.table.getRow(data)[0]
 
+    @register('.d')
     def remove(self):
 
         if self.selected:
-            annotation=self.selected
+            page=self.selected['pAnn'].page()
+            self.table.removeRow(
+                    {'id': self.selected['id']}) 
+            page.removeAnnotation(self.selected)
+            page.pageItem().refresh(dropCachedPixmap=True)
             self.selected=None
-            self.remove(annotation)
-        self.setFocus()
 
     def add(self, document, annotation):
 
         page=document.page(annotation['page'])
-        annotation['color'] = QtGui.QColor(
-                self.colors.get(
-                    annotation['function'], 'cyan'))
+        color=self.func_colors.get(
+                annotation['function'],
+                self.default_color)
+        annotation['color'] = QtGui.QColor(color)
         annotation['boundaries']=getBoundaries(
                 annotation['position'])
+
         return page.annotate(
                 annotation, 
                 kind='highlightAnnotation')
@@ -105,7 +140,7 @@ class Annotate(Plug):
     def paint(self, document=None):
 
         if not document: 
-            view=self.app.window.main.display.view
+            view=self.display.view
             if view: document=view.model()
         if document:
             dhash = document.hash()
@@ -116,7 +151,7 @@ class Annotate(Plug):
     def checkLeader(self, event, pressed):
 
         if super().checkLeader(event, pressed):
-            view=self.app.window.main.display.view
+            view=self.display.view
             current=self.app.plugman.current
             if view and current:
                 if current.name=='normal':
