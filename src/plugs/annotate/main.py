@@ -9,7 +9,11 @@ from lura.utils import getPosition, getBoundaries
 
 class Annotate(Plug):
 
-    def __init__(self, app, *args, **kwargs):
+    def __init__(self, 
+                 app, 
+                 *args, 
+                 listen_leader='<c-a>', 
+                 **kwargs):
 
         self.colors={}
         self.func_colors={}
@@ -18,7 +22,7 @@ class Annotate(Plug):
         super().__init__(
                 *args, 
                 app=app, 
-                listen_leader='<c-a>', 
+                listen_leader=listen_leader,
                 **kwargs,
                 )
         self.table=Table()
