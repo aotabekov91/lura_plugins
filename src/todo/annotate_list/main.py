@@ -4,6 +4,7 @@ from PyQt5 import QtGui
 
 from plug.qt import Plug
 from tables import Annotation as Table
+from gizmo.widget import ListWidget, UpDown
 from lura.utils import getPosition, getBoundaries
 
 class Annotate(Plug):
@@ -16,10 +17,23 @@ class Annotate(Plug):
                 *args, 
                 app=app, 
                 listen_leader='<c-a>', 
+                mode_keys={'command': 'a'},
                 **kwargs,
                 )
+        # self.setUI()
         self.table=Table()
-        self.app.buffer.bufferCreated.connect(self.paint)
+        # self.app.buffer.bufferCreated.connect(self.paint)
+
+    def setUI(self):
+
+        super().setUI()
+        self.ui.addWidget(
+                ListWidget(item_widget=UpDown), 
+                'mode', 
+                main=True)
+        self.ui.main.setList(self.colorList)
+        self.ui.mode.hideWanted.connect(
+                self._onExecuteMatch)
 
     def setup(self):
 
@@ -28,15 +42,25 @@ class Annotate(Plug):
 
     def setColors(self):
 
+        self.annotateActions={(
+            self.__class__.__name__, 
+            'toggle'): self.toggle}
+
+        self.colorList=[]
         for k, v in self.colors.items():
+            color=v['color']
             function=v['name']
+            up=f'{k} - {function}'
+            self.colorList+=[{'up': up, 'up_color':color}]
             func=functools.partial(
                     self.annotate, 
                     function=function)
             func.key=f'{k}'
             func.modes=[]
             self.commandKeys[k]=func
-            self.actions[(self.name, function)]=func
+            data=(self.name, function)
+            self.actions[data]=func
+            self.annotateActions[data]=func
         self.app.plugman.register(self, self.actions)
 
     def annotate(self, function):
