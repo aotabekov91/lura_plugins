@@ -1,7 +1,7 @@
 from PyQt5 import QtCore, QtGui
 
 from plug.qt.utils import register
-from plug.qt.modes import Visual as Mode
+from plug.qt.plugs.modes import Visual as Mode
 
 class Visual(Mode):
 
