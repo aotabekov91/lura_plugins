@@ -19,17 +19,16 @@ class Autosave(Plug):
     def on_viewCreated(self, view):
 
         data=self.getData(view)
-        print(data)
         if data:
             page, left, top = data
             view.goto(page, left, top)
 
     def getData(self, view):
 
-        row=self.table.getRow(
+        data=self.table.getRow(
                 {'hash':view.model().hash()})
-        if row:
-            r=row[0]
+        if data:
+            r=data[0]
             page=r['page']
             pos=r['position'].split(':')
             left, top =float(pos[0]), float(pos[1])
@@ -44,15 +43,6 @@ class Autosave(Plug):
                 'position': f'{left}:{top}'}
 
         vdata=self.getData(view)
-        if vdata:
-            p, l, t = vdata
-            print(data, p, l, t)
-
-            if p==view.currentPage():
-                if abs(l-left)<0.05 and abs(t-top)<0.05:
-                    return
-
-
         if vdata:
             hdata={'hash':view.model().hash()}
             self.table.updateRow(hdata, data)
