@@ -1,7 +1,7 @@
 from plug.qt import Plug 
 from plug.qt.utils import register
 
-class Lookup(Plug):
+class WLookup(Plug):
 
     def setConnection(self):
 
