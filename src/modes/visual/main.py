@@ -7,103 +7,123 @@ class Visual(Mode):
 
     hintSelected=QtCore.pyqtSignal()
 
-    def __init__(self, app, **kwargs):
+    def __init__(self, 
+            app,
+            *args,
+            listen_leader='<c-v>',
+            **kwargs):
 
         super().__init__(
                 app=app, 
-                listen_leader='<c-v>',
+                listen_leader=listen_leader,
                 **kwargs,
                 )
+        self.key=''
+        self.s=None
         self.hints=None
         self.hinting=False
-        self.selection=None
 
     def setup(self):
 
         super().setup()
-        self.event_listener.keysChanged.connect(
-                self.updateHint)
+        self.display=self.app.window.main.display
+        self.listenerAddKeys=self.event_listener.addKeys
+        self.event_listener.addKeys=self.ownAddKeys
+
+    def ownAddKeys(self, event):
+
+        if self.hinting:
+            if event.text():
+                self.key+=event.text()
+                self.updateHint(self.key)
+                event.accept()
+                return True
+        return self.listenerAddKeys(event)
 
     def delisten(self): 
 
         super().delisten()
+        self.key=''
+        self.s=None
         self.hints=None
         self.hinting=False
-        self.selection=None
 
     def listen(self):
 
         super().listen()
-        if self.app.window.main.display.view:
-            selection=self.app.window.main.display.view.selected()
-            if not selection: self.hint()
+        view=self.display.view
+        if view and not view.selected(): 
+            self.hint()
 
     def jump(self):
 
-        selection=self.app.window.main.display.view.selected()
-        
-        item=selection[-1]['item']
+        s=self.display.view.selected()
+        item=s[-1]['item']
         page=item.page()
-
-        start=self.selection[0]['box'][0]
-        end=self.selection[0]['box'][-1]
-
-        rect=selection[0]['box'][0]
-
+        # b=self.s[0]['box']
+        # start, end, rect = b[0], b[-1], 
+        start=self.s[0]['box'][0]
+        end=self.s[0]['box'][-1]
+        rect=s[0]['box'][0]
         if rect.y()>end.y():
-            item.select([page.getRows(start, rect)])
+            # item.select([page.getRows(start, rect)])
+            selected=[page.getRows(start, rect)]
         elif rect.y()<start.y():
-            item.select([page.getRows(rect, end)])
+            # item.select([page.getRows(rect, end)])
+            selected=[page.getRows(rect, end)]
         else:
-            item.select([page.getRows(start, rect)])
-
+            # item.select([page.getRows(start, rect)])
+            selected=[page.getRows(start, rect)]
+        item.select(selected)
         self.hintSelected.disconnect(self.jump)
 
     @register('o')
     def gotoStart(self): 
 
-        selection=self.app.window.main.display.view.selected()
-        if selection: self.getWord(selection, word='first')
+        s=self.display.view.selected()
+        if s: 
+            self.getWord(s, word='first')
 
     @register('$')
     def gotoEnd(self):
 
-        selection=self.app.window.main.display.view.selected()
-        if selection: self.getWord(selection, word='last')
+        s=self.display.view.selected()
+        if s: 
+            self.getWord(s, word='last')
 
     @register('j') 
     def selectNextRow(self, digit=1):
 
-        for i in range(digit): self.getRow(direction='next')
+        for i in range(digit):
+            self.getRow(direction='next')
         
     @register('J') 
     def deselectNextRow(self, digit=1):
 
-        for i in range(digit): self.getRow(direction='next', kind='deselect')
+        for i in range(digit): 
+            self.getRow(direction='next', kind='deselect')
         
     @register('k') 
     def selectPrevRow(self, digit=1):
 
-        for i in range(digit): self.getRow(direction='prev')
+        for i in range(digit): 
+            self.getRow(direction='prev')
 
     @register('K') 
     def deselectPrevRow(self, digit=1):
 
-        for i in range(digit): self.getRow(direction='prev', kind='deselect')
+        for i in range(digit): 
+            self.getRow(direction='prev', kind='deselect')
 
     def getRow(self, direction='next', kind='select'):
 
-        selection=self.app.window.main.display.view.selected()
-        if selection:
-
-            item=selection[-1]['item']
+        s=self.display.view.selected()
+        if s:
+            item=s[-1]['item']
             page=item.page()
-
-            start=selection[-1]['box'][0]
-            end=selection[-1]['box'][-1]
-            
+            start=s[-1]['box'][0]
+            end=s[-1]['box'][-1]
             if kind=='select':
-
                 if direction=='next':
                     edge=QtCore.QRectF(end.x(), 
                                 end.y()+end.height()+2, 
@@ -125,27 +145,23 @@ class Visual(Mode):
                         edge=data['box'][-1]
                         selected=[page.getRows(edge, end)]
                         if selected: item.select(selected)
-
             elif kind=='deselect':
-
-                if len(selection[-1]['box'])>1:
-
+                if len(s[-1]['box'])>1:
                     if direction=='next':
-                        edge=selection[-1]['box'][-2]
+                        edge=s[-1]['box'][-2]
                         selected=[page.getRows(start, edge)]
                         if selected: item.select(selected)
                     elif direction=='prev':
-                        edge=selection[-1]['box'][1]
+                        edge=s[-1]['box'][1]
                         selected=[page.getRows(edge, end)]
                         if selected: item.select(selected)
 
     @register('e')
     def jumpSelect(self):
 
-        selection=self.app.window.main.display.view.selected()
-
-        if selection:
-            self.selection=selection
+        s=self.display.view.selected()
+        if s:
+            self.s=s
             self.hintSelected.connect(self.jump)
             self.hint()
 
@@ -153,43 +169,43 @@ class Visual(Mode):
     def selectNextWord(self, digit=1):
         
         for d in range(digit):
-
-            selection=self.app.window.main.display.view.selected()
-            if selection: self.getWord(selection, kind='select')
+            s=self.display.view.selected()
+            if s: 
+                self.getWord(s, kind='select')
 
     @register('W')
     def deselectNextWord(self, digit=1):
 
         for d in range(digit):
-
-            selection=self.app.window.main.display.view.selected()
-            if selection: self.getWord(selection, kind='deselect')
+            s=self.display.view.selected()
+            if s: 
+                self.getWord(s, kind='deselect')
 
     @register('b') 
     def selectPrevWord(self, digit=1):
         
         for d in range(digit):
-
-            selection=self.app.window.main.display.view.selected()
-            if selection: self.getWord(selection, kind='select', direction='backward')
+            s=self.display.view.selected()
+            if s: 
+                self.getWord(s, kind='select', direction='backward')
 
     @register('B') 
     def deselectPrevWord(self, digit=1):
         
         for d in range(digit):
 
-            selection=self.app.window.main.display.view.selected()
-            if selection: self.getWord(selection, kind='deselect', direction='backward')
+            s=self.display.view.selected()
+            if s: 
+                self.getWord(s, kind='deselect', direction='backward')
 
-    def getWord(self, selection, kind='select', direction='forward', word=None):
+    def getWord(self, s, kind='select', direction='forward', word=None):
 
-        item=selection[-1]['item']
+        item=s[-1]['item']
         page=item.page()
-
         selected=None
-        boxes=selection[-1]['data']
-        start=selection[-1]['box'][0]
-        end=selection[-1]['box'][-1]
+        boxes=s[-1]['data']
+        start=s[-1]['box'][0]
+        end=s[-1]['box'][-1]
 
         if word=='first':
 
@@ -263,9 +279,11 @@ class Visual(Mode):
                     end=boxes[-1].boundingBox()
                     selected=[page.getRows(edge, end)]
 
-        if selected: item.select(selected)
+        if selected: 
+            item.select(selected)
 
-    def updateHint(self, key):
+    @register('u')
+    def updateHint(self, key=''):
 
         hints={}
         for item, data in self.hints.items():
@@ -274,23 +292,16 @@ class Visual(Mode):
                     if not item in hints: 
                         hints[item]={}
                     hints[item][i]=h
-
         self.hints=hints
-        self.app.window.main.display.view.updateAll()
+        self.display.view.updateAll()
         keys=list(self.hints.keys())
-
         if len(keys)<=1:
-
             if not keys:
-
                 self.event_listener.clearKeys()
                 self.hints=None
                 self.hinting=False
-
             elif len(self.hints[keys[0]])<=1:
-
                 if len(self.hints[keys[0]])==1:
-
                     data=list(self.hints[keys[0]].values())[0]
                     hint=data[0]
                     item=data[1]
@@ -298,30 +309,22 @@ class Visual(Mode):
                     data=item.page().getRow(top_point)
                     item.select([data])
                     self.hintSelected.emit()
-                
-                self.event_listener.clearKeys()
-                self.hints=None
-                self.hinting=False
+                self.unhint()
 
-    @register('h')
-    def clearHint(self):
+    def unhint(self):
 
+        self.key=''
         self.hints=None
-        self.hinting=True
-        self.event_listener.clearKeys()
-
-        self.app.window.main.display.itemPainted.connect(
+        self.hinting=False
+        self.display.itemPainted.disconnect(
                 self.paint)
-        self.app.window.main.display.view.updateAll()
 
     def hint(self):
 
         self.hinting=True
-        self.event_listener.clearKeys()
-
-        self.app.window.main.display.itemPainted.connect(
+        self.display.itemPainted.connect(
                 self.paint)
-        self.app.window.main.display.view.updateAll()
+        self.display.view.updateAll()
 
     def generate(self, view):
 
@@ -348,26 +351,31 @@ class Visual(Mode):
                 hint=number_to_string(n)
                 hints[item][hint]=[h, item]
             i=n
-
         return hints
 
-    def paint(self, painter, options, widget, pageItem, view):
+    def paint(self, painter, options, widget, item, view):
 
         if self.hinting:
-
             if self.hints is None: 
                 self.hints=self.generate(view)
-
             painter.save()
             pen=QtGui.QPen(QtCore.Qt.red, 0.0)
             painter.setPen(pen)
-
-            item_hints=self.hints.get(pageItem, None)
+            item_hints=self.hints.get(item, None)
             if item_hints:
                 for i, data in item_hints.items():
-                    transformed_rect=pageItem.mapToItem(
+                    transformed_rect=item.mapToItem(
                             data[0].boundingBox())
                     painter.drawText(
                             transformed_rect.topLeft(), i)
-
             painter.restore()
+
+    def checkLeader(self, event, pressed):
+
+        if super().checkLeader(event, pressed):
+            if self.listening:
+                return True
+            current=self.app.plugman.current
+            if current and current.name=='normal':
+                return True
+        return False

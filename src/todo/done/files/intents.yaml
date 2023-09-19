@@ -1,5 +1,0 @@
----
-type: intent
-name: toggle 
-utterances:
-  - toggle file browser 
