@@ -1,6 +1,6 @@
 import subprocess
 
-from PyQt5 import QtCore
+from PyQt5 import QtCore, QtGui
 
 from plug.qt import Plug
 from plug.qt.utils import register
@@ -17,11 +17,12 @@ class Links(Plug):
 
         super().__init__(
                 *args,
-                app=app
+                app=app,
                 listen_leader=listen_leader,
                 **kwargs
                 )
 
+        self.key=''
         self.links=None
         self.selection=None
 
@@ -29,33 +30,38 @@ class Links(Plug):
 
         super().setup()
         self.display=self.app.window.main.display
-        self.setConnect(self)
+        self.setConnect()
 
     def setConnect(self):
 
-        pass
-            
-    def addKeys(self, event):
+        self.display.itemPainted.connect(
+                self.paint)
+        self.listenerAddKeys=self.event_listener.addKeys
+        self.event_listener.addKeys=self.ownAddKeys
 
-        self.timer.stop()
-        if self.activated:
-            if self.registerKey(event): 
-                self.updateHint()
+    def ownAddKeys(self, event):
+
+        text=event.text()
+        if text:
+            self.key+=text
+            self.updateHint(self.key)
+            event.accept()
+            return True
         else:
-            super().addKeys(event)
+            return self.listenerAddKeys(event)
 
-    def updateHint(self):
+    def updateHint(self, key):
 
-        key=''.join(self.keys_pressed)
         links={}
         for i, h in self.links.items():
-            if key==i[:len(key)]: links[i]=h
+            if key==i[:len(key)]: 
+                links[i]=h
         self.links=links
         self.display.view.updateAll()
         if len(self.links)<=1:
             if len(self.links)==1: 
                 self.open(links[key])
-            self.delisten()
+            self.delistenWanted.emit()
 
     def open(self, link): 
 
@@ -71,43 +77,36 @@ class Links(Plug):
     def delisten(self): 
 
         super().delisten()
-        if self.activated:
-            self.links=None
-            self.activated=False
-            self.ui.deactivate()
-            self.display.itemPainted.disconnect(
-                    self.paint)
-            self.display.view.updateAll()
+        self.key=''
+        self.links=None
+        self.selection=None
 
-    @register('l', modes=['command'])
     def listen(self):
 
         super().listen()
-        self.links=None
-        self.activated=True
-        self.display.itemPainted.connect(
-                self.paint)
         self.display.view.updateAll()
 
     def generate(self, item):
 
-        alphabet = 'abcdefghijkmnopqrstuvwxyz'
-        len_of_codes = 2
-        char_to_pos = {}
         def number_to_string(n):
             chars = []
             for _ in range(len_of_codes):
                 chars.append(alphabet[n % len(alphabet)])
                 n = n // len(alphabet)
             return "".join(reversed(chars))
+
+        alphabet = 'abcdefghijkmnopqrstuvwxyz'
+        len_of_codes = 2
+        char_to_pos = {}
+
         for i in range(len(alphabet)): 
             char_to_pos[alphabet[i]] = i
         links=item.page().links()
         return {number_to_string(i):h  for i, h in enumerate(links)}
 
-    def paint(self, painter, options, widget, item, v):
+    def paint(self, painter, options, widget, item, view):
 
-        if self.activated:
+        if self.listening:
             if self.links is None: 
                 self.links=self.generate(item)
             painter.save()
@@ -116,10 +115,20 @@ class Links(Plug):
                 page_rect=item.mapToPage(rect, unify=False)
                 link['down']=i
                 link['up']=text=item.page().find(page_rect)
-                pen=QPen(QColor(88, 139, 174, 220), 0.0)
+                pen=QtGui.QPen(QtGui.QColor(88, 139, 174, 220), 0.0)
                 painter.setPen(pen)
                 painter.drawRect(rect)
-                pen=QPen(Qt.red, 0.0)
+                pen=QtGui.QPen(QtCore.Qt.red, 0.0)
                 painter.setPen(pen)
                 painter.drawText(rect.topLeft(), i)
             painter.restore()
+
+    def checkLeader(self, event, pressed):
+
+        if super().checkLeader(event, pressed):
+            if self.listening:
+                return True
+            current=self.app.plugman.current
+            if current and current.name=='normal':
+                return True
+        return False
