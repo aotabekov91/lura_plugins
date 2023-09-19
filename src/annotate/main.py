@@ -155,12 +155,13 @@ class Annotate(Plug):
     def checkLeader(self, event, pressed):
 
         if super().checkLeader(event, pressed):
-            if self.listening: return True
+            if self.listening: 
+                return True
             view=self.display.view
             current=self.app.plugman.current
             if view and current:
                 if current.name=='normal':
                     return True
                 elif current.name=='visual':
-                    return current.hinting
+                    return True 
         return False
