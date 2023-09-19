@@ -2,11 +2,11 @@ from plug.qt import Plug
 from plug.qt.utils import register
 from gizmo.widget import InputList
 
-class ReadingList(Plug):
+class Progress(Plug):
 
     def __init__(self, app, **kwargs):
 
-        super(ReadingList, self).__init__(
+        super(Progress, self).__init__(
                 app=app,
                 position='window',
                 mode_keys={'command':'r'},
