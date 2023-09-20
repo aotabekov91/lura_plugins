@@ -13,9 +13,6 @@ class Search(Plug):
             special=special,
             **kwargs):
 
-        self.box_color='green'
-        self.text_color='yellow'
-
         super(Search, self).__init__(
                 *args,
                 app=app, 
@@ -27,12 +24,8 @@ class Search(Plug):
         self.index=-1
         self.match=None
         self.matches=[]
-
-    def setup(self):
-
-        super().setup()
-        self.display=self.app.window.main.display
         self.setConnect()
+        self.display=self.app.window.main.display
 
     def setConnect(self):
 
@@ -65,7 +58,6 @@ class Search(Plug):
     def delisten(self):
 
         super().delisten()
-        self.clearItems()
         self.clear()
         bar=self.app.window.bar
         bar.bottom.hide()
@@ -74,6 +66,7 @@ class Search(Plug):
 
     def clear(self):
 
+        self.clearItems()
         self.index=-1
         self.match=None
         self.matches=[]
@@ -81,30 +74,25 @@ class Search(Plug):
     def clearItems(self):
 
         for m in self.matches:
-            page, rect = m['page'], m['rect']
+            page, rect = m
             item=self.display.view.pageItem(page-1)
             item.setSearched()
-        self.display.view.updateAll()
+        if self.matches:
+            self.display.view.updateAll()
+
+    def search(self, text, view, found=[]):
+
+        if view:
+            pages=view.model().pages()
+            for p in pages.values():
+                rects=p.search(text)
+                pnum=p.pageNumber()
+                if rects:
+                    for r in rects:
+                        found+=[(pnum, r)]
+        return found
 
     def find(self):
-
-        self.listen_widget=[]
-        self.exclude_widget=[]
-
-        def search(text, view, found=[]):
-
-            if not view: return found
-            document=view.model()
-            for page in document.pages().values():
-                rects=page.search(text)
-                if not rects: continue
-                for rect in rects:
-                    line=self.getLine(text, page, rect)
-                    data={'page': page.pageNumber(), 
-                          'rect': rect, 
-                          'up': line}
-                    found+=[data]
-            return found
 
         self.clear()
         self.app.window.main.setFocus()
@@ -112,36 +100,26 @@ class Search(Plug):
 
         if text:
             view=self.display.currentView()
-            self.matches=search(text, view)
-            if len(self.matches) > 0: 
-                self.jump()
+            self.matches=self.search(text, view)
+            if self.matches: self.jump()
 
     def jump(self, increment=1, m=None):
 
-        if len(self.matches)==0: 
-            return
-        if not m:
-            self.index+=increment
-            if self.index>=len(self.matches):
-                self.index=0
-            elif self.index<0:
-                self.index=len(self.matches)-1
-            m=self.matches[self.index]
-        page, rect = m['page'], m['rect']
-        item=self.display.view.pageItem(page-1)
-        mapped=item.mapToItem(rect)
-        item.setSearched([mapped])
-        sceneRect=item.mapRectToScene(mapped)
-        self.display.view.goto(page)
-        self.display.view.centerOn(0, sceneRect.y())
-
-    def getLine(self, text, page, rectF):
-
-        width=page.size().width()
-        lineRectF=QtCore.QRectF(0, rectF.y(), width, rectF.height())
-        line=f'<html>{page.find(lineRectF)}</html>'
-        replacement=f'<font color="{self.text_color}">{text}</font>'
-        return line.replace(text, replacement)
+        if self.matches:
+            if not m:
+                self.index+=increment
+                if self.index>=len(self.matches):
+                    self.index=0
+                elif self.index<0:
+                    self.index=len(self.matches)-1
+                m=self.matches[self.index]
+            page, rect = m
+            item=self.display.view.pageItem(page-1)
+            mapped=item.mapToItem(rect)
+            item.setSearched([mapped])
+            sceneRect=item.mapRectToScene(mapped)
+            self.display.view.goto(page)
+            self.display.view.centerOn(0, sceneRect.y())
 
     def checkLeader(self, event, pressed):
 
