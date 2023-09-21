@@ -53,9 +53,8 @@ class ListWidget(QtWidgets.QWidget):
         h = min(int(0.9*r.height()), h*n)
         return QtCore.QSize(w, h) 
 
-    def updatePosition(self):
+    def updatePosition(self, x=0):
 
-        x=0
         p = self.parent().rect()
         if p:
             self.adjustSize()

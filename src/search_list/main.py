@@ -1,9 +1,7 @@
-from PyQt5 import QtCore, QtGui
+from PyQt5 import QtCore 
 
 from plug.qt import Plug
-from plug.qt.utils import register
-
-from .widget import ListWidget
+from gizmo.widget import ListWidget, Item
 
 class SearchList(Plug):
 
@@ -19,46 +17,52 @@ class SearchList(Plug):
     def on_plugsLoaded(self, plugs):
 
         self.search=plugs.get('Search', None)
-
         if self.search:
-            listener=self.search.event_listener
-            listener.returnPressed.connect(
-                    self.find)
-
-    def jump(self, *args, **kwargs):
-
-        self.searchJump(*args, **kwargs)
-        idx=self.search.index
-        self.ui.list.setCurrentRow(idx)
+            ear=self.search.event_listener
+            ear.returnPressed.connect(self.find)
 
     def find(self):
 
-        self.ui.model.clear()
-        self.ui.proxy.clear()
-
         if self.search.matches:
+            dlist=[]
             v=self.display.currentView()
             t=self.app.window.bar.edit.text()
             for f in self.search.matches:
                 pn, r = f
                 p=v.model().page(pn)
-                t=self.getLine(t, p, r)
-                l=QtGui.QStandardItem(t)
-                self.ui.model.appendRow(l)
-            self.ui.updatePosition()
+                dlist+=[{'up': self.getLine(t, p, r)}]
+            self.ui.setList(dlist)
+            self.updateUIPosition()
             self.ui.show()
+
+    def updateUIPosition(self):
+
+        p = self.ui.parent().rect()
+        if p:
+            self.ui.adjustSize()
+            hint=self.ui.sizeHint()
+            # w=self.ui.width()
+            # h=self.ui.height()
+            w=hint.width()
+            h=hint.height()
+            y=int(p.height()/2-h/2)
+            print(0,y,w,h)
+            self.ui.setGeometry(0, y, w, h)
 
     def setUI(self):
 
-        super().setUI(ui=ListWidget())
-        self.ui.setParent(self.app.window)
+        wlist=ListWidget(
+                item_widget=Item,
+                parent=self.app.window)
+        super().setUI(ui=wlist)
         self.ui.hide()
         
-    def getLine(self, text, page, rectF):
+    def getLine(self, t, p, r):
 
-        w=page.size().width()
-        lrec=QtCore.QRectF(
-                0, rectF.y(), w, rectF.height())
-        line=f'<html>{page.find(lrec)}</html>'
-        rep=f'<font color="{self.text_color}">{text}</font>'
-        return line.replace(text, rep)
+        c=self.text_color
+        w=p.size().width()
+        x, y, w, h = 0, r.y(), w, r.height()
+        r=QtCore.QRectF(x, y, w, h)
+        line=f'<html>{p.find(r)}</html>'
+        rep=f'<font color="{c}">{t}</font>'
+        return line.replace(t, rep)
