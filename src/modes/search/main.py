@@ -106,26 +106,27 @@ class Search(Plug):
             if self.matches and jump: 
                 self.jump()
 
-    def jump(self, increment=1, m=None):
+    def jump(self, increment=1, match=None):
 
         if self.matches:
-            if not m:
-                self.index+=increment
-                if self.index>=len(self.matches):
-                    self.index=0
-                elif self.index<0:
-                    self.index=len(self.matches)-1
-                m=self.matches[self.index]
-            page, rect = m
-            item=self.display.view.pageItem(
-                    page-1)
-            mapped=item.mapToItem(rect)
-            item.setSearched([mapped])
-            sceneRect=item.mapRectToScene(
-                    mapped)
-            self.display.view.goto(page)
+            self.index+=increment
+            self.setIndex()
+
+    def setIndex(self):
+
+        if self.matches:
+            if self.index>=len(self.matches):
+                self.index=0
+            elif self.index<0:
+                self.index=len(self.matches)-1
+            p, r = self.matches[self.index]
+            i=self.display.view.pageItem(p-1)
+            m=i.mapToItem(r)
+            i.setSearched([m])
+            srec=i.mapRectToScene(m)
+            self.display.view.goto(p)
             self.display.view.centerOn(
-                    0, sceneRect.y())
+                    0, srec.y())
 
     def checkLeader(self, event, pressed):
 

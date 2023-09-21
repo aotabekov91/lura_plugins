@@ -1,13 +1,28 @@
 from PyQt5 import QtCore 
 
 from plug.qt import Plug
+from plug.qt.utils import register
 from gizmo.widget import ListWidget, Item
 
 class SearchList(Plug):
 
+    def __init__(self,
+                 app,
+                 *args,
+                 position='bottom',
+                 **kwargs):
+
+        self.follow_move=False 
+
+        super().__init__(
+                *args,
+                app=app,
+                position=position,
+                **kwargs
+                )
+
     def setup(self):
 
-        self.text_color='green'
         super().setup()
         self.display=self.app.window.main.display
         self.app.plugman.plugsLoaded.connect(
@@ -19,7 +34,10 @@ class SearchList(Plug):
         self.search=plugs.get('Search', None)
         if self.search:
             ear=self.search.event_listener
-            ear.returnPressed.connect(self.find)
+            ear.returnPressed.connect(
+                    self.find)
+            self.search.endedListening.connect(
+                    self.deactivate)
 
     def find(self):
 
@@ -31,38 +49,39 @@ class SearchList(Plug):
                 pn, r = f
                 p=v.model().page(pn)
                 dlist+=[{'up': self.getLine(t, p, r)}]
-            self.ui.setList(dlist)
-            self.updateUIPosition()
-            self.ui.show()
-
-    def updateUIPosition(self):
-
-        p = self.ui.parent().rect()
-        if p:
-            self.ui.adjustSize()
-            hint=self.ui.sizeHint()
-            # w=self.ui.width()
-            # h=self.ui.height()
-            w=hint.width()
-            h=hint.height()
-            y=int(p.height()/2-h/2)
-            print(0,y,w,h)
-            self.ui.setGeometry(0, y, w, h)
+            self.ui.main.setList(dlist)
+            self.ui.main.adjustSize()
+            self.activateUI()
 
     def setUI(self):
 
         wlist=ListWidget(
                 item_widget=Item,
-                parent=self.app.window)
-        super().setUI(ui=wlist)
-        self.ui.hide()
+                objectName='List'
+                )
+        super().setUI()
+        self.ui.addWidget(
+                wlist, 'main', main=True)
         
+    @register('<c-j>', modes=['Search'])
+    def next(self): 
+        self.ui.main.moveDown()
+
+    @register('<c-k>', modes=['Search'])
+    def prev(self): 
+        self.ui.main.moveUp()
+
+    @register('<c-l>', modes=['Search'])
+    def jump(self, increment=1):
+        crow=self.ui.main.currentRow()
+        self.search.index=crow
+        self.search.setIndex()
+
     def getLine(self, t, p, r):
 
-        c=self.text_color
         w=p.size().width()
         x, y, w, h = 0, r.y(), w, r.height()
         r=QtCore.QRectF(x, y, w, h)
-        line=f'<html>{p.find(r)}</html>'
-        rep=f'<font color="{c}">{t}</font>'
-        return line.replace(t, rep)
+        l=f'<html>{p.find(r)}</html>'
+        r=f'<strong><u>{t}</u></strong>'
+        return l.replace(t, r)
