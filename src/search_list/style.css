@@ -1,0 +1,11 @@
+QListView{
+	color: 'red';
+	border-color: 'blue';
+	background-color: 'cyan';
+}
+
+QWidget{
+	color: 'red';
+	border-color: 'blue';
+	background-color: 'cyan';
+}

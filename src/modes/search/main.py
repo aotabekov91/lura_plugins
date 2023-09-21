@@ -29,10 +29,11 @@ class Search(Plug):
 
     def setConnect(self):
 
-        self.event_listener.returnPressed.connect(
-                self.find)
-        self.event_listener.carriageReturnPressed.connect(
-                self.find)
+        listener=self.event_listener
+        listener.returnPressed.connect(
+                lambda: self.find(jump=True))
+        listener.carriageReturnPressed.connect(
+                lambda: self.find(jump=True))
 
     @register('j')
     def next(self, digit=1): 
@@ -92,7 +93,7 @@ class Search(Plug):
                         found+=[(pnum, r)]
         return found
 
-    def find(self):
+    def find(self, jump=True):
 
         self.clear()
         self.app.window.main.setFocus()
@@ -100,8 +101,10 @@ class Search(Plug):
 
         if text:
             view=self.display.currentView()
-            self.matches=self.search(text, view)
-            if self.matches: self.jump()
+            self.matches=self.search(
+                    text, view)
+            if self.matches and jump: 
+                self.jump()
 
     def jump(self, increment=1, m=None):
 
@@ -114,12 +117,15 @@ class Search(Plug):
                     self.index=len(self.matches)-1
                 m=self.matches[self.index]
             page, rect = m
-            item=self.display.view.pageItem(page-1)
+            item=self.display.view.pageItem(
+                    page-1)
             mapped=item.mapToItem(rect)
             item.setSearched([mapped])
-            sceneRect=item.mapRectToScene(mapped)
+            sceneRect=item.mapRectToScene(
+                    mapped)
             self.display.view.goto(page)
-            self.display.view.centerOn(0, sceneRect.y())
+            self.display.view.centerOn(
+                    0, sceneRect.y())
 
     def checkLeader(self, event, pressed):
 

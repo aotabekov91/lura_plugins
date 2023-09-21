@@ -42,7 +42,8 @@ class ListWidget(QtWidgets.QWidget):
 
         c=0
         for i in range(self.proxy.rowCount()):
-            c=max(c, self.list.sizeHintForColumn(i))
+            ch=self.list.sizeHintForColumn(i)
+            c=max(c, ch)
         c+=5
 
         r = self.parent().rect()
@@ -62,4 +63,3 @@ class ListWidget(QtWidgets.QWidget):
             h=self.height()
             y=int(p.height()/2-self.height()/2)
             self.setGeometry(x, y, w, h)
-            self.list.setStyleSheet('background-color: yellow;')
