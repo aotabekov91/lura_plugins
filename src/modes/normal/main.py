@@ -1,4 +1,4 @@
-from plug.qt.utils import register
+from plug.utils import register
 from plug.qt.plugs.modes import Normal as Mode
 
 class Normal(Mode):

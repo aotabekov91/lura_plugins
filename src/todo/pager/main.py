@@ -1,5 +1,5 @@
 from plug.qt import Plug
-from plug.qt.utils import register
+from plug.utils import register
 
 from .widget import PagerWidget
 

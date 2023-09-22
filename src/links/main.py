@@ -3,7 +3,7 @@ import subprocess
 from PyQt5 import QtCore, QtGui
 
 from plug.qt import Plug
-from plug.qt.utils import register
+from plug.utils import register
 
 class Links(Plug):
 

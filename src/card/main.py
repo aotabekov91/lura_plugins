@@ -3,7 +3,7 @@ from plyer import notification
 from ankipulator import Submitter
 
 from plug.qt import Plug
-from plug.qt.utils import register
+from plug.utils import register
 from gizmo.widget import InputList, UpDownEdit
 
 class Card(Plug):
