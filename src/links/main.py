@@ -36,8 +36,8 @@ class Links(Plug):
 
         self.display.itemPainted.connect(
                 self.paint)
-        self.listenerAddKeys=self.event_listener.addKeys
-        self.event_listener.addKeys=self.ownAddKeys
+        self.listenerAddKeys=self.ear.addKeys
+        self.ear.addKeys=self.ownAddKeys
 
     def ownAddKeys(self, event):
 

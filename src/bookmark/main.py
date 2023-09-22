@@ -27,9 +27,9 @@ class Bookmark(Plug):
 
     def setConnect(self):
 
-        self.event_listener.returnPressed.connect(
+        self.ear.returnPressed.connect(
                 self.bookmark)
-        self.event_listener.carriageReturnPressed.connect(
+        self.ear.carriageReturnPressed.connect(
                 self.bookmark)
 
     def delisten(self):

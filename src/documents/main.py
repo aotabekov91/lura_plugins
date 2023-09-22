@@ -35,9 +35,9 @@ class Documents(Plug):
 
     def setConnect(self):
 
-        self.event_listener.returnPressed.connect(
+        self.ear.returnPressed.connect(
                 self.open)
-        self.event_listener.carriageReturnPressed.connect(
+        self.ear.carriageReturnPressed.connect(
                 self.open)
 
     def setUI(self):

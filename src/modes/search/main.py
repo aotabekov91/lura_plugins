@@ -29,7 +29,7 @@ class Search(Plug):
 
     def setConnect(self):
 
-        listener=self.event_listener
+        listener=self.ear
         listener.returnPressed.connect(
                 lambda: self.find(jump=True))
         listener.carriageReturnPressed.connect(

@@ -33,7 +33,7 @@ class SearchList(Plug):
 
         self.search=plugs.get('Search', None)
         if self.search:
-            ear=self.search.event_listener
+            ear=self.search.ear
             ear.returnPressed.connect(
                     self.find)
             self.search.endedListening.connect(

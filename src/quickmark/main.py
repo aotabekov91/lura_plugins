@@ -27,8 +27,8 @@ class Quickmark(Plug):
         super().setup()
         self.table = Table() 
         self.display=self.app.window.main.display
-        self.keys=self.event_listener.listen_leader
-        self.event_listener.keyRegistered.connect(
+        self.keys=self.ear.listen_leader
+        self.ear.keyRegistered.connect(
                 self.on_keyRegistered)
 
     def listen(self):

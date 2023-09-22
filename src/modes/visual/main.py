@@ -27,8 +27,8 @@ class Visual(Mode):
 
         super().setup()
         self.display=self.app.window.main.display
-        self.listenerAddKeys=self.event_listener.addKeys
-        self.event_listener.addKeys=self.ownAddKeys
+        self.listenerAddKeys=self.ear.addKeys
+        self.ear.addKeys=self.ownAddKeys
 
     def ownAddKeys(self, event):
 
@@ -297,7 +297,7 @@ class Visual(Mode):
         keys=list(self.hints.keys())
         if len(keys)<=1:
             if not keys:
-                self.event_listener.clearKeys()
+                self.ear.clearKeys()
                 self.hints=None
                 self.hinting=False
             elif len(self.hints[keys[0]])<=1:
