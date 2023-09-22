@@ -1,7 +1,7 @@
 from tables import Part as Table
 
 from plug.qt import Plug 
-from plug.utils import register
+from plug.utils.register import register
 from gizmo.widget import Item, InputList
 
 from .widget import PartTree

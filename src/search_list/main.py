@@ -1,7 +1,7 @@
 from PyQt5 import QtCore 
 
 from plug.qt import Plug
-from plug.utils import register
+from plug.utils.register import register
 from gizmo.widget import ListWidget, Item
 
 class SearchList(Plug):
