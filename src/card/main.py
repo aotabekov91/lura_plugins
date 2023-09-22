@@ -12,7 +12,7 @@ class Card(Plug):
                  app,
                  *args,
                  position='right', 
-                 mode_keys={
+                 prefix_key={
                      'command':'c', 
                      'normal': 'c',
                      'Card': '<c-u>',
@@ -22,7 +22,7 @@ class Card(Plug):
         super(Card, self).__init__(
                 app=app,
                 position=position,
-                mode_keys=mode_keys,
+                prefix_key=prefix_key,
                 **kwargs)
 
         self.decks=[]

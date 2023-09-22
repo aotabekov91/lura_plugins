@@ -8,13 +8,13 @@ class Outline(TreePlug):
     def __init__(self, 
             app,
             position='left',
-            mode_keys={'command':'o'},
+            prefix_key={'command':'o'},
             **kwargs): 
 
         super().__init__(
                 app=app, 
                 position=position,
-                mode_keys=mode_keys,
+                prefix_key=prefix_key,
                 **kwargs,
                 )
         self.outlines={}

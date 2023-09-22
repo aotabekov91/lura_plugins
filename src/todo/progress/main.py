@@ -9,7 +9,7 @@ class Progress(Plug):
         super(Progress, self).__init__(
                 app=app,
                 position='window',
-                mode_keys={'command':'r'},
+                prefix_key={'command':'r'},
                 **kwargs,
                 )
 

@@ -12,13 +12,13 @@ class Metadata(Plug):
             app, 
             *args,
             position='right',
-            mode_keys={'command': 'm'},
+            prefix_key={'command': 'm'},
             **kwargs):
 
         super().__init__(
                 app=app, 
                 position=position, 
-                mode_keys=mode_keys,
+                prefix_key=prefix_key,
                 **kwargs,
                 )
 

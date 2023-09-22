@@ -13,14 +13,14 @@ class Documents(Plug):
             *args,
             special=special,
             position='right',
-            mode_keys={'command': 'd'},
+            prefix_key={'command': 'd'},
             **kwargs):
 
         super(Documents, self).__init__(
                 app=app, 
                 special=special,
                 position=position, 
-                mode_keys=mode_keys,
+                prefix_key=prefix_key,
                 **kwargs
                 )
 

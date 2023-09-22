@@ -13,7 +13,7 @@ class Parts(Plug):
             app, 
             *args,
             position='left',
-            mode_keys={'command': 'p'},
+            prefix_key={'command': 'p'},
             **kwargs):
 
         self.follow=False
@@ -22,7 +22,7 @@ class Parts(Plug):
                 *args,
                 app=app, 
                 position=position, 
-                mode_keys=mode_keys,
+                prefix_key=prefix_key,
                 **kwargs)
 
         self.table=Table()

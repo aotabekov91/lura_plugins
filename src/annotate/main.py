@@ -48,10 +48,10 @@ class Annotate(Plug):
                     function=v['name'])
             func.key=f'{k}'
             func.modes=[]
-            self.commandKeys[k]=func
             self.func_colors[v['name']]=v['color']
             self.actions[(self.name, v['name'])]=func
-        self.app.plugman.saveActions(self, self.actions)
+        self.app.plugman.saveActions(
+                self, self.actions)
 
     def on_mousePressEvent(self, v, i, e):
 
