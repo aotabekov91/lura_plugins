@@ -1,6 +1,6 @@
 from PyQt5 import QtCore, QtWidgets
 
-from plug.utils.register import register
+from gizmo.utils import register
 from plug.qt.plugs import TreePlug
 
 class Outline(TreePlug):

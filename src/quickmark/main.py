@@ -1,5 +1,5 @@
 from plug.qt import Plug
-from plug.utils import register
+from gizmo.utils import register
 from tables import Quickmark as Table
 
 class Quickmark(Plug):

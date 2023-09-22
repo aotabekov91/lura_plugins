@@ -1,4 +1,4 @@
-from plug.utils.register import register
+from gizmo.utils import register
 from plug.qt.plugs.modes import Normal as Mode
 
 class Normal(Mode):
