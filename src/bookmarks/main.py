@@ -36,7 +36,7 @@ class Bookmarks(Plug):
 
     def setUI(self):
 
-        super().setUI()
+        self.uiman.setUI()
         main=InputList(
                 item_widget=UpDownEdit,
                 objectName='BookmarksList')
@@ -73,7 +73,7 @@ class Bookmarks(Plug):
 
         prev=self.app.plugman.prev
         if prev and prev.name=='normal':
-            view=self.app.window.main.display.currentView()
+            view=self.app.display.currentView()
             if view:
                 criteria={'hash': view.model().hash()}
                 rows = self.table.getRow(criteria)

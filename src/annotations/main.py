@@ -26,7 +26,7 @@ class Annotations(Plug):
 
     def connect(self):
 
-        self.display=self.app.window.main.display
+        self.display=self.app.display
         self.display.viewChanged.connect(
                 self.update)
         self.display.viewSelection.connect(
@@ -34,7 +34,7 @@ class Annotations(Plug):
 
     def setUI(self):
 
-        super().setUI()
+        self.uiman.setUI()
         self.ui.addWidget(
                 InputList(
                     item_widget=UpDownEdit,

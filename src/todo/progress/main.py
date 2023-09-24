@@ -9,7 +9,7 @@ class Progress(Plug):
         super(Progress, self).__init__(
                 app=app,
                 position='window',
-                prefix_key={'command':'r'},
+                prefix_keys={'command':'r'},
                 **kwargs,
                 )
 
@@ -18,7 +18,7 @@ class Progress(Plug):
 
     def setUI(self):
 
-        super().setUI()
+        self.uiman.setUI()
 
         self.ui.addWidget(InputList(), 'main', main=True)
         self.ui.main.input.setLabel('Reading list')

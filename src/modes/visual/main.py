@@ -26,7 +26,7 @@ class Visual(Mode):
     def setup(self):
 
         super().setup()
-        self.display=self.app.window.main.display
+        self.display=self.app.display
         self.listenerAddKeys=self.ear.addKeys
         self.ear.addKeys=self.ownAddKeys
 
@@ -373,7 +373,7 @@ class Visual(Mode):
     def checkLeader(self, event, pressed):
 
         if super().checkLeader(event, pressed):
-            if self.listening:
+            if self.ear.listening:
                 return True
             current=self.app.plugman.current
             if current and current.name=='normal':

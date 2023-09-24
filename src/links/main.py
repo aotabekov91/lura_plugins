@@ -29,7 +29,7 @@ class Links(Plug):
     def setup(self):
 
         super().setup()
-        self.display=self.app.window.main.display
+        self.display=self.app.display
         self.setConnect()
 
     def setConnect(self):
@@ -106,7 +106,7 @@ class Links(Plug):
 
     def paint(self, painter, options, widget, item, view):
 
-        if self.listening:
+        if self.ear.listening:
             if self.links is None: 
                 self.links=self.generate(item)
             painter.save()
@@ -126,7 +126,7 @@ class Links(Plug):
     def checkLeader(self, event, pressed):
 
         if super().checkLeader(event, pressed):
-            if self.listening:
+            if self.ear.listening:
                 return True
             current=self.app.plugman.current
             if current and current.name=='normal':

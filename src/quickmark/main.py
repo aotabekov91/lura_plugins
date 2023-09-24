@@ -26,7 +26,7 @@ class Quickmark(Plug):
 
         super().setup()
         self.table = Table() 
-        self.display=self.app.window.main.display
+        self.display=self.app.display
         self.keys=self.ear.listen_leader
         self.ear.keyRegistered.connect(
                 self.on_keyRegistered)

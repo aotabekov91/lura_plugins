@@ -35,7 +35,7 @@ class Annotate(Plug):
 
     def setConnect(self):
 
-        self.display=self.app.window.main.display
+        self.display=self.app.display
         self.app.buffer.bufferCreated.connect(self.paint)
         self.display.itemMousePressOccured.connect(
                 self.on_mousePressEvent)
@@ -155,7 +155,7 @@ class Annotate(Plug):
     def checkLeader(self, event, pressed):
 
         if super().checkLeader(event, pressed):
-            if self.listening: 
+            if self.ear.listening: 
                 return True
             view=self.display.view
             current=self.app.plugman.current

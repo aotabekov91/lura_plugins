@@ -12,13 +12,13 @@ class Metadata(Plug):
             app, 
             *args,
             position='right',
-            prefix_key={'command': 'm'},
+            prefix_keys={'command': 'm'},
             **kwargs):
 
         super().__init__(
                 app=app, 
                 position=position, 
-                prefix_key=prefix_key,
+                prefix_keys=prefix_keys,
                 **kwargs,
                 )
 
@@ -31,12 +31,12 @@ class Metadata(Plug):
 
     def setConnect(self):
 
-        self.app.window.main.display.viewChanged.connect(
+        self.app.display.viewChanged.connect(
                 self.update)
 
     def setUI(self):
 
-        super().setUI()
+        self.uiman.setUI()
         self.ui.addWidget(
                 InputList(item_widget=UpDownEdit),
                 'main', 
@@ -72,7 +72,7 @@ class Metadata(Plug):
 
     def update(self, view, prev):
 
-        view=self.app.window.main.display.view
+        view=self.app.display.view
         if view:
             dhash=view.model().hash()
             meta=self.table.getRow({'hash':dhash})

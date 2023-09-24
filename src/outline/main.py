@@ -8,13 +8,13 @@ class Outline(TreePlug):
     def __init__(self, 
             app,
             position='left',
-            prefix_key={'command':'o'},
+            prefix_keys={'command':'o'},
             **kwargs): 
 
         super().__init__(
                 app=app, 
                 position=position,
-                prefix_key=prefix_key,
+                prefix_keys=prefix_keys,
                 **kwargs,
                 )
         self.outlines={}
@@ -22,7 +22,7 @@ class Outline(TreePlug):
     def setup(self):
 
         super().setup()
-        self.display=self.app.window.main.display
+        self.display=self.app.display
         self.setConnect()
 
     def setConnect(self):
@@ -34,7 +34,7 @@ class Outline(TreePlug):
 
     def setUI(self):
 
-        super().setUI()
+        self.uiman.setUI()
         self.ui.main.tree.m_expansionRole=QtCore.Qt.UserRole+4
         self.ui.main.tree.m_expansionIDRole=QtCore.Qt.UserRole+5
         self.ui.main.tree.setEditTriggers(

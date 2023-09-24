@@ -24,7 +24,7 @@ class SearchList(Plug):
     def setup(self):
 
         super().setup()
-        self.display=self.app.window.main.display
+        self.display=self.app.display
         self.app.plugman.plugsLoaded.connect(
                 self.on_plugsLoaded)
         self.setUI()
@@ -59,7 +59,7 @@ class SearchList(Plug):
                 item_widget=Item,
                 objectName='List'
                 )
-        super().setUI()
+        self.uiman.setUI()
         self.ui.addWidget(
                 wlist, 'main', main=True)
         

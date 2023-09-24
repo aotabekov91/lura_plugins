@@ -11,9 +11,9 @@ class Autosave(Plug):
 
     def setConnect(self):
 
-        self.app.window.main.display.viewCreated.connect(
+        self.app.display.viewCreated.connect(
                 self.on_viewCreated)
-        self.app.window.main.display.positionChanged.connect(
+        self.app.display.positionChanged.connect(
                 self.on_positionChanged)
 
     def on_viewCreated(self, view):

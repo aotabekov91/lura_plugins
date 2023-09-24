@@ -13,7 +13,7 @@ class Parts(Plug):
             app, 
             *args,
             position='left',
-            prefix_key={'command': 'p'},
+            prefix_keys={'command': 'p'},
             **kwargs):
 
         self.follow=False
@@ -22,7 +22,7 @@ class Parts(Plug):
                 *args,
                 app=app, 
                 position=position, 
-                prefix_key=prefix_key,
+                prefix_keys=prefix_keys,
                 **kwargs)
 
         self.table=Table()
@@ -31,7 +31,7 @@ class Parts(Plug):
     def setup(self):
 
         super().setup()
-        self.display=self.app.window.main.display
+        self.display=self.app.display
 
     @register('f')
     def toggleFollow(self): 
@@ -39,7 +39,7 @@ class Parts(Plug):
 
     def setUI(self):
 
-        super().setUI()
+        self.uiman.setUI()
         self.ui.addWidget(PartTree(), 'tree')
         self.ui.tree.returnPressed.connect(self.open)
         self.ui.tree.itemChanged.connect(self.on_itemChanged)

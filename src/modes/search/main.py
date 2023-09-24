@@ -25,7 +25,7 @@ class Search(Plug):
         self.match=None
         self.matches=[]
         self.setConnect()
-        self.display=self.app.window.main.display
+        self.display=self.app.display
 
     def setConnect(self):
 
@@ -131,7 +131,7 @@ class Search(Plug):
     def checkLeader(self, event, pressed):
 
         if super().checkLeader(event, pressed):
-            if self.listening:
+            if self.ear.listening:
                 return True
             current=self.app.plugman.current
             if current and current.name=='normal':

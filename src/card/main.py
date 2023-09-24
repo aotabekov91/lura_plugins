@@ -12,7 +12,7 @@ class Card(Plug):
                  app,
                  *args,
                  position='right', 
-                 prefix_key={
+                 prefix_keys={
                      'command':'c', 
                      'normal': 'c',
                      'Card': '<c-u>',
@@ -22,7 +22,7 @@ class Card(Plug):
         super(Card, self).__init__(
                 app=app,
                 position=position,
-                prefix_key=prefix_key,
+                prefix_keys=prefix_keys,
                 **kwargs)
 
         self.decks=[]
@@ -37,7 +37,7 @@ class Card(Plug):
 
     def setUI(self):
 
-        super().setUI()
+        self.uiman.setUI()
         self.ui.addWidget(
                 InputList(
                     item_widget=UpDownEdit,
@@ -149,7 +149,7 @@ class Card(Plug):
     @register('Y', modes=['command'])
     def yankToFieldSaveStructure(self, digit=1):
 
-        view=self.app.window.main.display.view
+        view=self.app.display.view
         if view.selected(): 
             text=[]
             for s in view.selected(): text+=['\n'.join(s['text_data'])]
@@ -164,7 +164,7 @@ class Card(Plug):
 
         if hasattr(self.ui.current, 'list'):
             widget=self.ui.current.list.getWidget(digit)
-            view=self.app.window.main.display.view
+            view=self.app.display.view
             if widget: 
                 if not text:
                     if view.selected():

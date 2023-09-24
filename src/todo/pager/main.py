@@ -10,10 +10,10 @@ class Pager(Plug):
         super().__init__(position='overlay', **kwargs)
 
         self.setUI()
-        self.app.window.main.display.itemChanged.connect(
+        self.app.display.itemChanged.connect(
                 self.on_itemChanged
                 )
-        self.app.window.main.display.viewChanged.connect(
+        self.app.display.viewChanged.connect(
                 self.on_itemChanged
                 )
         self.app.window.bar.toggled.connect(

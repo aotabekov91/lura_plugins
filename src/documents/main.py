@@ -13,14 +13,14 @@ class Documents(Plug):
             *args,
             special=special,
             position='right',
-            prefix_key={'command': 'd'},
+            prefix_keys={'command': 'd'},
             **kwargs):
 
         super(Documents, self).__init__(
                 app=app, 
                 special=special,
                 position=position, 
-                prefix_key=prefix_key,
+                prefix_keys=prefix_keys,
                 **kwargs
                 )
 
@@ -42,7 +42,7 @@ class Documents(Plug):
 
     def setUI(self):
 
-        super().setUI()
+        self.uiman.setUI()
         main=InputList(item_widget=UpDown)
         self.ui.addWidget(main, 'main', main=True)
         self.ui.main.input.hideLabel()
@@ -74,7 +74,6 @@ class Documents(Plug):
         if item:
             path=self.hash.getPath(
                     item.itemData['hash'])
-            print(path)
             if path: 
                 self.app.window.display.open(
                         path, how=how)

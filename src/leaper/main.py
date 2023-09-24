@@ -12,7 +12,7 @@ class Leaper(Plug):
 
     def setConnect(self):
 
-        self.display=self.app.window.main.display
+        self.display=self.app.display
         self.display.itemChanged.connect(
                 self.on_itemChanged)
 

@@ -22,7 +22,7 @@ class Bookmark(Plug):
 
         super().setup()
         self.table=Table()
-        self.display=self.app.window.main.display
+        self.display=self.app.display
         self.setConnect()
 
     def setConnect(self):
