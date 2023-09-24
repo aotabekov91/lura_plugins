@@ -34,7 +34,7 @@ class Outline(TreePlug):
 
     def setUI(self):
 
-        self.uiman.setUI()
+        super().setUI()
         self.ui.main.tree.m_expansionRole=QtCore.Qt.UserRole+4
         self.ui.main.tree.m_expansionIDRole=QtCore.Qt.UserRole+5
         self.ui.main.tree.setEditTriggers(
@@ -111,18 +111,6 @@ class Outline(TreePlug):
             if not dhash in self.outlines:
                 self.outlines[dhash]=document.loadOutline()
             return self.outlines[dhash]
-
-
-    def listen(self):
-
-        super().listen()
-        self.activated=True
-        self.activateUI()
-
-    def delisten(self):
-
-        super().delisten()
-        self.activated=False
         
     @register('t', modes=['command'])
     def toggle(self): super().toggle()
