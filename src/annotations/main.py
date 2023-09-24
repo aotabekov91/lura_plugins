@@ -54,32 +54,33 @@ class Annotations(Plug):
     def update(self):
 
         view=self.display.currentView()
-        annotations=view.model().annotations()
-        native=view.model().nativeAnnotations()
+        annotations=[]
+        if view:
+            dhash=view.model().hash()
+            annotations=view.model().annotations()
+            native=view.model().nativeAnnotations()
 
-        dhash=view.model().hash()
+            for a in annotations:
 
-        for a in annotations:
+                a['up']=f'# {a.get("id")}'
+                a['down']=a['content']
+                a['up_color']=a['color'].name()
 
-            a['up']=f'# {a.get("id")}'
-            a['down']=a['content']
-            a['up_color']=a['color'].name()
-
-        for n in native:
-            data={
-                  'pAnn':n,
-                  'up': 'Native',
-                  'hash': dhash,
-                  'up_color':n.color(),
-                  'down':n.contents(),
-                  'kind': 'document',
-                  'text': n.contents(),
-                  'content': n.contents(),
-                  'color': QtGui.QColor(n.color()),
-                  'page': n.page().pageNumber(),
-                  }
-            annotations+=[data]
-        self.ui.main.setList(annotations)
+            for n in native:
+                data={
+                      'pAnn':n,
+                      'up': 'Native',
+                      'hash': dhash,
+                      'up_color':n.color(),
+                      'down':n.contents(),
+                      'kind': 'document',
+                      'text': n.contents(),
+                      'content': n.contents(),
+                      'color': QtGui.QColor(n.color()),
+                      'page': n.page().pageNumber(),
+                      }
+                annotations+=[data]
+            self.ui.main.setList(annotations)
         return annotations
 
     def on_viewSelection(self, view, selections):
