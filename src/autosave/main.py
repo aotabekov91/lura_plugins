@@ -26,7 +26,7 @@ class Autosave(Plug):
     def getData(self, view):
 
         data=self.table.getRow(
-                {'hash':view.model().hash()})
+                {'hash':view.model().id()})
         if data:
             r=data[0]
             page=r['page']
@@ -44,8 +44,8 @@ class Autosave(Plug):
 
         vdata=self.getData(view)
         if vdata:
-            hdata={'hash':view.model().hash()}
+            hdata={'hash':view.model().id()}
             self.table.updateRow(hdata, data)
         else:
-            data['hash']=view.model().hash()
+            data['hash']=view.model().id()
             self.table.writeRow(data, uniqueField='hash')

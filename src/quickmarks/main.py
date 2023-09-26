@@ -73,7 +73,7 @@ class Quickmarks(Plug):
         if prev and prev.name=='normal':
             view=self.app.display.currentView()
             if view:
-                criteria={'hash': view.model().hash()}
+                criteria={'hash': view.model().id()}
                 rows = self.table.getRow(criteria)
                 for a in rows:
                     p, l, t = tuple(a['position'].split(':'))

@@ -59,7 +59,7 @@ class Bookmark(Plug):
                 page=view.pageItem().page().pageNumber()
                 position=[str(f) for f in view.saveLeftAndTop()]
                 data={'page' : page, 
-                      'hash' : view.model().hash(),
+                      'hash' : view.model().id(),
                       'position' : ':'.join(position)
                       }
                 row=self.table.getRow(data)
@@ -84,7 +84,7 @@ class Bookmark(Plug):
                             'title':text, 
                             'text':text,
                             'kind':'document',
-                            'hash':view.model().hash(),
+                            'hash':view.model().id(),
                             'page':page,
                             'position':':'.join(position),
                             }

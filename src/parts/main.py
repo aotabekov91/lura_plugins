@@ -67,7 +67,7 @@ class Parts(Plug):
 
         view=self.display.view
         if view:
-            dhash=view.model().hash()
+            dhash=view.model().id()
             data=self.table.getTreeDict(dhash)
             if data: 
                 self.ui.tree.installData({'root': data})
@@ -115,7 +115,7 @@ class Parts(Plug):
             self.activate()
         view=self.display.currentView()
         if view: 
-            dhash=view.model().hash() 
+            dhash=view.model().id() 
             data=self.table.search(f'hash:{dhash} kind:{kind}')
             for d in data:
                 d['up']=d['text']

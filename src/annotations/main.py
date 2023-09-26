@@ -56,7 +56,7 @@ class Annotations(Plug):
         view=self.display.currentView()
         annotations=[]
         if view:
-            dhash=view.model().hash()
+            dhash=view.model().id()
             annotations=view.model().annotations()
             native=view.model().nativeAnnotations()
 

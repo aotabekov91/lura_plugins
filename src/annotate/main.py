@@ -85,7 +85,7 @@ class Annotate(Plug):
             area=selection['area_unified']
             page=pageItem.page()
             pageNumber = page.pageNumber()
-            dhash = page.document().hash()
+            dhash = page.document().id()
             aData=self.write(
                     dhash, 
                     pageNumber, 
@@ -147,7 +147,7 @@ class Annotate(Plug):
             view=self.display.view
             if view: document=view.model()
         if document:
-            dhash = document.hash()
+            dhash = document.id()
             aData=self.table.getRow({'hash':dhash})
             for annotation in aData: 
                 self.add(document, annotation)

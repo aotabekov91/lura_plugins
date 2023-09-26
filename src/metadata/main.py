@@ -74,7 +74,7 @@ class Metadata(Plug):
 
         view=self.app.display.view
         if view:
-            dhash=view.model().hash()
+            dhash=view.model().id()
             meta=self.table.getRow({'hash':dhash})
             if meta:
                 dlist=[]

@@ -43,7 +43,7 @@ class Quickmark(Plug):
 
         if mark: 
             view = self.display.currentView()
-            dhash= self.display.currentView().model().hash()
+            dhash= self.display.currentView().model().id()
             page = self.display.currentView().currentPage()
             left, top = self.display.currentView().saveLeftAndTop()
             position=f'{page}:{left}:{top}'

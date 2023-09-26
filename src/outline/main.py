@@ -106,10 +106,10 @@ class Outline(TreePlug):
     def getData(self, view):
 
         if view:
-            document=view.model()
-            dhash=document.hash()
+            model=view.model()
+            dhash=model.id()
             if not dhash in self.outlines:
-                self.outlines[dhash]=document.loadOutline()
+                self.outlines[dhash]=model.loadOutline()
             return self.outlines[dhash]
         
     @register('t', modes=['command'])
