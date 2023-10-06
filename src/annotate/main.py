@@ -50,8 +50,7 @@ class Annotate(Plug):
             func.modes=[]
             self.func_colors[v['name']]=v['color']
             self.actions[(self.name, v['name'])]=func
-        self.app.plugman.saveActions(
-                self, self.actions)
+        self.app.plugman.save(self, self.actions)
 
     def on_mousePressEvent(self, v, i, e):
 
