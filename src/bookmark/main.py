@@ -52,7 +52,7 @@ class Bookmark(Plug):
 
     def getBookmark(self):
 
-        prev=self.app.plugman.prev
+        prev=self.app.moder.prev
         if prev and prev.name=='normal':
             view=self.display.currentView()
             if view:
@@ -67,7 +67,7 @@ class Bookmark(Plug):
 
     def bookmark(self):
 
-        prev=self.app.plugman.prev
+        prev=self.app.moder.prev
         text=self.app.window.bar.edit.text()
         if prev:
             view=self.display.currentView()

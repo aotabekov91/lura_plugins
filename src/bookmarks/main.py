@@ -71,7 +71,7 @@ class Bookmarks(Plug):
     @register('.u')
     def update(self):
 
-        prev=self.app.plugman.prev
+        prev=self.app.moder.prev
         if prev and prev.name=='normal':
             view=self.app.display.currentView()
             if view:

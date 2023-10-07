@@ -50,7 +50,7 @@ class Annotate(Plug):
             func.modes=[]
             self.func_colors[v['name']]=v['color']
             self.actions[(self.name, v['name'])]=func
-        self.app.plugman.save(self, self.actions)
+        self.app.moder.save(self, self.actions)
 
     def on_mousePressEvent(self, v, i, e):
 
@@ -157,7 +157,7 @@ class Annotate(Plug):
             if self.ear.listening: 
                 return True
             view=self.display.view
-            current=self.app.plugman.current
+            current=self.app.moder.current
             if view and current:
                 if current.name=='normal':
                     return True

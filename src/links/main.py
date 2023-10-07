@@ -128,7 +128,7 @@ class Links(Plug):
         if super().checkLeader(event, pressed):
             if self.ear.listening:
                 return True
-            current=self.app.plugman.current
+            current=self.app.moder.current
             if current and current.name=='normal':
                 return True
         return False

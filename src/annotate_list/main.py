@@ -15,7 +15,7 @@ class AnnotateList(Plug):
                 app=app, 
                 **kwargs,
                 )
-        self.app.plugman.plugsLoaded.connect(
+        self.app.moder.plugsLoaded.connect(
                 self.on_plugsLoaded)
 
     def on_plugsLoaded(self, plugs):

@@ -25,7 +25,7 @@ class SearchList(Plug):
 
         super().setup()
         self.display=self.app.display
-        self.app.plugman.plugsLoaded.connect(
+        self.app.moder.plugsLoaded.connect(
                 self.on_plugsLoaded)
         self.setUI()
 

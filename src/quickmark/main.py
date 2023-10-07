@@ -72,7 +72,7 @@ class Quickmark(Plug):
     def checkLeader(self, event, pressed):
 
         if super().checkLeader(event, pressed):
-            current=self.app.plugman.current
+            current=self.app.moder.current
             if current and current.name=='normal':
                 self.pressed=pressed
                 return True
