@@ -31,16 +31,21 @@ class Card(Plug):
                 app=app,
                 position=position,
                 prefix_keys=prefix_keys,
-                **kwargs)
+                **kwargs
+                )
 
-        self.submitter=Submitter()
+    def setup(self):
+
+        super().setup()
+        self.filler=Submitter()
         self.setUI()
         self.update()
-        self.setInput()
+        self.app.moder.plugsLoaded.connect(
+                self.on_plugsLoaded)
 
-    def setInput(self):
+    def on_plugsLoaded(self, plugs):
 
-        self.input=self.app.moder.plugs.get(
+        self.input=plugs.get(
                 'input', None)
 
     def setUI(self):
@@ -83,8 +88,11 @@ class Card(Plug):
                     self.on_inputEscapePressed)
             self.input.escapePressed.connect(
                     self.on_inputEscapePressed)
-            self.setMode('input')
-            self.input.setText(self.getSelected())
+            self.input.setRatio(
+                    w=0.7, h=0.3)
+            self.input.activate()
+            self.input.setText(
+                    self.getSelected())
 
     def on_clozeCreated(self):
         raise
@@ -111,6 +119,7 @@ class Card(Plug):
 
     def on_inputEscapePressed(self):
 
+        self.input.setRatio()
         self.input.carriagePressed.disconnect(
                 self.on_inputReturnPressed)
         self.input.escapePressed.disconnect(
@@ -132,10 +141,10 @@ class Card(Plug):
 
         def _update():
 
-            for d in self.submitter.getDecks():
+            for d in self.filler.getDecks():
                 self.decks+=[{'up':d}]
 
-            for m, flds in self.submitter.getModels().items():
+            for m, flds in self.filler.getModels().items():
                 self.models+=[{'up':m}]
                 self.fields[m]=flds
 
@@ -298,7 +307,7 @@ class Card(Plug):
 
         try:
 
-            self.submitter.addNotes(note)
+            self.filler.addNotes(note)
             notification.notify(
                     title='LookupMode', 
                     message='Submitted to Anki')
