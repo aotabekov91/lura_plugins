@@ -8,22 +8,18 @@ from gizmo.widget import InputList, UpDownEdit
 
 class Card(Plug):
 
-    def __init__(self, 
-                 app,
-                 *args,
-                 position='right', 
-                 prefix_keys={
-                     'command':'c', 
-                     'normal': 'c',
-                     'Card': '<c-u>',
-                     },
-                 **kwargs):
-
-        super(Card, self).__init__(
-                app=app,
-                position=position,
-                prefix_keys=prefix_keys,
-                **kwargs)
+    def __init__(
+            self, 
+            app, 
+            *args, 
+            position='right', 
+            prefix_keys={
+                'command':'c', 
+                'normal': 'c', 
+                'Card': '<c-u>', 
+                }, 
+            **kwargs
+            ):
 
         self.decks=[]
         self.models=[]
@@ -31,9 +27,21 @@ class Card(Plug):
         self.pinned=[]
         self.deck='No deck chosen'
         self.model='No model chosen'
+        super(Card, self).__init__(
+                app=app,
+                position=position,
+                prefix_keys=prefix_keys,
+                **kwargs)
+
         self.submitter=Submitter()
         self.setUI()
         self.update()
+        self.setInput()
+
+    def setInput(self):
+
+        self.input=self.app.moder.plugs.get(
+                'input', None)
 
     def setUI(self):
 
@@ -65,38 +73,57 @@ class Card(Plug):
         self.ui.info.returnPressed.connect(
                 self.on_modelsReturnPressed)
 
+    @register('ac', modes=['command'])
+    def addCloze(self):
+
+        if self.input:
+            self.input.textCreated.connect(
+                    self.on_clozeCreated)
+            self.input.carriagePressed.connect(
+                    self.on_inputEscapePressed)
+            self.input.escapePressed.connect(
+                    self.on_inputEscapePressed)
+            self.setMode('input')
+            self.input.setText(self.getSelected())
+
+    def on_clozeCreated(self):
+        raise
+
     @register('cu', modes=['command'])
     def inputField(self, digit=1):
 
-        self.app.modes.input.returnPressed.connect(
-                self.on_inputReturnPressed)
-        self.app.modes.input.forceDelisten.connect(
-                self.on_inputEscapePressed)
-        self.app.modes.setMode('input')
-        self.app.modes.input.showField()
-        digit-=1
-        self.m_inputField=None
-        if hasattr(self.ui.current, 'list'):
-            self.m_inputField=self.ui.current.list.getWidget(
-                    digit)
-            label=self.m_inputField.textUp()
-            self.app.modes.input.widget.label.setText(label)
-            self.app.modes.input.showField(
-                    field=True, label=True)
+        if self.input:
+            self.input.returnPressed.connect(
+                    self.on_inputReturnPressed)
+            self.input.escapePressed.connect(
+                    self.on_inputEscapePressed)
+            self.app.moder.setMode('input')
+            self.input.showField()
+            digit-=1
+            self.m_inputField=None
+            if hasattr(self.ui.current, 'list'):
+                self.m_inputField=self.ui.current.list.getWidget(
+                        digit)
+                label=self.m_inputField.textUp()
+                self.input.widget.label.setText(label)
+                self.input.showField(
+                        field=True, label=True)
 
     def on_inputEscapePressed(self):
 
-        self.app.modes.input.returnPressed.disconnect(
+        self.input.carriagePressed.disconnect(
                 self.on_inputReturnPressed)
-        self.app.modes.input.forceDelisten.disconnect(
+        self.input.escapePressed.disconnect(
                 self.on_inputEscapePressed)
+        self.input.textCreated.disconnect(
+                self.on_clozeCreated)
 
     def on_inputReturnPressed(self):
 
         self.on_inputEscapePressed()
-        text=self.app.modes.input.widget.field.toPlainText()
-        self.app.modes.input.hideClearField()
-        self.app.modes.setMode('normal')
+        text=self.input.widget.field.toPlainText()
+        self.input.hideClearField()
+        self.app.moder.setMode('normal')
         if self.m_inputField:
             self.m_inputField.setTextDown(text)
 
@@ -146,16 +173,25 @@ class Card(Plug):
             self.ui.models.clear()
             self.ui.show(self.ui.main)
 
-    @register('Y', modes=['command'])
-    def yankToFieldSaveStructure(self, digit=1):
+    def getSelected(self):
 
         view=self.app.display.view
         if view.selected(): 
             text=[]
-            for s in view.selected(): text+=['\n'.join(s['text_data'])]
-            text='\n'.join(text)
+            for s in view.selected(): 
+                text+=[s['text']]
+            return '\n'.join(text)
+        return ''
 
-        self.yankToField(digit, separator='\n\n', text=text) 
+    @register('Y', modes=['command'])
+    def yankToFieldSaveStructure(self, digit=1):
+
+        stext=self.getSelected()
+        self.yankToField(
+                digit, 
+                separator='\n\n', 
+                text=text
+                ) 
 
     @register('y', modes=['command'])
     def yankToField(self, digit=1, append=False, separator=' ', text=None):
@@ -169,7 +205,8 @@ class Card(Plug):
                 if not text:
                     if view.selected():
                         text=[]
-                        for s in view.selected(): text+=[s['text']]
+                        for s in view.selected(): 
+                            text+=[s['text']]
                         text=' '.join(text)
                     else:
                         return

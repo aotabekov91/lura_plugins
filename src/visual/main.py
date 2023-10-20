@@ -7,31 +7,33 @@ class Visual(Mode):
 
     hintSelected=QtCore.pyqtSignal()
 
-    def __init__(self, 
+    def __init__(
+            self, 
             app,
             *args,
-            listen_leader='<c-v>',
-            **kwargs):
+            listen_leader='<c-V>',
+            **kwargs
+            ):
 
+        self.key=''
+        self.s=None
+        self.hints=None
+        self.hinting=False
         super().__init__(
                 *args, 
                 app=app, 
                 listen_leader=listen_leader,
                 **kwargs,
                 )
-        self.key=''
-        self.s=None
-        self.hints=None
-        self.hinting=False
 
     def setup(self):
 
         super().setup()
         self.display=self.app.display
         self.listenerAddKeys=self.ear.addKeys
-        self.ear.addKeys=self.ownAddKeys
+        self.ear.addKeys=self.addOwnKeys
 
-    def ownAddKeys(self, event):
+    def addOwnKeys(self, event):
 
         if self.hinting:
             if event.text():
@@ -377,6 +379,6 @@ class Visual(Mode):
             if self.ear.listening:
                 return True
             current=self.app.moder.current
-            if current and current.name=='normal':
+            if current and current.name=='Normal':
                 return True
         return False
