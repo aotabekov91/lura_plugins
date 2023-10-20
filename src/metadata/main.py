@@ -1,5 +1,4 @@
 from plug.qt import Plug 
-from gizmo.utils import register
 from tables import Metadata as Table
 from gizmo.widget import UpDownEdit, InputList
 
@@ -15,6 +14,7 @@ class Metadata(Plug):
             prefix_keys={'command': 'm'},
             **kwargs):
 
+        self.table=Table()
         super().__init__(
                 app=app, 
                 position=position, 
@@ -26,7 +26,6 @@ class Metadata(Plug):
 
         super().setup()
         self.setUI()
-        self.table=Table()
         self.setConnect()
 
     def setConnect(self):
@@ -55,20 +54,6 @@ class Metadata(Plug):
         self.table.updateRow(
                 {'hash':dhash}, 
                 {field:value})
-
-    def listen(self):
-
-        super().listen()
-        self.activated=True
-        self.activateUI()
-
-    def delisten(self):
-
-        super().delisten()
-        self.activated=False
-        
-    @register('t', modes=['command'])
-    def toggle(self): super().toggle()
 
     def update(self, view, prev):
 

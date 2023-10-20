@@ -1,7 +1,7 @@
 from PyQt5 import QtCore, QtGui
 
 from gizmo.utils import register
-from plug.qt.plugs.modes import Visual as Mode
+from plug.qt.plugs.visual import Visual as Mode
 
 class Visual(Mode):
 
@@ -14,6 +14,7 @@ class Visual(Mode):
             **kwargs):
 
         super().__init__(
+                *args, 
                 app=app, 
                 listen_leader=listen_leader,
                 **kwargs,
