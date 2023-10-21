@@ -4,7 +4,7 @@ from ankipulator import Submitter
 
 from plug.qt import Plug
 from gizmo.utils import register
-from gizmo.widget import InputList, UpDownEdit
+from gizmo.widget import InputList, ListView, UpDownEdit
 
 class Card(Plug):
 
@@ -53,8 +53,9 @@ class Card(Plug):
         self.uiman.setUI()
         self.ui.addWidget(
                 InputList(
+                    objectName='Card',
+                    list_class=ListView,
                     item_widget=UpDownEdit,
-                    objectName='Card'
                     ),
                 'main', 
                 main=True)
@@ -63,16 +64,24 @@ class Card(Plug):
                 self.confirm)
         self.ui.main.list.widgetDataChanged.connect(
                 self.on_contentChanged)
-        self.ui.addWidget(InputList(), 'decks')
+        self.ui.addWidget(
+                InputList(list_class=ListView), 
+                'decks'
+                )
         self.ui.decks.input.setLabel('Decks')
         self.ui.decks.returnPressed.connect(
                 self.on_decksReturnPressed)
-        self.ui.addWidget(InputList(), 'models')
+        self.ui.addWidget(
+                InputList(list_class=ListView), 
+                'models'
+                )
         self.ui.models.input.setLabel('Models')
         self.ui.models.returnPressed.connect(
                 self.on_modelsReturnPressed)
         self.ui.addWidget(
-                InputList(item_widget=UpDownEdit),
+                InputList(
+                    list_class=ListView,
+                    item_widget=UpDownEdit),
                 'info')
         self.ui.info.input.setLabel('Info')
         self.ui.info.returnPressed.connect(
