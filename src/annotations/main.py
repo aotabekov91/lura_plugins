@@ -12,7 +12,7 @@ class Annotations(Plug):
             position='right',
             prefix_keys={
                 'command': 'A',
-                'Annotations': '<c-u>'
+                'Annotations': '<c-e>'
                 },
             **kwargs
             ):
@@ -46,11 +46,17 @@ class Annotations(Plug):
 
     def setUI(self):
 
-        w=InputList(item_widget=UpDownEdit)
+        w=InputList(widget=UpDownEdit)
         w.returnPressed.connect(self.open)
         w.list.widgetDataChanged.connect(
                 self.on_contentChanged)
         self.uiman.setUI(w)
+
+    def setColorStyle(self, ann):
+
+        color=ann['color'].name()
+        style=f'background-color: {color}'
+        ann['up_style']=style
 
     def update(self):
 
@@ -63,7 +69,7 @@ class Annotations(Plug):
                 a['view']=view
                 a['down']=a['content']
                 a['up']=f'# {a.get("id")}'
-                a['up_color']=a['color'].name()
+                self.setColorStyle(a)
             for n in native:
                 data={
                       'pAnn':n,

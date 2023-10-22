@@ -11,10 +11,11 @@ class Bookmarks(Plug):
             position='right',
             prefix_keys={
                 'command': 'B',
-                'Bookmarks': '<c-u>',
+                'Bookmarks': '<c-e>',
                 },
             **kwargs):
 
+        self.color='#CC885E'
         self.table=Table()
         self.display=app.display
         super().__init__(
@@ -42,7 +43,7 @@ class Bookmarks(Plug):
 
     def setUI(self):
 
-        w=InputList(item_widget=UpDownEdit)
+        w=InputList(widget=UpDownEdit)
         w.returnPressed.connect(self.open)
         w.list.widgetDataChanged.connect(
                 self.on_contentChanged)
@@ -69,6 +70,11 @@ class Bookmarks(Plug):
         self.update()
         self.ui.list.setCurrentRow(nrow)
 
+    def setColorStyle(self, ann):
+
+        style=f'background-color: {self.color}'
+        ann['up_style']=style
+
     def update(self):
 
         view=self.display.currentView()
@@ -82,6 +88,7 @@ class Bookmarks(Plug):
                 a['down']=a['text']
                 a['up']=f'# {a.get("id")}'
                 a['pos']=float(p[0]), float(p[0])
+                self.setColorStyle(a)
             rows=sorted(
                     rows, 
                     key=lambda x: (x['page'], x['position'])

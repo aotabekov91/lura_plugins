@@ -11,12 +11,11 @@ class Card(Plug):
     def __init__(
             self, 
             app, 
-            *args, 
             position='right', 
             prefix_keys={
                 'command':'c', 
                 'normal': 'c', 
-                'Card': '<c-u>', 
+                'Card': '<c-e>', 
                 }, 
             **kwargs
             ):
@@ -64,9 +63,7 @@ class Card(Plug):
         self.ui.main.list.widgetDataChanged.connect(
                 self.on_contentChanged)
         self.ui.addWidget(
-                InputList(), 
-                'decks'
-                )
+                InputList(), 'decks')
         self.ui.decks.input.setLabel('Decks')
         self.ui.decks.returnPressed.connect(
                 self.on_decksReturnPressed)
