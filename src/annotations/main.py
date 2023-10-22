@@ -1,28 +1,31 @@
 from PyQt5 import QtGui
 from plug.qt import Plug
 from gizmo.utils import register
-from gizmo.widget import InputList, UpDownEdit
-
 from lura.utils import getBoundaries
+from tables import Annotation as Table
+from gizmo.widget import InputList, UpDownEdit
 
 class Annotations(Plug):
 
-    def __init__(self, 
-                 app, 
-                 *args, 
-                 position='right',
-                 **kwargs):
+    def __init__(
+            self, 
+            app, 
+            position='right',
+            prefix_keys={
+                'command': 'A',
+                'Annotations': '<c-u>'
+                },
+            **kwargs
+            ):
 
+        self.table=Table()
         super().__init__(
                 app=app, 
                 position=position,
+                prefix_keys=prefix_keys,
                 **kwargs)
-
         self.setUI()
         self.connect()
-
-    @register('<c-A>', modes=['normal'])
-    def toggle(self): super().toggle()
 
     def connect(self):
 
@@ -31,41 +34,36 @@ class Annotations(Plug):
                 self.update)
         self.display.viewSelection.connect(
                 self.on_viewSelection)
+        self.app.moder.plugsLoaded.connect(
+                self.on_plugsLoaded)
+
+    def on_plugsLoaded(self, plugs):
+
+        self.annotate=plugs.get(
+                'annotate', None)
+        if self.annotate:
+            self.annotate.annotated.connect(
+                    self.update)
 
     def setUI(self):
 
-        self.uiman.setUI()
-        self.ui.addWidget(
-                InputList(
-                    item_widget=UpDownEdit,
-                    objectName='Annotations',
-                    ), 
-                'main', 
-                main=True)
-
-        self.ui.main.input.hideLabel()
-        self.ui.main.returnPressed.connect(
-                self.open)
-        self.ui.main.list.widgetDataChanged.connect(
+        w=InputList(item_widget=UpDownEdit)
+        w.returnPressed.connect(self.open)
+        w.list.widgetDataChanged.connect(
                 self.on_contentChanged)
-        self.ui.main.list.itemChanged.connect(
-                self.on_itemChanged)
+        self.uiman.setUI(w)
 
     def update(self):
 
         view=self.display.currentView()
-        annotations=[]
         if view:
             dhash=view.model().id()
             annotations=view.model().annotations()
             native=view.model().nativeAnnotations()
-
             for a in annotations:
-
                 a['up']=f'# {a.get("id")}'
                 a['down']=a['content']
                 a['up_color']=a['color'].name()
-
             for n in native:
                 data={
                       'pAnn':n,
@@ -76,49 +74,22 @@ class Annotations(Plug):
                       'kind': 'document',
                       'text': n.contents(),
                       'content': n.contents(),
-                      'color': QtGui.QColor(n.color()),
                       'page': n.page().pageNumber(),
+                      'color': QtGui.QColor(n.color()),
                       }
                 annotations+=[data]
-            self.ui.main.setList(annotations)
-        return annotations
+            self.ui.setList(annotations)
 
     def on_viewSelection(self, view, selections):
 
-        if selections:
-            s=selections[0]
-            for j, i in enumerate(self.ui.main.list.filterList()):
-                page=s['item'].page().pageNumber()#+1
-                if page==i['page']:
-                    for ss in selections[0]['area_unified']:
-                        for b in i['boundaries']:
-                            if b.intersects(ss) or ss.intersects(b):
-                                self.ui.main.list.setCurrentRow(j)
-                                return
-
-    def on_itemChanged(self, item): 
-
-        if self.ui.main.list.hasFocus(): self.open(item)
-
-    @register('o')
-    def openAndFocus(self):
-
-        self.open()
-        self.modeWanted.emit('normal')
-
-    @register('O')
-    def open(self, item=None):
-
-        if not item: 
-            item=self.ui.main.list.currentItem()
-
-        if item:
-            aid=item.itemData.get('id', None)
-            pAnn=item.itemData.get('pAnn', None)
-            if aid:
-                self.openById(aid)
-            elif pAnn:
-                self.openByData(pAnn)
+        s=selections[0]
+        aid=s.get('aid', None)
+        if aid:
+            enum=enumerate(self.ui.list.flist)
+            for j, i in enum:
+                if i.get('id', None)==aid:
+                    self.ui.list.setCurrentRow(j)
+                    return
 
     def openByData(self, pAnn):
 
@@ -127,52 +98,70 @@ class Annotations(Plug):
         x, y = topLeft.x(), topLeft.y()
         page=pAnn.page().pageNumber()
         view=self.display.currentView()
-        if view: view.goto(page, x, y-0.05)
+        if view: 
+            view.goto(page, x, y-0.05)
 
     def openById(self, aid):
 
-        data=self.app.tables.annotation.getRow({'id':aid})
+        data=self.table.getRow({'id':aid})
         if data:
             data=data[0]
-            dhash=data['hash']
             page=data['page']
-            boundaries=getBoundaries(data['position'])
+            boundaries=getBoundaries(
+                    data['position'])
             boundary=boundaries[0]
             topLeft=boundary.topLeft() 
             x, y = topLeft.x(), topLeft.y()
             view=self.display.currentView()
-            if view: view.goto(page, x, y-0.05)
+            if view: 
+                view.goto(page, x, y-0.05)
 
     def on_contentChanged(self, widget):
 
         data=widget.data
         aid=data['id']
         text=widget.textDown()
-        self.app.tables.annotation.updateRow({'id':aid}, {'content':text})
+        self.table.updateRow(
+                {'id':aid}, {'content':text})
+
+    @register('d')
+    def delete(self):
+
+        item=self.ui.list.currentItem()
+        nrow=max(self.ui.list.currentRow()-1, 0)
+        if item:
+            view=self.display.view
+            aid=item.itemData.get(
+                    'id', None)
+            apage=item.itemData.get(
+                    'page', None)
+            self.table.removeRow(
+                    {'id': aid})
+            page=view.model().page(
+                    apage)
+            page.removeAnnotation(
+                    item.itemData)
+            page.pageItem().refresh(
+                    dropCachedPixmap=True)
+            self.update()
+            self.ui.list.setCurrentRow(
+                    nrow)
 
     @register('O')
-    def openAndHide(self):
+    def openAndFocus(self):
 
         self.open()
         self.delistenWanted.emit()
 
-    @register('D')
-    def delete(self):
+    @register('o')
+    def open(self, item=None):
 
-        item=self.ui.main.list.currentItem()
-        nrow=max(self.ui.main.list.currentRow()-1, 0)
-
+        if not item: 
+            item=self.ui.list.currentItem()
         if item:
-
-            self.app.tables.annotation.removeRow(
-                    {'id': item.itemData.get('id', None)})
-
-            page=self.display.view.model().page(
-                item.itemData['page'])
-
-            page.removeAnnotation(item.itemData)
-            page.pageItem().refresh(dropCachedPixmap=True)
-
-            self.update()
-            self.ui.main.list.setCurrentRow(nrow)
-            self.ui.main.setFocus()
+            aid=item.itemData.get('id', None)
+            pAnn=item.itemData.get('pAnn', None)
+            if aid:
+                self.openById(aid)
+            elif pAnn:
+                self.openByData(pAnn)

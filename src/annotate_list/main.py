@@ -5,22 +5,17 @@ from .widget import ListWidget
 
 class AnnotateList(Plug):
 
-    def __init__(self, app, *args, **kwargs):
+    def setup(self):
 
         self.colors={}
         self.func_colors={}
-
-        super().__init__(
-                *args, 
-                app=app, 
-                **kwargs,
-                )
+        super().setup()
         self.app.moder.plugsLoaded.connect(
                 self.on_plugsLoaded)
 
     def on_plugsLoaded(self, plugs):
 
-        self.annotate=plugs.get('Annotate', None)
+        self.annotate=plugs.get('annotate', None)
         if self.annotate:
             self.setUI()
             self.annotate.startedListening.connect(
@@ -29,23 +24,21 @@ class AnnotateList(Plug):
                     self.on_endedListening)
 
     def on_startedListening(self):
-
-        self.ui.show()
-        self.ui.updatePosition()
+        self.uiman.activate()
 
     def on_endedListening(self):
-
-        self.ui.hide()
+        self.uiman.deactivate()
 
     def setUI(self):
 
-        self.ui=ListWidget(
-                    objectName='Annotate',
-                    parent=self.app.window,
-                )
-        for k, v in self.annotate.colors.items():
-            name=v['name']
-            text=f'{name} [{k}]'
-            item=QtGui.QStandardItem(text)
-            self.ui.model.appendRow(item)
-        self.ui.hide()
+        self.uiman.position='overlay'
+        self.uiman.setUI(ListWidget())
+        self.setColors()
+
+    def setColors(self):
+
+        clrs=self.annotate.colors
+        for k, v in clrs.items():
+            t=f'{v["name"]} [{k}]'
+            i=QtGui.QStandardItem(t)
+            self.ui.model.appendRow(i)

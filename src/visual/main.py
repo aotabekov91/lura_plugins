@@ -11,7 +11,7 @@ class Visual(Mode):
             self, 
             app,
             *args,
-            listen_leader='<c-V>',
+            listen_leader='v',
             **kwargs
             ):
 
@@ -379,6 +379,6 @@ class Visual(Mode):
             if self.ear.listening:
                 return True
             current=self.app.moder.current
-            if current and current.name=='Normal':
+            if current and current.name=='normal':
                 return True
         return False

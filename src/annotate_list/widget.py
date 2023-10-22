@@ -2,9 +2,11 @@ from PyQt5 import QtWidgets, QtCore, QtGui
 
 class ListWidget(QtWidgets.QWidget):
 
-    def __init__(self, *args, **kwargs):
+    def __init__(
+            self, *args, **kwargs):
 
-        super().__init__(*args, **kwargs)
+        super().__init__(
+                *args, **kwargs)
         self.setup()
 
     def setup(self):
@@ -15,22 +17,20 @@ class ListWidget(QtWidgets.QWidget):
                 QtCore.Qt.ScrollBarAlwaysOff)
         self.list.setHorizontalScrollBarPolicy(
                 QtCore.Qt.ScrollBarAlwaysOff)
-
         self.m_layout=QtWidgets.QVBoxLayout(self)
         self.m_layout.setContentsMargins(0,0,0,0)
         self.m_layout.addWidget(self.list)
         self.setLayout(self.m_layout)
-
         self.model=QtGui.QStandardItemModel()
         self.proxy=QtCore.QSortFilterProxyModel()
         self.proxy.setSourceModel(self.model)
         self.list.setModel(self.proxy)
-        self.show()
 
     def show(self):
 
         super().show()
         self.list.show()
+        self.updatePosition()
 
     def sizeHint(self):
 
