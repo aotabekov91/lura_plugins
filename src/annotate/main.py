@@ -3,7 +3,6 @@ from plug.qt import Plug
 from PyQt5 import QtGui, QtCore
 from gizmo.utils import register
 from tables import Annotation as Table
-from lura.utils import getPosition, getBoundaries
 
 class Annotate(Plug):
 
@@ -101,6 +100,7 @@ class Annotate(Plug):
             pageNumber = page.pageNumber()
             dhash = page.document().id()
             aData=self.write(
+                    view.model(),
                     dhash, 
                     pageNumber, 
                     text, 
@@ -115,6 +115,7 @@ class Annotate(Plug):
 
     def write(
             self, 
+            model,
             dhash, 
             pageNumber, 
             text, 
@@ -122,7 +123,7 @@ class Annotate(Plug):
             function
             ):
 
-        position=getPosition(boundaries)
+        position=model.getPosition(boundaries)
         data = {'hash': dhash,
                 'page': pageNumber,
                 'position': position,
@@ -147,14 +148,18 @@ class Annotate(Plug):
             page.pageItem().refresh(dropCachedPixmap=True)
             self.selected=None
 
-    def add(self, document, annotation):
+    def add(
+            self, 
+            model, 
+            annotation
+            ):
 
-        page=document.page(annotation['page'])
+        page=model.page(annotation['page'])
         color=self.func_colors.get(
                 annotation['function'],
                 self.default_color)
         annotation['color'] = QtGui.QColor(color)
-        annotation['boundaries']=getBoundaries(
+        annotation['boundaries']=model.getBoundaries(
                 annotation['position'])
 
         return page.annotate(
@@ -163,14 +168,17 @@ class Annotate(Plug):
 
     def paint(self, document=None):
 
-        if not document: 
-            view=self.display.view
-            if view: document=view.model()
+        view=self.display.view
+        if not document and view: 
+            document=view.model()
         if document:
             dhash = document.id()
             aData=self.table.getRow({'hash':dhash})
             for annotation in aData: 
-                self.add(document, annotation)
+                self.add(
+                        document, 
+                        annotation
+                        )
 
     def checkLeader(self, event, pressed):
 

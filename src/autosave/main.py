@@ -14,16 +14,16 @@ class Autosave(Plug):
         self.app.display.viewCreated.connect(
                 self.on_viewCreated)
         self.app.display.positionChanged.connect(
-                self.on_positionChanged)
+                self.save)
 
     def on_viewCreated(self, view):
 
-        data=self.getData(view)
+        data=self.get(view)
         if data:
             page, left, top = data
             view.goto(page, left, top)
 
-    def getData(self, view):
+    def get(self, view):
 
         data=self.table.getRow(
                 {'hash':view.model().id()})
@@ -34,15 +34,20 @@ class Autosave(Plug):
             left, top =float(pos[0]), float(pos[1])
             return page, left, top
 
-    def on_positionChanged(self, view, item, left, top):
+    def save(
+            self, 
+            view, 
+            item, 
+            left, 
+            top
+            ):
 
-        if view.currentPage() in [0, 1]: 
-            return
-
-        data={'page': view.currentPage(), 
-                'position': f'{left}:{top}'}
-
-        vdata=self.getData(view)
+        page=view.currentPage()
+        data={
+             'page': page, 
+             'position': f'{left}:{top}'
+             }
+        vdata=self.get(view)
         if vdata:
             hdata={'hash':view.model().id()}
             self.table.updateRow(hdata, data)

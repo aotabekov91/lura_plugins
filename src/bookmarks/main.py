@@ -9,86 +9,89 @@ class Bookmarks(Plug):
             self, 
             app, 
             position='right',
-            listen_leader='<c-B>',
+            prefix_keys={
+                'command': 'B',
+                'Bookmarks': '<c-u>',
+                },
             **kwargs):
 
+        self.table=Table()
+        self.display=app.display
         super().__init__(
                 app=app, 
                 position=position,
-                listen_leader=listen_leader,
+                prefix_keys=prefix_keys,
                 **kwargs) 
-
         self.setUI()
-        self.table=Table()
+        self.connect()
 
-    def listen(self):
+    def connect(self):
 
-        super().listen()
-        self.activated=True
-        self.update()
-        self.activateUI()
+        self.display.viewChanged.connect(
+                self.update)
+        self.app.moder.plugsLoaded.connect(
+                self.on_plugsLoaded)
 
-    def delisten(self):
+    def on_plugsLoaded(self, plugs):
 
-        super().delisten()
-        self.activated=False
-        self.deactivateUI()
+        self.bookmark=plugs.get(
+                'bookmark', None)
+        if self.bookmark:
+            self.bookmark.marked.connect(
+                    self.update)
 
     def setUI(self):
 
-        self.uiman.setUI()
-        main=InputList(
-                item_widget=UpDownEdit,
-                objectName='BookmarksList')
-        self.ui.addWidget(main, 'main', main=True)
-        self.ui.main.input.hideLabel()
-        self.ui.main.returnPressed.connect(
-                self.open)
-        self.ui.main.list.widgetDataChanged.connect(
+        w=InputList(item_widget=UpDownEdit)
+        w.returnPressed.connect(self.open)
+        w.list.widgetDataChanged.connect(
                 self.on_contentChanged)
+        self.uiman.setUI(w)
 
-    @register('.o')
+    @register('o')
     def open(self):
 
-        item=self.ui.main.list.currentItem()
-        if item: 
-            self.app.window.main.openBy(
-                    'bookmark', 
-                    item.itemData['id']
-                    )
+        i=self.ui.list.currentItem()
+        if i: 
+            p=i.itemData['page']
+            l, t=i.itemData['pos']
+            view=i.itemData['view']
+            view.goto(p, l, t)
 
-    @register('.d')
+    @register('d')
     def delete(self):
 
-        item=self.ui.main.list.currentItem()
-        nrow=self.ui.main.list.currentRow()-1
-        bid=item.itemData['id']
+        crow=self.ui.list.currentRow()-1
+        nrow=max(0, crow) 
+        i=self.ui.list.currentItem()
+        bid=i.itemData['id']
         self.table.removeRow({'id':bid})
         self.update()
-        self.ui.main.list.setCurrentRow(nrow)
-        self.ui.show()
+        self.ui.list.setCurrentRow(nrow)
 
-    @register('.u')
     def update(self):
 
-        prev=self.app.moder.prev
-        if prev and prev.name=='normal':
-            view=self.app.display.currentView()
-            if view:
-                criteria={'hash': view.model().id()}
-                rows = self.table.getRow(criteria)
-                for a in rows:
-                    a['down']=a['text']
-                    a['up']=f'# {a.get("id")}'
-                rows=sorted(
-                        rows, 
-                        key=lambda x: (x['page'], x['position'])
-                        )
-                self.ui.main.setList(rows)
+        view=self.display.currentView()
+        if view:
+            dhash=view.model().id()
+            rows = self.table.getRow(
+                    {'hash': dhash})
+            for a in rows:
+                p=a['position'].split(':')
+                a['view']=view
+                a['down']=a['text']
+                a['up']=f'# {a.get("id")}'
+                a['pos']=float(p[0]), float(p[0])
+            rows=sorted(
+                    rows, 
+                    key=lambda x: (x['page'], x['position'])
+                    )
+            self.ui.setList(rows)
 
-    def on_contentChanged(self, widget):
+    def on_contentChanged(self, w):
         
+        xid=w.data['id']
+        tdata=w.data['down']
         self.table.updateRow(
-                {'id': widget.data['id']},
-                {'text': widget.data['down']}
-                )
+                {'id': xid},
+                {'text': tdata})

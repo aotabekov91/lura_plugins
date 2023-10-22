@@ -1,7 +1,6 @@
 from PyQt5 import QtGui
 from plug.qt import Plug
 from gizmo.utils import register
-from lura.utils import getBoundaries
 from tables import Annotation as Table
 from gizmo.widget import InputList, UpDownEdit
 
@@ -61,12 +60,14 @@ class Annotations(Plug):
             annotations=view.model().annotations()
             native=view.model().nativeAnnotations()
             for a in annotations:
-                a['up']=f'# {a.get("id")}'
+                a['view']=view
                 a['down']=a['content']
+                a['up']=f'# {a.get("id")}'
                 a['up_color']=a['color'].name()
             for n in native:
                 data={
                       'pAnn':n,
+                      'view': view,
                       'up': 'Native',
                       'hash': dhash,
                       'up_color':n.color(),
@@ -82,37 +83,39 @@ class Annotations(Plug):
 
     def on_viewSelection(self, view, selections):
 
-        s=selections[0]
-        aid=s.get('aid', None)
-        if aid:
-            enum=enumerate(self.ui.list.flist)
-            for j, i in enum:
-                if i.get('id', None)==aid:
+        if selections:
+            s=selections[0]
+            aid=s.get('aid', None)
+            if aid:
+                d=enumerate(self.ui.list.flist)
+                for j, i in d:
+                    if i.get('id', None)!=aid:
+                        continue
                     self.ui.list.setCurrentRow(j)
                     return
 
-    def openByData(self, pAnn):
+    def openByData(self, pAnn, data):
 
-        boundary=pAnn.boundary()
-        topLeft=boundary.topLeft() 
-        x, y = topLeft.x(), topLeft.y()
-        page=pAnn.page().pageNumber()
-        view=self.display.currentView()
-        if view: 
+        view=data.get('view', None)
+        if pAnn and view:
+            boundary=pAnn.boundary()
+            topLeft=boundary.topLeft() 
+            x, y = topLeft.x(), topLeft.y()
+            page=pAnn.page().pageNumber()
             view.goto(page, x, y-0.05)
 
-    def openById(self, aid):
+    def openById(self, aid, data):
 
+        view=data.get('view', None)
         data=self.table.getRow({'id':aid})
-        if data:
+        if data and view:
             data=data[0]
             page=data['page']
-            boundaries=getBoundaries(
+            boundaries=view.model().getBoundaries(
                     data['position'])
             boundary=boundaries[0]
             topLeft=boundary.topLeft() 
             x, y = topLeft.x(), topLeft.y()
-            view=self.display.currentView()
             if view: 
                 view.goto(page, x, y-0.05)
 
@@ -162,6 +165,6 @@ class Annotations(Plug):
             aid=item.itemData.get('id', None)
             pAnn=item.itemData.get('pAnn', None)
             if aid:
-                self.openById(aid)
+                self.openById(aid, item.itemData)
             elif pAnn:
-                self.openByData(pAnn)
+                self.openByData(pAnn, item.itemData)

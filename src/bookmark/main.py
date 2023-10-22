@@ -1,33 +1,29 @@
+from PyQt5 import QtCore
 from plug.qt import Plug 
-from gizmo.utils import register
 from tables import Bookmark as Table
 
 class Bookmark(Plug):
 
+    marked=QtCore.pyqtSignal()
     special=['return', 'carriage']
 
     def __init__(
             self, 
             app, 
             special=special,
+            report_keys=False,
             listen_leader='<c-b>',
-            **kwargs):
+            **kwargs
+            ):
 
+        self.table=Table()
+        self.display=app.display
         super().__init__(
                 app=app, 
                 special=special,
+                report_keys=report_keys,
                 listen_leader=listen_leader,
                 **kwargs) 
-
-    @register('a')
-    def test(self):
-        raise
-
-    def setup(self):
-
-        super().setup()
-        self.table=Table()
-        self.display=self.app.display
         self.setConnect()
 
     def setConnect(self):
@@ -48,50 +44,52 @@ class Bookmark(Plug):
 
         super().listen()
         bar=self.app.window.bar
+        r=self.getBookmark()
+        if r: 
+            text=r[0]['text']
+            bar.edit.setText(text)
         bar.bottom.show()
-        bar.show()
         bar.edit.setFocus()
-        rows=self.getBookmark()
-        if rows: 
-            bar.edit.setText(rows[0]['text'])
 
     def getBookmark(self):
 
-        prev=self.app.moder.prev
-        if prev and prev.name=='normal':
-            view=self.display.currentView()
-            if view:
-                page=view.pageItem().page().pageNumber()
-                position=[str(f) for f in view.saveLeftAndTop()]
-                data={'page' : page, 
-                      'hash' : view.model().id(),
-                      'position' : ':'.join(position)
-                      }
-                row=self.table.getRow(data)
-                return row
+        view=self.display.currentView()
+        if view:
+            page=view.pageItem().page()
+            pnum=page.pageNumber()
+            position=[]
+            for f in view.saveLeftAndTop():
+                position+=[str(f)]
+            data={'page' : pnum, 
+                  'hash' : view.model().id(),
+                  'position' : ':'.join(position)
+                  }
+            return self.table.getRow(data)
 
     def bookmark(self):
 
-        prev=self.app.moder.prev
-        text=self.app.window.bar.edit.text()
-        if prev:
-            view=self.display.currentView()
-            if prev.name=='normal' and view:
-                rows=self.getBookmark()
-                if rows:
-                    self.table.updateRow(
-                            {'id': rows[0]['id']},
-                            {'text':text})
-                else:
-                    page=view.pageItem().page().pageNumber()
-                    position=[str(f) for f in view.saveLeftAndTop()]
-                    row={
-                            'title':text, 
-                            'text':text,
-                            'kind':'document',
-                            'hash':view.model().id(),
-                            'page':page,
-                            'position':':'.join(position),
-                            }
-                    self.table.writeRow(row)
+        t=self.app.window.bar.edit.text()
+        view=self.display.currentView()
+        if view:
+            rows=self.getBookmark()
+            if rows:
+                self.table.updateRow(
+                        {'id': rows[0]['id']},
+                        {'text':t})
+            else:
+                page=view.pageItem().page()
+                pnum=page.pageNumber()
+                position=[]
+                for f in view.saveLeftAndTop():
+                    position+=[str(f)]
+                row={
+                     'text':t, 
+                     'title':t, 
+                     'page':pnum, 
+                     'kind':'document', 
+                     'hash':view.model().id(),
+                     'position':':'.join(position)
+                     }
+                self.table.writeRow(row)
+            self.marked.emit()
         self.delistenWanted.emit()
