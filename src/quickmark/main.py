@@ -12,6 +12,9 @@ class Quickmark(Plug):
             **kwargs,
             ):
 
+        self.kind=None
+        self.pressed=None
+        self.table = Table() 
         super(Quickmark, self).__init__(
                 *args,
                 app=app,
@@ -19,14 +22,9 @@ class Quickmark(Plug):
                 **kwargs,
                 )
 
-        self.kind=None
-        self.pressed=None
-
     def setup(self):
 
         super().setup()
-        self.table = Table() 
-        self.display=self.app.display
         self.keys=self.ear.listen_leader
         self.ear.keyRegistered.connect(
                 self.on_keyRegistered)
@@ -42,24 +40,29 @@ class Quickmark(Plug):
     def mark(self, mark):
 
         if mark: 
-            view = self.display.currentView()
-            dhash= self.display.currentView().model().id()
-            page = self.display.currentView().currentPage()
-            left, top = self.display.currentView().saveLeftAndTop()
+            view = self.app.display.currentView()
+            dhash= view.model().id()
+            page = view.currentPage()
+            left, top = view.saveLeftAndTop()
             position=f'{page}:{left}:{top}'
-            data={'hash':dhash, 'position': position, 'mark':mark}
+            data={'hash':dhash, 
+                  'position': position, 
+                  'mark':mark}
             self.table.writeRow(data)
         self.delistenWanted.emit()
 
     def jump(self, mark):
 
         if mark:
-            rows=self.table.getRow({'mark':mark})
+            rows=self.table.getRow(
+                    {'mark':mark})
             if rows:
                 mark=rows[0]
-                p, l, t = tuple(mark['position'].split(':'))
-                self.display.currentView().goto(
-                        int(p), float(l), float(t))
+                d = mark['position'].split(':')
+                p, l, t = tuple(d)
+                p, l, t = int(p), float(l), float(t)
+                self.app.display.currentView().goto(
+                        p, l, t)
         self.delistenWanted.emit()
 
     def on_keyRegistered(self, event):

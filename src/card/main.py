@@ -4,7 +4,7 @@ from ankipulator import Submitter
 
 from plug.qt import Plug
 from gizmo.utils import register
-from gizmo.widget import InputList, ListView, UpDownEdit
+from gizmo.widget import InputList, UpDownEdit
 
 class Card(Plug):
 
@@ -54,7 +54,6 @@ class Card(Plug):
         self.ui.addWidget(
                 InputList(
                     objectName='Card',
-                    list_class=ListView,
                     item_widget=UpDownEdit,
                     ),
                 'main', 
@@ -65,14 +64,14 @@ class Card(Plug):
         self.ui.main.list.widgetDataChanged.connect(
                 self.on_contentChanged)
         self.ui.addWidget(
-                InputList(list_class=ListView), 
+                InputList(), 
                 'decks'
                 )
         self.ui.decks.input.setLabel('Decks')
         self.ui.decks.returnPressed.connect(
                 self.on_decksReturnPressed)
         self.ui.addWidget(
-                InputList(list_class=ListView), 
+                InputList(), 
                 'models'
                 )
         self.ui.models.input.setLabel('Models')
@@ -80,7 +79,6 @@ class Card(Plug):
                 self.on_modelsReturnPressed)
         self.ui.addWidget(
                 InputList(
-                    list_class=ListView,
                     item_widget=UpDownEdit),
                 'info')
         self.ui.info.input.setLabel('Info')
@@ -237,18 +235,21 @@ class Card(Plug):
                 view.select()
 
     @register('a', modes=['command'])
-    def appendToField(self, digit=1): self.yankToField(digit, append=True)
+    def appendToField(self, digit=1): 
+        self.yankToField(digit, append=True)
 
     @register('A', modes=['command'])
-    def AppendToField(self, digit=1): 
+    def appendTo(self, digit=1): 
 
-        self.yankToField(digit, append=True, separator='\n\n')
+        self.yankToField(
+                digit,
+                append=True, 
+                separator='\n\n')
 
     @register('f', modes=['command'])
     def focusField(self, digit=1):
 
         digit-=1
-
         if hasattr(self.ui.current, 'list'):
             self.modeWanted(self)
             self.ui.current.list.focusItem(digit)
@@ -259,6 +260,7 @@ class Card(Plug):
         super().toggle()
         if self.model=='No model chosen': 
             self.toggleModels()
+        self.ui.current.list.setFocus()
 
     @register('p')
     def togglePin(self):
@@ -267,9 +269,11 @@ class Card(Plug):
         if item: 
             fieldName=item.itemData['up']
             if fieldName in self.pinned:
-                self.pinned.pop(self.pinned.index(fieldName))
+                self.pinned.pop(
+                        self.pinned.index(fieldName))
             else:
-                self.pinned.append(fieldName)
+                self.pinned.append(
+                        fieldName)
 
     @register('i')
     def toggleInfo(self):

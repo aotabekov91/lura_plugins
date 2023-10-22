@@ -1,4 +1,5 @@
 from plug.qt import Plug 
+from gizmo.utils import register
 from tables import Bookmark as Table
 
 class Bookmark(Plug):
@@ -17,6 +18,10 @@ class Bookmark(Plug):
                 special=special,
                 listen_leader=listen_leader,
                 **kwargs) 
+
+    @register('a')
+    def test(self):
+        raise
 
     def setup(self):
 
