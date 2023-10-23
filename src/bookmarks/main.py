@@ -11,7 +11,7 @@ class Bookmarks(Plug):
             position='right',
             prefix_keys={
                 'command': 'B',
-                'Bookmarks': '<c-e>',
+                'Bookmarks': '<c-.>',
                 },
             **kwargs):
 

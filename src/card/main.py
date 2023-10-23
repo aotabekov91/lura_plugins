@@ -15,7 +15,7 @@ class Card(Plug):
             prefix_keys={
                 'command':'c', 
                 'normal': 'c', 
-                'Card': '<c-e>', 
+                'Card': '<c-.>', 
                 }, 
             **kwargs
             ):
@@ -43,44 +43,40 @@ class Card(Plug):
                 self.on_plugsLoaded)
 
     def on_plugsLoaded(self, plugs):
-
-        self.input=plugs.get(
-                'input', None)
+        self.input=plugs.get('input', None)
 
     def setUI(self):
 
         self.uiman.setUI()
-        self.ui.addWidget(
-                InputList(
-                    objectName='Card',
-                    item_widget=UpDownEdit,
-                    ),
-                'main', 
-                main=True)
-        self.ui.main.input.setLabel('Card')
-        self.ui.main.returnPressed.connect(
+        main=InputList(
+                widget=UpDownEdit)
+        main.input.setLabel('Card')
+        main.returnPressed.connect(
                 self.confirm)
-        self.ui.main.list.widgetDataChanged.connect(
+        main.list.widgetDataChanged.connect(
                 self.on_contentChanged)
         self.ui.addWidget(
-                InputList(), 'decks')
-        self.ui.decks.input.setLabel('Decks')
-        self.ui.decks.returnPressed.connect(
+                main, 'main', main=True)
+        decks=InputList()
+        decks.input.setLabel(
+                'Decks')
+        decks.returnPressed.connect(
                 self.on_decksReturnPressed)
         self.ui.addWidget(
-                InputList(), 
-                'models'
-                )
-        self.ui.models.input.setLabel('Models')
-        self.ui.models.returnPressed.connect(
+                decks , 'decks')
+        models=InputList()
+        models.input.setLabel('Models')
+        models.returnPressed.connect(
                 self.on_modelsReturnPressed)
         self.ui.addWidget(
-                InputList(
-                    item_widget=UpDownEdit),
-                'info')
-        self.ui.info.input.setLabel('Info')
-        self.ui.info.returnPressed.connect(
+                models, 'models')
+        info=InputList(
+                widget=UpDownEdit)
+        info.input.setLabel('Info')
+        info.returnPressed.connect(
                 self.on_modelsReturnPressed)
+        self.ui.addWidget(
+                info, 'info')
 
     @register('ac', modes=['command'])
     def addCloze(self):

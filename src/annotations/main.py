@@ -12,7 +12,7 @@ class Annotations(Plug):
             position='right',
             prefix_keys={
                 'command': 'A',
-                'Annotations': '<c-e>'
+                'Annotations': '<c-.>'
                 },
             **kwargs
             ):
