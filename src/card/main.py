@@ -128,17 +128,23 @@ class Card(Plug):
 
         i=self.ui.models.list.currentItem()
         if i:
-            self.model=i.itemData['up']
-            flds=self.fields[self.model]
-            data=[]
-            for f in flds:
-                data+=[{
-                  'id': f,
-                  'up': f'# {f}',
-                  'up_style': f'background-color: {self.field_color}',
-                  'down': ''
-                  }]
-            self.ui.main.setList(data)
+            model=i.itemData['up']
+            self.setModel(model)
+
+    def setModel(self, model):
+
+        self.model=model
+        flds=self.fields.get(
+                self.model, {})
+        data=[]
+        for f in flds:
+            data+=[{
+              'id': f,
+              'up': f'# {f}',
+              'up_style': f'background-color: {self.field_color}',
+              'down': ''
+              }]
+        self.ui.main.setList(data)
         if self.deck:
             self.ui.show()
         else:
@@ -284,13 +290,16 @@ class Card(Plug):
     @register('c', modes=['command'])
     def addCloze(self):
 
-        if self.input:
-            self.input.setRatio(
-                    w=0.6, h=0.3)
-            self.input.following=False
+
+        if self.deck and self.input:
+            self.input.follow=False
             self.input.getter=self.getSelected
             self.input.activate()
+            self.input.setRatio(w=0.6, h=0.3)
             self.input.setter=self.createCloze
+        else:
+            self.activate()
+            self.setModel('Cloze')
 
     def getSelected(self, sep=' '):
 
