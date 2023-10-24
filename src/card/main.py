@@ -1,4 +1,3 @@
-from threading import Thread
 from ankipulator import Submitter
 from plyer import notification as echo 
 
@@ -145,19 +144,6 @@ class Card(Plug):
         else:
             self.toggleDecks()
 
-    def getSelected(self, sep=' '):
-
-        v=self.app.display.view
-        if v.selected(): 
-            text=[]
-            for s in v.selected(): 
-                if 'lines' in s:
-                    text+=s['lines']
-                else:
-                    text+=[s['text']]
-            return f'{sep}'.join(text)
-        return ''
-
     @register('Y', modes=['command'])
     def yankToField(self, digit=1):
 
@@ -262,24 +248,14 @@ class Card(Plug):
         else:
             self.ui.show(self.ui.models)
 
-    def createNote(self):
-
-        n={
-          'deckName':self.deck, 
-          'modelName':self.model,
-          }
-        f={}
-        for d in self.ui.main.list.dlist:
-            f[d['id']]=d['down']
-        n['fields']=f
-        return n
 
     @register('s', modes=['Card', 'command'])
-    def submit(self):
+    def submit(self, note=None):
 
         try:
-            n=self.createNote()
-            self.filler.addNotes(n)
+            if not note:
+                note=self.createNote()
+            self.filler.addNotes(note)
             self.clear()
             msg='Submitted to Anki'
         except:
@@ -309,36 +285,52 @@ class Card(Plug):
     def addCloze(self):
 
         if self.input:
-            self.input.textCreated.connect(
-                    self.on_clozeCreated)
-            self.input.carriagePressed.connect(
-                    self.on_inputEscapePressed)
-            self.input.escapePressed.connect(
-                    self.on_inputEscapePressed)
             self.input.setRatio(
                     w=0.6, h=0.3)
+            self.input.following=False
+            self.input.getter=self.getSelected
             self.input.activate()
-            text=self.getSelected()
-            self.input.setText(text)
+            self.input.setter=self.createCloze
 
-    def on_clozeCreated(self):
-        raise
+    def getSelected(self, sep=' '):
 
-    def on_inputEscapePressed(self):
+        v=self.app.display.view
+        if v.selected(): 
+            text=[]
+            for s in v.selected(): 
+                if 'lines' in s:
+                    text+=s['lines']
+                else:
+                    text+=[s['text']]
+            return f'{sep}'.join(text)
+        return ''
 
-        self.input.setRatio()
-        self.input.carriagePressed.disconnect(
-                self.on_inputReturnPressed)
-        self.input.escapePressed.disconnect(
-                self.on_inputEscapePressed)
-        self.input.textCreated.disconnect(
-                self.on_clozeCreated)
+    def createCloze(self, text):
 
-    def on_inputReturnPressed(self):
+        note=self.createNote(
+                model='Cloze',
+                fields={'Text':text},
+                )
+        self.submit(note)
 
-        self.on_inputEscapePressed()
-        t=self.input.widget.field.toPlainText()
-        self.input.hideClearField()
-        self.app.moder.setMode()
-        if self.m_inputField:
-            self.m_inputField.setTextDown(t)
+    def createNote(
+            self,
+            deck=None,
+            model=None,
+            fields={}
+            ):
+
+        if not deck:
+            deck=self.deck
+        if not model:
+            model=self.model
+        if not fields:
+            d=self.ui.main.list.dlist
+            for f in d: 
+                xid=f['id']
+                fields[xid]=f['down']
+        return {
+                'deckName' : deck, 
+                'modelName' : model, 
+                'fields': fields
+                }
