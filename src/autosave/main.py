@@ -13,15 +13,17 @@ class Autosave(Plug):
 
         self.app.display.viewCreated.connect(
                 self.on_viewCreated)
-        self.app.display.positionChanged.connect(
-                self.save)
+
 
     def on_viewCreated(self, view):
 
         data=self.get(view)
         if data:
+            print(data)
             page, left, top = data
             view.goto(page, left, top)
+        # view.positionChanged.connect(
+                # self.save)
 
     def get(self, view):
 
@@ -29,7 +31,7 @@ class Autosave(Plug):
                 {'hash':view.model().id()})
         if data:
             r=data[0]
-            page=r['page']
+            page=int(r['page'])
             pos=r['position'].split(':')
             left, top =float(pos[0]), float(pos[1])
             return page, left, top
@@ -42,10 +44,10 @@ class Autosave(Plug):
             top
             ):
 
-        page=view.currentPage()
+        top, left=str(top), str(left)
         data={
-             'page': page, 
-             'position': f'{left}:{top}'
+             'page': view.currentPage(),
+             'position': f'{left}:{top}',
              }
         vdata=self.get(view)
         if vdata:
