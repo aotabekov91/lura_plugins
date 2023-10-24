@@ -38,12 +38,13 @@ class Quickmarks(Plug):
 
         self.uiman.setUI()
         main=InputList(
-                item_widget=UpDownEdit,
+                widget=UpDownEdit,
                 objectName='QuickmarkList')
-        self.ui.addWidget(main, 'main', main=True)
-        self.ui.main.input.hideLabel()
-        self.ui.main.returnPressed.connect(
+        main.input.hideLabel()
+        main.returnPressed.connect(
                 self.open)
+        self.ui.addWidget(
+                main, 'main', main=True)
 
     @register('.o')
     def open(self):

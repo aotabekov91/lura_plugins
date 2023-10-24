@@ -2,7 +2,7 @@ from tables import Part as Table
 
 from plug.qt import Plug 
 from gizmo.utils import register
-from gizmo.widget import Item, InputList
+from gizmo.widget import ItemWidget, InputList
 
 from .widget import PartTree
 
@@ -40,14 +40,21 @@ class Parts(Plug):
     def setUI(self):
 
         self.uiman.setUI()
-        self.ui.addWidget(PartTree(), 'tree')
-        self.ui.tree.returnPressed.connect(self.open)
-        self.ui.tree.itemChanged.connect(self.on_itemChanged)
-        self.ui.addWidget(InputList(item_widget=Item), 'main', main=True)
-        self.ui.main.input.hideLabel()
-        self.ui.main.returnPressed.connect(self.open)
-        self.ui.hideWanted.connect(self.deactivate)
-        self.ui.installEventFilter(self)
+        tree=PartTree()
+        tree.returnPressed.connect(
+                self.open)
+        tree.itemChanged.connect(
+                self.on_itemChanged)
+        self.ui.addWidget(tree, 'tree')
+        main=InputList(
+                widget=ItemWidget)
+        main.input.hideLabel()
+        main.returnPressed.connect(
+                self.open)
+        self.ui.addWidget(
+                main, 'main', main=True)
+        self.ui.hideWanted.connect(
+                self.deactivate)
 
     def on_itemChanged(self, item): 
 

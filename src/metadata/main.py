@@ -36,24 +36,24 @@ class Metadata(Plug):
     def setUI(self):
 
         self.uiman.setUI()
+        main=InputList(
+                widget=UpDownEdit)
+        main.input.hideLabel()
+        main.list.widgetDataChanged.connect(
+                self.on_contentChanged)
         self.ui.addWidget(
-                InputList(item_widget=UpDownEdit),
-                'main', 
-                main=True)
-        self.ui.main.input.hideLabel()
+                main, 'main', main=True)
         self.ui.hideWanted.connect(
                 self.deactivate)
-        self.ui.main.list.widgetDataChanged.connect(
-                self.on_contentChanged)
 
     def on_contentChanged(self, widget):
 
         value=widget.textDown()
         dhash=widget.data['hash']
         field=widget.data['field']
-        self.table.updateRow(
-                {'hash':dhash}, 
-                {field:value})
+        idx={'hash':dhash}
+        val={field:value}
+        self.table.updateRow(idx, val)
 
     def update(self, view, prev):
 

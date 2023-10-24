@@ -2,7 +2,7 @@ from PyQt5 import QtCore
 
 from plug.qt import Plug
 from gizmo.utils import register
-from gizmo.widget import ListWidget, Item
+from gizmo.widget import ListWidget, ItemWidget
 
 class SearchList(Plug):
 
@@ -56,8 +56,8 @@ class SearchList(Plug):
     def setUI(self):
 
         wlist=ListWidget(
-                item_widget=Item,
-                objectName='List'
+                objectName='List',
+                widget=ItemWidget,
                 )
         self.uiman.setUI()
         self.ui.addWidget(

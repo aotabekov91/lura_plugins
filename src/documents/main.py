@@ -43,8 +43,10 @@ class Documents(Plug):
     def setUI(self):
 
         self.uiman.setUI()
-        main=InputList(item_widget=UpDown)
-        self.ui.addWidget(main, 'main', main=True)
+        main=InputList(
+                widget=UpDown)
+        self.ui.addWidget(
+                main, 'main', main=True)
         self.ui.main.input.hideLabel()
 
     def activateUI(self):

@@ -8,23 +8,14 @@ class Visual(Mode):
     hintSelected=QtCore.pyqtSignal()
 
     def __init__(
-            self, 
-            app,
-            *args,
-            listen_leader='v',
-            **kwargs
-            ):
+            self, *args, **kwargs):
 
         self.key=''
         self.s=None
         self.hints=None
         self.hinting=False
         super().__init__(
-                *args, 
-                app=app, 
-                listen_leader=listen_leader,
-                **kwargs,
-                )
+                *args, **kwargs)
 
     def setup(self):
 
@@ -104,21 +95,30 @@ class Visual(Mode):
     def deselectNextRow(self, digit=1):
 
         for i in range(digit): 
-            self.getRow(direction='next', kind='deselect')
+            self.getRow(
+                    direction='next', 
+                    kind='deselect')
         
     @register('k') 
     def selectPrevRow(self, digit=1):
 
         for i in range(digit): 
-            self.getRow(direction='prev')
+            self.getRow(
+                    direction='prev')
 
     @register('K') 
     def deselectPrevRow(self, digit=1):
 
         for i in range(digit): 
-            self.getRow(direction='prev', kind='deselect')
+            self.getRow(
+                    direction='prev', 
+                    kind='deselect')
 
-    def getRow(self, direction='next', kind='select'):
+    def getRow(
+            self, 
+            direction='next', 
+            kind='select'
+            ):
 
         s=self.display.view.selected()
         if s:
@@ -165,7 +165,8 @@ class Visual(Mode):
         s=self.display.view.selected()
         if s:
             self.s=s
-            self.hintSelected.connect(self.jump)
+            self.hintSelected.connect(
+                    self.jump)
             self.hint()
 
     @register('w') 
