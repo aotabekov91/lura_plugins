@@ -11,7 +11,7 @@ class Annotations(Plug):
             app, 
             position='right',
             prefix_keys={
-                'command': 'A',
+                'command': 'a',
                 'Annotations': '<c-.>'
                 },
             **kwargs
