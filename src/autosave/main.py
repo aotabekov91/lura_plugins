@@ -13,17 +13,15 @@ class Autosave(Plug):
 
         self.app.display.viewCreated.connect(
                 self.on_viewCreated)
-
+        self.app.display.positionChanged.connect(
+                self.save)
 
     def on_viewCreated(self, view):
 
         data=self.get(view)
         if data:
-            print(data)
             page, left, top = data
             view.goto(page, left, top)
-        # view.positionChanged.connect(
-                # self.save)
 
     def get(self, view):
 
@@ -51,8 +49,10 @@ class Autosave(Plug):
              }
         vdata=self.get(view)
         if vdata:
-            hdata={'hash':view.model().id()}
-            self.table.updateRow(hdata, data)
+            idx=view.model().id()
+            self.table.updateRow(
+                    {'hash':idx}, data)
         else:
             data['hash']=view.model().id()
-            self.table.writeRow(data, uniqueField='hash')
+            self.table.writeRow(
+                    data, uniqueField='hash')

@@ -58,7 +58,7 @@ class Bookmark(Plug):
             page=view.pageItem().page()
             pnum=page.pageNumber()
             position=[]
-            for f in view.saveLeftAndTop():
+            for f in view.getPosition():
                 position+=[str(f)]
             data={'page' : pnum, 
                   'hash' : view.model().id(),
@@ -80,7 +80,7 @@ class Bookmark(Plug):
                 page=view.pageItem().page()
                 pnum=page.pageNumber()
                 position=[]
-                for f in view.saveLeftAndTop():
+                for f in view.getPosition():
                     position+=[str(f)]
                 row={
                      'text':t, 

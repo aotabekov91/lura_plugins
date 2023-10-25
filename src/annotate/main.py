@@ -109,7 +109,7 @@ class Annotate(Plug):
             self.add(page.document(), aData)
             pageItem.select()
             pageItem.refresh(
-                    dropCachedPixmap=True)
+                    dropCache=True)
         self.annotated.emit()
         self.delistenWanted.emit()
 
@@ -145,7 +145,7 @@ class Annotate(Plug):
             self.table.removeRow(
                     {'id': self.selected['id']}) 
             page.removeAnnotation(self.selected)
-            page.pageItem().refresh(dropCachedPixmap=True)
+            page.pageItem().refresh(dropCache=True)
             self.selected=None
 
     def add(

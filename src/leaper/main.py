@@ -29,7 +29,7 @@ class Leaper(Plug):
 
         jumps=self.jumps.get(view)
         index=self.indices.get(view)
-        data=(view.currentPage(), view.saveLeftAndTop())
+        data=(view.currentPage(), view.getPosition())
 
         idx_data=jumps.get(index, None)
         if idx_data and idx_data!=data:

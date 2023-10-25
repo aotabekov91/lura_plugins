@@ -151,7 +151,7 @@ class Annotations(Plug):
             page.removeAnnotation(
                     item.itemData)
             page.pageItem().refresh(
-                    dropCachedPixmap=True)
+                    dropCache=True)
             self.update()
             self.ui.list.setCurrentRow(
                     nrow)
