@@ -70,8 +70,8 @@ class Outline(TreePlug):
 
         outline=self.getData(view)
         if outline:
-            page=item.page().pageNumber()
-            found=self.find(page)
+            idx=item.element().index()
+            found=self.find(idx)
             if found: 
                 self.ui.main.tree.setCurrentIndex(found)
 

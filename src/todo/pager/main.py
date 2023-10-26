@@ -34,9 +34,9 @@ class Pager(Plug):
 
     def on_itemChanged(self, view, item=None): 
 
-        cpage=view.currentPage()
-        pages=view.totalPages()
-        self.ui.setText(f'{cpage}/{pages}')
+        count=view.count()
+        cpage=view.current()
+        self.ui.setText(f'{cpage}/{count}')
 
     def setUI(self):
 

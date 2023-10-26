@@ -36,15 +36,13 @@ class Metadata(Plug):
     def setUI(self):
 
         self.uiman.setUI()
-        main=InputList(
+        w=InputList(
                 widget=UpDownEdit)
-        main.input.hideLabel()
-        main.list.widgetDataChanged.connect(
+        w.input.hideLabel()
+        w.list.widgetDataChanged.connect(
                 self.on_contentChanged)
         self.ui.addWidget(
-                main, 'main', main=True)
-        self.ui.hideWanted.connect(
-                self.deactivate)
+                w, 'main', main=True)
 
     def on_contentChanged(self, widget):
 

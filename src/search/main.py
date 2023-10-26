@@ -7,21 +7,20 @@ class Search(Plug):
     special=['return', 'carriage']
 
     def __init__(self, 
-            app, 
             *args,
-            listen_leader='/',
             special=special,
+            listen_leader='/',
             **kwargs):
 
-        super(Search, self).__init__(
+        super().__init__(
                 *args,
-                app=app, 
                 special=special,
                 listen_leader=listen_leader, 
                 **kwargs,
                 )
 
         self.index=-1
+        self.text=None
         self.match=None
         self.matches=[]
         self.setConnect()
@@ -67,16 +66,17 @@ class Search(Plug):
 
     def clear(self):
 
-        self.clearItems()
+        self.erase()
         self.index=-1
+        self.text=None
         self.match=None
         self.matches=[]
 
-    def clearItems(self):
+    def erase(self):
 
         for m in self.matches:
             page, rect = m
-            item=self.display.view.pageItem(page-1)
+            item=self.display.view.item(page)
             item.setSearched()
         if self.matches:
             self.display.view.updateAll()
@@ -84,10 +84,10 @@ class Search(Plug):
     def search(self, text, view, found=[]):
 
         if view:
-            pages=view.model().pages()
-            for p in pages.values():
+            elems=view.model().elements()
+            for p in elems.values():
                 rects=p.search(text)
-                pnum=p.pageNumber()
+                pnum=p.index()
                 if rects:
                     for r in rects:
                         found+=[(pnum, r)]
@@ -98,29 +98,29 @@ class Search(Plug):
         self.clear()
         self.app.window.main.setFocus()
         text=self.app.window.bar.edit.text()
-
         if text:
+            self.text=text
             view=self.display.currentView()
             self.matches=self.search(
                     text, view)
             if self.matches and jump: 
                 self.jump()
 
-    def jump(self, increment=1, match=None):
+    def jump(self, digit=1, match=None):
 
         if self.matches:
-            self.index+=increment
-            self.setIndex()
-
-    def setIndex(self):
-
-        if self.matches:
+            self.index+=digit
             if self.index>=len(self.matches):
                 self.index=0
             elif self.index<0:
                 self.index=len(self.matches)-1
+            self.jumpToIndex()
+
+    def jumpToIndex(self):
+
+        if self.matches:
             p, r = self.matches[self.index]
-            i=self.display.view.pageItem(p-1)
+            i=self.display.view.item(p)
             m=i.mapToItem(r)
             i.setSearched([m])
             srec=i.mapRectToScene(m)

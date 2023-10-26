@@ -81,7 +81,7 @@ class Annotations(Plug):
                       'kind': 'document',
                       'text': n.contents(),
                       'content': n.contents(),
-                      'page': n.page().pageNumber(),
+                      'page': n.element().index(),
                       'color': QtGui.QColor(n.color()),
                       }
                 annotations+=[data]
@@ -107,8 +107,8 @@ class Annotations(Plug):
             boundary=pAnn.boundary()
             topLeft=boundary.topLeft() 
             x, y = topLeft.x(), topLeft.y()
-            page=pAnn.page().pageNumber()
-            view.goto(page, x, y-0.05)
+            e=pAnn.element().index()
+            view.goto(e, x, y-0.05)
 
     def openById(self, aid, data):
 
@@ -116,14 +116,14 @@ class Annotations(Plug):
         data=self.table.getRow({'id':aid})
         if data and view:
             data=data[0]
-            page=data['page']
+            idx=data['page']
             boundaries=view.model().getBoundaries(
                     data['position'])
             boundary=boundaries[0]
             topLeft=boundary.topLeft() 
             x, y = topLeft.x(), topLeft.y()
             if view: 
-                view.goto(page, x, y-0.05)
+                view.goto(idx, x, y-0.05)
 
     def on_contentChanged(self, widget):
 
@@ -140,21 +140,14 @@ class Annotations(Plug):
         nrow=max(self.ui.list.currentRow()-1, 0)
         if item:
             view=self.display.view
-            aid=item.itemData.get(
-                    'id', None)
-            apage=item.itemData.get(
-                    'page', None)
-            self.table.removeRow(
-                    {'id': aid})
-            page=view.model().page(
-                    apage)
-            page.removeAnnotation(
-                    item.itemData)
-            page.pageItem().refresh(
-                    dropCache=True)
+            aid=item.itemData.get('id', None)
+            idx=item.itemData.get('page', None)
+            self.table.removeRow({'id': aid})
+            elem=view.model().element(idx)
+            elem.removeAnnotation(item.itemData)
+            elem.item().refresh(dropCache=True)
             self.update()
-            self.ui.list.setCurrentRow(
-                    nrow)
+            self.ui.list.setCurrentRow(nrow)
 
     @register('O')
     def openAndFocus(self):

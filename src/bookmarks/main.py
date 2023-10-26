@@ -80,8 +80,9 @@ class Bookmarks(Plug):
         view=self.display.currentView()
         if view:
             dhash=view.model().id()
-            rows = self.table.getRow(
-                    {'hash': dhash})
+            cond={'hash': dhash}
+            rows = self.table.getRow(cond)
+            print(cond, rows)
             for a in rows:
                 p=a['position'].split(':')
                 a['view']=view

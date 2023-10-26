@@ -42,7 +42,7 @@ class Quickmark(Plug):
         if mark: 
             view = self.app.display.currentView()
             dhash= view.model().id()
-            page = view.currentPage()
+            page = view.item().index()
             left, top = view.getPosition()
             position=f'{page}:{left}:{top}'
             data={'hash':dhash, 

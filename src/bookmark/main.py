@@ -55,12 +55,11 @@ class Bookmark(Plug):
 
         view=self.display.currentView()
         if view:
-            page=view.pageItem().page()
-            pnum=page.pageNumber()
             position=[]
             for f in view.getPosition():
                 position+=[str(f)]
-            data={'page' : pnum, 
+            idx=view.currentItem().index()
+            data={'page' : idx, 
                   'hash' : view.model().id(),
                   'position' : ':'.join(position)
                   }
@@ -77,15 +76,14 @@ class Bookmark(Plug):
                         {'id': rows[0]['id']},
                         {'text':t})
             else:
-                page=view.pageItem().page()
-                pnum=page.pageNumber()
                 position=[]
                 for f in view.getPosition():
                     position+=[str(f)]
+                idx=view.currentItem().index()
                 row={
                      'text':t, 
                      'title':t, 
-                     'page':pnum, 
+                     'page':idx, 
                      'kind':'document', 
                      'hash':view.model().id(),
                      'position':':'.join(position)

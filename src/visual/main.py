@@ -53,7 +53,7 @@ class Visual(Mode):
 
         s=self.display.view.selected()
         item=s[-1]['item']
-        page=item.page()
+        elem=item.element()
         # b=self.s[0]['box']
         # start, end, rect = b[0], b[-1], 
         start=self.s[0]['box'][0]
@@ -61,13 +61,13 @@ class Visual(Mode):
         rect=s[0]['box'][0]
         if rect.y()>end.y():
             # item.select([page.getRows(start, rect)])
-            selected=[page.getRows(start, rect)]
+            selected=[elem.getRows(start, rect)]
         elif rect.y()<start.y():
             # item.select([page.getRows(rect, end)])
-            selected=[page.getRows(rect, end)]
+            selected=[elem.getRows(rect, end)]
         else:
             # item.select([page.getRows(start, rect)])
-            selected=[page.getRows(start, rect)]
+            selected=[elem.getRows(start, rect)]
         item.select(selected)
         self.hintSelected.disconnect(self.jump)
 
@@ -123,7 +123,7 @@ class Visual(Mode):
         s=self.display.view.selected()
         if s:
             item=s[-1]['item']
-            page=item.page()
+            elem=item.element()
             start=s[-1]['box'][0]
             end=s[-1]['box'][-1]
             if kind=='select':
@@ -132,31 +132,31 @@ class Visual(Mode):
                                 end.y()+end.height()+2, 
                                 end.width(), 
                                 end.height())
-                    data=page.getRow(edge.bottomLeft())
+                    data=elem.getRow(edge.bottomLeft())
                     # data=page.getRow(edge.bottomRight())
                     if data: 
                         edge=data['box'][-1]
-                        selected=[page.getRows(start, edge)]
+                        selected=[elem.getRows(start, edge)]
                         if selected: item.select(selected)
                 elif direction=='prev':
                     edge=QtCore.QRectF(start.x(),
                                 start.y()-start.height()-2, 
                                 start.width(), 
                                 start.height())
-                    data=page.getRow(edge.topLeft())
+                    data=elem.getRow(edge.topLeft())
                     if data: 
                         edge=data['box'][-1]
-                        selected=[page.getRows(edge, end)]
+                        selected=[elem.getRows(edge, end)]
                         if selected: item.select(selected)
             elif kind=='deselect':
                 if len(s[-1]['box'])>1:
                     if direction=='next':
                         edge=s[-1]['box'][-2]
-                        selected=[page.getRows(start, edge)]
+                        selected=[elem.getRows(start, edge)]
                         if selected: item.select(selected)
                     elif direction=='prev':
                         edge=s[-1]['box'][1]
-                        selected=[page.getRows(edge, end)]
+                        selected=[elem.getRows(edge, end)]
                         if selected: item.select(selected)
 
     @register('e')
@@ -205,7 +205,7 @@ class Visual(Mode):
     def getWord(self, s, kind='select', direction='forward', word=None):
 
         item=s[-1]['item']
-        page=item.page()
+        elem=item.element()
         selected=None
         boxes=s[-1]['data']
         start=s[-1]['box'][0]
@@ -214,57 +214,57 @@ class Visual(Mode):
         if word=='first':
 
             rect=QtCore.QRectF(0, start.y(), start.x(), start.height())
-            selected=page.getRows(rect, end)
+            selected=elem.getRows(rect, end)
             if selected:
                 first_word=selected['data'][0].boundingBox()
-                selected=[page.getRows(first_word, end)]
+                selected=[elem.getRows(first_word, end)]
 
         elif word=='last':
 
-            rect=QtCore.QRectF(end.x(), end.y(), page.size().width(), end.height())
-            selected=page.getRows(rect, end)
+            rect=QtCore.QRectF(end.x(), end.y(), elem.size().width(), end.height())
+            selected=elem.getRows(rect, end)
             if selected:
                 last_word=selected['data'][-1].boundingBox()
-                selected=[page.getRows(start, last_word)]
+                selected=[elem.getRows(start, last_word)]
 
         elif kind=='select':
 
             if direction=='forward':
 
                 edge_horizontal=QtCore.QRectF(end.x()+end.width()+2, end.y(), 5, end.height())
-                data=page.getRow(edge_horizontal.bottomRight())
+                data=elem.getRow(edge_horizontal.bottomRight())
 
                 if data: 
                     edge=data['box'][-1]
-                    selected=[page.getRows(start, edge)]
+                    selected=[elem.getRows(start, edge)]
 
                 else:
                     for i in range(1, int(end.x())):
                         edge=QtCore.QRectF(i, end.y()+end.height()+2, 2, end.height())
-                        data=page.getRow(edge.bottomRight())
+                        data=elem.getRow(edge.bottomRight())
 
                         if data: 
                             edge=data['box'][-1]
-                            selected=[page.getRows(start, edge)]
+                            selected=[elem.getRows(start, edge)]
                             break
 
             elif direction=='backward':
 
                 edge_horizontal=QtCore.QRectF(start.x()-7, start.y(), 5, start.height())
-                data=page.getRow(edge_horizontal.topLeft())
+                data=elem.getRow(edge_horizontal.topLeft())
                 if data: 
                     edge=data['box'][-1]
-                    selected=[page.getRows(edge, end)]
+                    selected=[elem.getRows(edge, end)]
 
                 else:
-                    width=page.size().width()
+                    width=elem.size().width()
                     for i in range(int(width), int(start.x()), -1):
                         edge=QtCore.QRectF(i, start.y()-start.height(), 2, start.height()/2.)
-                        data=page.getRow(edge.bottomRight())
+                        data=elem.getRow(edge.bottomRight())
 
                         if data: 
                             edge=data['box'][-1]
-                            selected=[page.getRows(edge, end)]
+                            selected=[elem.getRows(edge, end)]
                             break
 
         elif kind=='deselect':
@@ -274,14 +274,14 @@ class Visual(Mode):
                 if len(boxes)>=2:
                     start=boxes[0].boundingBox()
                     edge=boxes[-2].boundingBox()
-                    selected=[page.getRows(start, edge)]
+                    selected=[elem.getRows(start, edge)]
 
             elif direction=='backward':
 
                 if len(boxes)>=2:
                     edge=boxes[1].boundingBox()
                     end=boxes[-1].boundingBox()
-                    selected=[page.getRows(edge, end)]
+                    selected=[elem.getRows(edge, end)]
 
         if selected: 
             item.select(selected)
@@ -310,7 +310,7 @@ class Visual(Mode):
                     hint=data[0]
                     item=data[1]
                     top_point=hint.boundingBox().topLeft()
-                    data=item.page().getRow(top_point)
+                    data=item.element().getRow(top_point)
                     item.select([data])
                     self.hintSelected.emit()
                 self.unhint()
@@ -349,7 +349,7 @@ class Visual(Mode):
         hints={}
         for item in view.visibleItems(): 
             hints[item]={}
-            text_list=item.page().textList()
+            text_list=item.element().textList()
             for j, h in enumerate(text_list):
                 n=i+j
                 hint=number_to_string(n)

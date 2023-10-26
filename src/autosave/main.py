@@ -18,10 +18,10 @@ class Autosave(Plug):
 
     def on_viewCreated(self, view):
 
-        data=self.get(view)
-        if data:
-            page, left, top = data
-            view.goto(page, left, top)
+        d=self.get(view)
+        if d:
+            idx, x, y = d
+            view.goto(idx, x, y)
 
     def get(self, view):
 
@@ -43,8 +43,9 @@ class Autosave(Plug):
             ):
 
         top, left=str(top), str(left)
+        idx=view.currentItem().index()
         data={
-             'page': view.currentPage(),
+             'page': idx,
              'position': f'{left}:{top}',
              }
         vdata=self.get(view)

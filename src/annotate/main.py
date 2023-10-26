@@ -60,14 +60,14 @@ class Annotate(Plug):
             ):
 
         self.selected=None
-        page=item.page().pageNumber()
+        idx=item.element().index()
         point=item.mapToPage(
                 event.pos(), unify=False)
         pos=item.mapToPage(
                 point, unify=True)
         annotations=view.model().annotations()
         for a in annotations: 
-            if page!=a['page']: 
+            if idx!=a['page']: 
                 continue
             for b in a['boundaries']:
                 if not b.contains(pos): 
@@ -94,22 +94,21 @@ class Annotate(Plug):
         if selections:
             selection=selections[0]
             text=selection['text']
-            pageItem=selection['item']
+            item=selection['item']
             area=selection['area_unified']
-            page=pageItem.page()
-            pageNumber = page.pageNumber()
-            dhash = page.document().id()
+            elem=item.element()
+            idx = elem.index()
+            dhash = elem.model().id()
             aData=self.write(
                     view.model(),
                     dhash, 
-                    pageNumber, 
+                    idx, 
                     text, 
                     area, 
                     function)
-            self.add(page.document(), aData)
-            pageItem.select()
-            pageItem.refresh(
-                    dropCache=True)
+            self.add(elem.model(), aData)
+            item.select()
+            item.refresh(dropCache=True)
         self.annotated.emit()
         self.delistenWanted.emit()
 
@@ -141,11 +140,11 @@ class Annotate(Plug):
     def remove(self):
 
         if self.selected:
-            page=self.selected['pAnn'].page()
+            elem=self.selected['pAnn'].element()
             self.table.removeRow(
                     {'id': self.selected['id']}) 
-            page.removeAnnotation(self.selected)
-            page.pageItem().refresh(dropCache=True)
+            elem.removeAnnotation(self.selected)
+            elem.item().refresh(dropCache=True)
             self.selected=None
 
     def add(
@@ -154,15 +153,15 @@ class Annotate(Plug):
             annotation
             ):
 
-        page=model.page(annotation['page'])
-        color=self.func_colors.get(
+        e=model.element(annotation['page'])
+        c=self.func_colors.get(
                 annotation['function'],
                 self.default_color)
-        annotation['color'] = QtGui.QColor(color)
+        annotation['color'] = QtGui.QColor(c)
         annotation['boundaries']=model.getBoundaries(
                 annotation['position'])
 
-        return page.annotate(
+        return e.annotate(
                 annotation, 
                 kind='highlightAnnotation')
 
@@ -175,10 +174,7 @@ class Annotate(Plug):
             dhash = document.id()
             aData=self.table.getRow({'hash':dhash})
             for annotation in aData: 
-                self.add(
-                        document, 
-                        annotation
-                        )
+                self.add(document, annotation)
 
     def checkLeader(self, event, pressed):
 

@@ -1,19 +1,17 @@
 from PyQt5 import QtCore 
-
 from plug.qt import Plug
 from gizmo.utils import register
-from gizmo.widget import ListWidget, ItemWidget
+from gizmo.widget import InputList, UpDown
 
 class SearchList(Plug):
 
     def __init__(self,
                  app,
                  *args,
-                 position='bottom',
+                 position='down',
                  **kwargs):
 
         self.follow_move=False 
-
         super().__init__(
                 *args,
                 app=app,
@@ -31,37 +29,40 @@ class SearchList(Plug):
 
     def on_plugsLoaded(self, plugs):
 
-        self.search=plugs.get('Search', None)
+        self.search=plugs.get('search', None)
         if self.search:
             ear=self.search.ear
             ear.returnPressed.connect(
-                    self.find)
+                    self.activate)
             self.search.endedListening.connect(
                     self.deactivate)
+
+    def activate(self):
+
+        self.find()
+        self.uiman.activate()
 
     def find(self):
 
         if self.search.matches:
-            dlist=[]
+            t=self.search.text
             v=self.display.currentView()
-            t=self.app.window.bar.edit.text()
+            dlist=[]
             for f in self.search.matches:
                 pn, r = f
-                p=v.model().page(pn)
-                dlist+=[{'up': self.getLine(t, p, r)}]
+                e=v.model().element(pn)
+                dlist+=[{
+                    'up': self.getLine(t, e, r)
+                    }]
             self.ui.main.setList(dlist)
-            self.ui.main.adjustSize()
-            self.activateUI()
 
     def setUI(self):
 
-        wlist=ListWidget(
-                objectName='List',
-                widget=ItemWidget,
-                )
         self.uiman.setUI()
+        w=InputList(widget=UpDown)
+        w.input.hideLabel()
         self.ui.addWidget(
-                wlist, 'main', main=True)
+                w, 'main', main=True)
         
     @register('<c-j>', modes=['Search'])
     def next(self): 
@@ -73,6 +74,7 @@ class SearchList(Plug):
 
     @register('<c-l>', modes=['Search'])
     def jump(self, increment=1):
+
         crow=self.ui.main.currentRow()
         self.search.index=crow
         self.search.setIndex()
@@ -82,6 +84,7 @@ class SearchList(Plug):
         w=p.size().width()
         x, y, w, h = 0, r.y(), w, r.height()
         r=QtCore.QRectF(x, y, w, h)
+        return p.find(r)
         l=f'<html>{p.find(r)}</html>'
         r=f'<strong><u>{t}</u></strong>'
         return l.replace(t, r)

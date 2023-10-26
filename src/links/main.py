@@ -101,7 +101,7 @@ class Links(Plug):
 
         for i in range(len(alphabet)): 
             char_to_pos[alphabet[i]] = i
-        links=item.page().links()
+        links=item.element().links()
         return {number_to_string(i):h  for i, h in enumerate(links)}
 
     def paint(self, painter, options, widget, item, view):
@@ -114,7 +114,7 @@ class Links(Plug):
                 rect=item.mapToItem(link['boundary'], isUnified=True)
                 page_rect=item.mapToPage(rect, unify=False)
                 link['down']=i
-                link['up']=text=item.page().find(page_rect)
+                link['up']=item.element().find(page_rect)
                 pen=QtGui.QPen(QtGui.QColor(88, 139, 174, 220), 0.0)
                 painter.setPen(pen)
                 painter.drawRect(rect)
