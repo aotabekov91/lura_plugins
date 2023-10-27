@@ -14,14 +14,10 @@ class WLookup(Plug):
 
         view=self.app.display.view
         if view and view.selected():
-
             text=[]
             for s in view.selected(): text+=[s['text']]
             text=' '.join(text)
-
             cmd={'action':'translate',
                  'lan':'en', 
                  'term': text}
-
-            print(cmd)
             self.lookup.send_json(cmd)
