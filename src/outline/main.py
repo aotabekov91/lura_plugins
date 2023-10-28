@@ -5,9 +5,10 @@ from plug.qt.plugs import TreePlug
 
 class Outline(TreePlug):
 
-    def __init__(self, 
+    def __init__(
+            self, 
             app,
-            position='left',
+            position='dock_left',
             prefix_keys={'command':'o'},
             **kwargs): 
 

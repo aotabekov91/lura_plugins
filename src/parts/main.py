@@ -12,7 +12,7 @@ class Parts(Plug):
             self, 
             app, 
             *args,
-            position='left',
+            position='dock_left',
             prefix_keys={'command': 'p'},
             **kwargs):
 

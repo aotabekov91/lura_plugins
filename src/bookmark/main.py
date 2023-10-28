@@ -4,7 +4,7 @@ from tables import Bookmark as Table
 
 class Bookmark(Plug):
 
-    marked=QtCore.pyqtSignal()
+    bookmarked=QtCore.pyqtSignal()
     special=['return', 'carriage']
 
     def __init__(
@@ -16,8 +16,9 @@ class Bookmark(Plug):
             **kwargs
             ):
 
+        self.mode=None
         self.table=Table()
-        self.display=app.display
+        self.bar=app.window.bar
         super().__init__(
                 app=app, 
                 special=special,
@@ -36,58 +37,67 @@ class Bookmark(Plug):
     def delisten(self):
 
         super().delisten()
-        bar=self.app.window.bar
-        bar.bottom.hide()
-        bar.edit.clear()
+        self.bar.bottom.hide()
+        self.bar.edit.clear()
 
     def listen(self):
 
         super().listen()
-        bar=self.app.window.bar
         r=self.getBookmark()
         if r: 
-            text=r[0]['text']
-            bar.edit.setText(text)
-        bar.bottom.show()
-        bar.edit.setFocus()
+            t=r[0]['text']
+            self.bar.edit.setText(t)
+        self.bar.bottom.show()
+        self.bar.edit.setFocus()
 
     def getBookmark(self):
 
-        view=self.display.currentView()
-        if view:
-            position=[]
-            for f in view.getPosition():
-                position+=[str(f)]
-            idx=view.currentItem().index()
-            data={'page' : idx, 
-                  'hash' : view.model().id(),
-                  'position' : ':'.join(position)
-                  }
-            return self.table.getRow(data)
+        v=self.mode.getView()
+        if v:
+            p=v.itemId()
+            i=v.modelId()
+            l = v.getLocation()
+            d={
+               'hash' : i,
+               'page' : p,
+               'position' : l,
+               'kind': v.kind(),
+              }
+            return self.table.getRow(d)
 
     def bookmark(self):
 
-        t=self.app.window.bar.edit.text()
-        view=self.display.currentView()
-        if view:
+        v=self.mode.getView()
+        if v:
+            t=self.bar.edit.text()
             rows=self.getBookmark()
             if rows:
+                c={'id': rows[0]['id']}
                 self.table.updateRow(
-                        {'id': rows[0]['id']},
-                        {'text':t})
+                        c, {'text':t})
             else:
-                position=[]
-                for f in view.getPosition():
-                    position+=[str(f)]
-                idx=view.currentItem().index()
+                p = v.itemId()
+                m = v.modelId()
+                l = v.getLocation()
                 row={
-                     'text':t, 
-                     'title':t, 
-                     'page':idx, 
-                     'kind':'document', 
-                     'hash':view.model().id(),
-                     'position':':'.join(position)
+                     'page': p, 
+                     'text': t, 
+                     'hash': m, 
+                     'title': t, 
+                     'position': l,
+                     'kind': v.kind(), 
                      }
                 self.table.writeRow(row)
-            self.marked.emit()
+            self.bookmarked.emit()
         self.delistenWanted.emit()
+
+    def checkLeader(self, e, p):
+
+        if super().checkLeader(e, p):
+            if self.ear.listening:
+                return True
+            m=self.app.moder.current
+            if m and getattr(m, 'getView'):
+                self.mode=m
+                return True
+        return False

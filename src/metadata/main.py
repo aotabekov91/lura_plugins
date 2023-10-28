@@ -10,7 +10,7 @@ class Metadata(Plug):
             self, 
             app, 
             *args,
-            position='right',
+            position='dock_right',
             prefix_keys={'command': 'm'},
             **kwargs):
 

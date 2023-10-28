@@ -5,9 +5,16 @@ from .widget import PagerWidget
 
 class Pager(Plug):
 
-    def __init__(self, **kwargs):
+    def __init__(
+            self, 
+            *args, 
+            **kwargs
+            ):
 
-        super().__init__(position='overlay', **kwargs)
+        super().__init__(
+                *args,
+                position='overlay', 
+                **kwargs)
 
         self.setUI()
         self.app.display.itemChanged.connect(

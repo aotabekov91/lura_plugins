@@ -8,7 +8,7 @@ class Quickmarks(Plug):
     def __init__(
             self, 
             app, 
-            position='right',
+            position='dock_right',
             listen_leader='<c-M>',
             **kwargs):
 

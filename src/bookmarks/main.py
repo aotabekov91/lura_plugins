@@ -8,13 +8,14 @@ class Bookmarks(Plug):
     def __init__(
             self, 
             app, 
-            position='right',
+            position='dock_right',
             prefix_keys={
-                'command': 'B',
+                'command': 'b',
                 'Bookmarks': '<c-.>',
                 },
             **kwargs):
 
+        self.current=None
         self.color='#CC885E'
         self.table=Table()
         self.display=app.display
@@ -28,18 +29,16 @@ class Bookmarks(Plug):
 
     def connect(self):
 
-        self.display.viewChanged.connect(
+        self.app.moder.modeChanged.connect(
                 self.update)
         self.app.moder.plugsLoaded.connect(
                 self.on_plugsLoaded)
 
     def on_plugsLoaded(self, plugs):
 
-        self.bookmark=plugs.get(
-                'bookmark', None)
-        if self.bookmark:
-            self.bookmark.marked.connect(
-                    self.update)
+        b=plugs.get('bookmark', None)
+        if b: 
+            b.bookmarked.connect(self.update)
 
     def setUI(self):
 
@@ -54,10 +53,9 @@ class Bookmarks(Plug):
 
         i=self.ui.list.currentItem()
         if i: 
-            p=i.itemData['page']
-            l, t=i.itemData['pos']
-            view=i.itemData['view']
-            view.goto(p, l, t)
+            d=i.itemData
+            v=d['view']
+            v.open(**d)
 
     @register('d')
     def delete(self):
@@ -75,25 +73,38 @@ class Bookmarks(Plug):
         style=f'background-color: {self.color}'
         ann['up_style']=style
 
-    def update(self):
+    @register('f', modes=['command'])
+    def setFocus(self):
 
-        view=self.display.currentView()
-        if view:
-            dhash=view.model().id()
-            cond={'hash': dhash}
-            rows = self.table.getRow(cond)
-            for a in rows:
-                p=a['position'].split(':')
-                a['view']=view
-                a['down']=a['text']
-                a['up']=f'# {a.get("id")}'
-                a['pos']=float(p[0]), float(p[0])
-                self.setColorStyle(a)
-            rows=sorted(
-                    rows, 
-                    key=lambda x: (x['page'], x['position'])
-                    )
-            self.ui.setList(rows)
+        p=self.app.moder.plugs
+        self.update(p.command.client)
+        super().setFocus()
+
+    def update(self, mode=None):
+
+        if mode==self:
+            return
+        if not mode:
+            mode, _ =self.app.moder.getState()
+        gv=getattr(mode, 'getView', None)
+        if not gv: 
+            return
+        v=gv()
+        if not v or v==self.current:
+            return
+        k=v.kind()
+        i=v.modelId()
+        self.current=v
+        c={'hash': i, 'kind': k}
+        rs = self.table.getRow(c)
+        for r in rs:
+            r['view']=v
+            r['down']=r['text']
+            r['up']=f'# {r.get("id")}'
+            self.setColorStyle(r)
+        sfunc=lambda x: (x['page'], x['position'])
+        rs=sorted(rs, key=sfunc)
+        self.ui.setList(rs)
 
     def on_contentChanged(self, w):
         

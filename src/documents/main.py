@@ -12,7 +12,7 @@ class Documents(Plug):
             app, 
             *args,
             special=special,
-            position='right',
+            position='dock_right',
             prefix_keys={'command': 'd'},
             **kwargs):
 

@@ -8,7 +8,7 @@ class SearchList(Plug):
     def __init__(self,
                  app,
                  *args,
-                 position='down',
+                 position='dock_down',
                  **kwargs):
 
         self.follow_move=False 

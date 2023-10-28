@@ -9,7 +9,7 @@ class Annotations(Plug):
     def __init__(
             self, 
             app, 
-            position='right',
+            position='dock_right',
             prefix_keys={
                 'command': 'a',
                 'Annotations': '<c-.>'

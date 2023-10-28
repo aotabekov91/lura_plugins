@@ -21,7 +21,7 @@ class Autosave(Plug):
         d=self.get(view)
         if d:
             idx, x, y = d
-            view.goto(idx, x, y)
+            # view.goto(idx, x, y)
 
     def get(self, view):
 
