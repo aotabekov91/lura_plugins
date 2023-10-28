@@ -1,19 +1,24 @@
+from PyQt5 import QtCore
 from plug.qt import Plug
 from gizmo.utils import register
 from tables import Quickmark as Table
 
 class Quickmark(Plug):
 
+    jumped=QtCore.pyqtSignal()
+    marked=QtCore.pyqtSignal()
+    unmarked=QtCore.pyqtSignal()
+
     def __init__(
             self,
             app,
             *args,
-            listen_leader=['m', 't'],
+            listen_leader='<c-m>',
             **kwargs,
             ):
 
-        self.kind=None
-        self.pressed=None
+        self.mode=None
+        self.actor=None
         self.table = Table() 
         super(Quickmark, self).__init__(
                 *args,
@@ -25,58 +30,98 @@ class Quickmark(Plug):
     def setup(self):
 
         super().setup()
-        self.keys=self.ear.listen_leader
-        self.ear.keyRegistered.connect(
-                self.on_keyRegistered)
+        self.ear.suffix_functor=self.checkSuffix
+
+    def checkSuffix(self, key, digit, event):
+
+        key=event.text()
+        if key and self.actor: 
+            self.actor(key)
+            return True
+        return False
+
+    def delisten(self):
+
+        self.actor=None
+        super().delisten()
 
     def listen(self):
-        
+
+        self.actor=None
         super().listen()
-        if self.pressed==self.keys[0]:
-            self.kind='marker'
-        else:
-            self.kind='jumper'
 
-    def mark(self, mark):
+    @register('m')
+    def mark(self):
+        self.actor=self._mark
 
-        if mark: 
-            view = self.app.display.currentView()
-            dhash= view.model().id()
-            page = view.item().index()
-            left, top = view.getPosition()
-            position=f'{page}:{left}:{top}'
-            data={'hash':dhash, 
-                  'position': position, 
-                  'mark':mark}
+    @register('u')
+    def unmark(self):
+        self.actor=self._unmark
+
+    @register('U')
+    def unmarkGlobal(self):
+
+        f=lambda x: self._unmark(x, True)
+        self.actor=f
+
+    @register('g')
+    def goto(self):
+        self.actor=self._goto
+
+    @register('G')
+    def gotoGlobal(self):
+
+        f=lambda x: self._goto(x, True)
+        self.actor=f
+
+    def _unmark(self, m, globally=False):
+
+        if m: 
+            v = self.mode.getView()
+            cond={'mark': m}
+            if not globally:
+                cond['kind']=v.kind()
+                cond['page']=v.itemId()
+                cond['hash']=v.modelId(),
+            self.table.removeRow(cond)
+        self.unmarked.emit()
+        self.modeWanted.emit(self.mode)
+
+    def _mark(self, m):
+
+        if m: 
+            v = self.mode.getView()
+            data={
+                  'mark':m,
+                  'kind': v.kind(),
+                  'page': v.itemId(),
+                  'hash': v.modelId(), 
+                  'position': v.getLocation(),
+                  }
             self.table.writeRow(data)
-        self.delistenWanted.emit()
+        self.marked.emit()
+        self.modeWanted.emit(self.mode)
 
-    def jump(self, mark):
+    def _goto(self, m, globally=False):
 
-        if mark:
-            rows=self.table.getRow(
-                    {'mark':mark})
-            if rows:
-                mark=rows[0]
-                d = mark['position'].split(':')
-                p, l, t = tuple(d)
-                p, l, t = int(p), float(l), float(t)
-                self.app.display.currentView().goto(
-                        p, l, t)
-        self.delistenWanted.emit()
-
-    def on_keyRegistered(self, event):
-
-        if self.kind=='jumper':
-            self.jump(event.text())
-        elif self.kind=='marker':
-            self.mark(event.text())
+        if m:
+            v=self.mode.getView()
+            cond={
+                  'mark': m,
+                  'hash': v.modelId()
+                 }
+            if not globally:
+                cond['kind']=v.kind()
+            rs=self.table.getRow(cond)
+            if rs: v.open(**rs[0])
+        self.jumped.emit()
+        self.modeWanted.emit(self.mode)
 
     def checkLeader(self, event, pressed):
 
         if super().checkLeader(event, pressed):
-            current=self.app.moder.current
-            if current and current.name=='normal':
-                self.pressed=pressed
+            m=self.app.moder.current
+            if getattr(m, 'getView', False): 
+                self.mode=m
                 return True
         return False
