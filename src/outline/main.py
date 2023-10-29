@@ -109,6 +109,7 @@ class Outline(TreePlug):
         if view:
             model=view.model()
             dhash=model.id()
-            if not dhash in self.outlines:
-                self.outlines[dhash]=model.loadOutline()
-            return self.outlines[dhash]
+            f=getattr(model, 'loadOutlines', None)
+            if f and not dhash in self.outlines:
+                self.outlines[dhash]=f()
+            return self.outlines.get(dhash, None)
