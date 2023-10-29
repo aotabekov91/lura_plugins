@@ -112,6 +112,3 @@ class Outline(TreePlug):
             if not dhash in self.outlines:
                 self.outlines[dhash]=model.loadOutline()
             return self.outlines[dhash]
-        
-    @register('t', modes=['command'])
-    def toggle(self): super().toggle()
