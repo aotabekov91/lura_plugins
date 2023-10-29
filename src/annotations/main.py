@@ -17,6 +17,7 @@ class Annotations(Plug):
             **kwargs
             ):
 
+        self.current=None
         self.table=Table()
         super().__init__(
                 app=app, 
@@ -29,20 +30,10 @@ class Annotations(Plug):
     def connect(self):
 
         self.display=self.app.display
-        self.display.viewChanged.connect(
+        self.app.moder.modeChanged.connect(
                 self.update)
-        self.display.viewSelection.connect(
-                self.on_viewSelection)
         self.app.moder.plugsLoaded.connect(
                 self.on_plugsLoaded)
-
-    def on_plugsLoaded(self, plugs):
-
-        self.annotate=plugs.get(
-                'annotate', None)
-        if self.annotate:
-            self.annotate.annotated.connect(
-                    self.update)
 
     def setUI(self):
 
@@ -58,112 +49,101 @@ class Annotations(Plug):
         style=f'background-color: {color}'
         ann['up_style']=style
 
-    def update(self):
+    def getCompatibleView(self, mode):
 
-        view=self.display.currentView()
-        if view:
-            dhash=view.model().id()
-            annotations=view.model().annotations()
-            native=view.model().nativeAnnotations()
-            for a in annotations:
-                a['view']=view
-                a['down']=a['content']
+        gv=getattr(mode, 'getView', None)
+        if not gv:
+            return
+        v=gv()
+        if not v:
+            return
+        m=v.model()
+        if hasattr(m, 'annotations'):
+            return v
+
+    def update(self, m=None, v=None, force=False):
+
+        if not v:
+            v=self.getCompatibleView(m)
+        if not v:
+            return
+        if self.current==v and not force:
+            return
+        self.current=v
+        m=v.model()
+        anns=m.annotations()
+        for a in anns:
+            a['view']=v
+            a['down']=a['content']
+            if a['type']=='native':
+                a['up']='Native'
+                a['down']=a['text']
+                a['up_color']=a['color'] 
+            else:
                 a['up']=f'# {a.get("id")}'
                 self.setColorStyle(a)
-            for n in native:
-                data={
-                      'pAnn':n,
-                      'view': view,
-                      'up': 'Native',
-                      'hash': dhash,
-                      'up_color':n.color(),
-                      'down':n.contents(),
-                      'kind': 'document',
-                      'text': n.contents(),
-                      'content': n.contents(),
-                      'page': n.element().index(),
-                      'color': QtGui.QColor(n.color()),
-                      }
-                annotations+=[data]
-            self.ui.setList(annotations)
+        self.ui.setList(anns)
 
-    def on_viewSelection(self, view, selections):
+    @register('o')
+    def open(self):
 
-        if selections:
-            s=selections[0]
-            aid=s.get('aid', None)
-            if aid:
-                d=enumerate(self.ui.list.flist)
-                for j, i in d:
-                    if i.get('id', None)!=aid:
-                        continue
-                    self.ui.list.setCurrentRow(j)
-                    return
-
-    def openByData(self, pAnn, data):
-
-        view=data.get('view', None)
-        if pAnn and view:
-            boundary=pAnn.boundary()
-            topLeft=boundary.topLeft() 
-            x, y = topLeft.x(), topLeft.y()
-            e=pAnn.element().index()
-            view.goto(e, x, y-0.05)
-
-    def openById(self, aid, data):
-
-        view=data.get('view', None)
-        data=self.table.getRow({'id':aid})
-        if data and view:
-            data=data[0]
-            idx=data['page']
-            boundaries=view.model().getBoundaries(
-                    data['position'])
-            boundary=boundaries[0]
-            topLeft=boundary.topLeft() 
-            x, y = topLeft.x(), topLeft.y()
-            if view: 
-                view.goto(idx, x, y-0.05)
-
-    def on_contentChanged(self, widget):
-
-        data=widget.data
-        aid=data['id']
-        text=widget.textDown()
-        self.table.updateRow(
-                {'id':aid}, {'content':text})
+        i=self.ui.list.currentItem()
+        if i:
+            d=i.itemData
+            v=d['view']
+            v.open(**d)
 
     @register('d')
     def delete(self):
 
-        item=self.ui.list.currentItem()
-        nrow=max(self.ui.list.currentRow()-1, 0)
-        if item:
-            view=self.display.view
-            aid=item.itemData.get('id', None)
-            idx=item.itemData.get('page', None)
-            self.table.removeRow({'id': aid})
-            elem=view.model().element(idx)
-            elem.removeAnnotation(item.itemData)
-            elem.item().refresh(dropCache=True)
-            self.update()
-            self.ui.list.setCurrentRow(nrow)
+        i=self.ui.list.currentItem()
+        cr=self.ui.list.currentRow()
+        nr=max(cr-1, 0)
+        if i:
+            d=i.itemData
+            v=d['view']
+            idx=d.get('page')
+            aid=d.get('id', None)
+            self.table.removeRow(
+                    {'id': aid})
+            i=v.item(idx)
+            e=v.element(idx)
+            e.removeAnnotation(d)
+            i.refresh(dropCache=True)
+            self.update(v=v)
+            self.ui.list.setCurrentRow(nr)
+            
+    def on_plugsLoaded(self, plugs):
 
-    @register('O')
-    def openAndFocus(self):
+        aplug=plugs.get(
+                'annotate', None)
+        if aplug:
+            aplug.removed.connect(
+                    self.on_action)
+            aplug.annotated.connect(
+                    self.on_action)
+            aplug.chosen.connect(
+                    self.on_chosen)
 
-        self.open()
-        self.delistenWanted.emit()
+    def on_action(self):
+        self.update(v=self.current, force=True)
 
-    @register('o')
-    def open(self, item=None):
+    def on_chosen(self, a):
 
-        if not item: 
-            item=self.ui.list.currentItem()
-        if item:
-            aid=item.itemData.get('id', None)
-            pAnn=item.itemData.get('pAnn', None)
-            if aid:
-                self.openById(aid, item.itemData)
-            elif pAnn:
-                self.openByData(pAnn, item.itemData)
+        idx=a['aid']
+        d=enumerate(self.ui.list.flist)
+        for j, i in d:
+            if i.get('id', None)!=idx:
+                continue
+            self.ui.list.setCurrentRow(j)
+            return
+
+    def on_contentChanged(self, w):
+
+        d=w.data
+        idx=d['id']
+        text=w.textDown()
+        print(idx, text)
+        self.table.updateRow(
+                {'id':idx}, 
+                {'content':text})

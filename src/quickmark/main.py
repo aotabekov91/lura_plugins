@@ -20,7 +20,7 @@ class Quickmark(Plug):
         self.mode=None
         self.actor=None
         self.table = Table() 
-        super(Quickmark, self).__init__(
+        super().__init__(
                 *args,
                 app=app,
                 listen_leader=listen_leader,
@@ -30,20 +30,15 @@ class Quickmark(Plug):
     def setup(self):
 
         super().setup()
-        self.ear.suffix_functor=self.checkSuffix
+        self.ear.suffix_functor=self.set
 
-    def checkSuffix(self, key, digit, event):
+    def set(self, event):
 
         key=event.text()
         if key and self.actor: 
             self.actor(key)
             return True
         return False
-
-    def delisten(self):
-
-        self.actor=None
-        super().delisten()
 
     def listen(self):
 
@@ -120,6 +115,8 @@ class Quickmark(Plug):
     def checkLeader(self, event, pressed):
 
         if super().checkLeader(event, pressed):
+            if self.ear.listening:
+                return True
             m=self.app.moder.current
             if getattr(m, 'getView', False): 
                 self.mode=m

@@ -85,7 +85,7 @@ class Bookmarks(Plug):
         if mode==self:
             return
         if not mode:
-            mode, _ =self.app.moder.getState()
+            mode=self.app.moder.current
         gv=getattr(mode, 'getView', None)
         if not gv: 
             return
@@ -111,5 +111,4 @@ class Bookmarks(Plug):
         xid=w.data['id']
         tdata=w.data['down']
         self.table.updateRow(
-                {'id': xid},
-                {'text': tdata})
+                {'id': xid}, {'text': tdata})

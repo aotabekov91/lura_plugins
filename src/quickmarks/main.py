@@ -9,79 +9,90 @@ class Quickmarks(Plug):
             self, 
             app, 
             position='dock_right',
-            listen_leader='<c-M>',
+            prefix_keys={
+                'command': 'M',
+                'Quickmarks': '<c-.>',
+                },
             **kwargs):
 
+        self.current=None
+        self.table=Table()
         super().__init__(
                 app=app, 
                 position=position,
-                listen_leader=listen_leader,
+                prefix_keys=prefix_keys,
                 **kwargs) 
-
         self.setUI()
-        self.table=Table()
+        self.connect()
 
-    def listen(self):
+    def connect(self):
 
-        super().listen()
-        self.activated=True
-        self.update()
-        self.activateUI()
+        self.app.moder.modeChanged.connect(
+                self.update)
+        self.app.moder.plugsLoaded.connect(
+                self.on_plugsLoaded)
 
-    def delisten(self):
+    def on_plugsLoaded(self, plugs):
 
-        super().delisten()
-        self.activated=False
-        self.deactivateUI()
+        p=plugs.get('quickmark', None)
+        if p: 
+            p.marked.connect(self.update)
+            p.unmarked.connect(self.update)
 
     def setUI(self):
 
-        self.uiman.setUI()
-        main=InputList(
-                widget=UpDownEdit,
-                objectName='QuickmarkList')
-        main.input.hideLabel()
-        main.returnPressed.connect(
-                self.open)
-        self.ui.addWidget(
-                main, 'main', main=True)
+        w=InputList(widget=UpDownEdit)
+        w.returnPressed.connect(self.open)
+        self.uiman.setUI(w)
 
-    @register('.o')
+    @register('f', modes=['command'])
+    def setFocus(self):
+
+        p=self.app.moder.plugs
+        self.update(p.command.client)
+        super().setFocus()
+
+    @register('o')
     def open(self):
 
-        item=self.ui.main.list.currentItem()
-        if item: 
-            self.app.window.main.openBy(
-                    'bookmark', 
-                    item.itemData['id']
-                    )
+        i=self.ui.list.currentItem()
+        if i: 
+            d=i.itemData
+            v=d['view']
+            v.open(**d)
 
-    @register('.d')
+    @register('d')
     def delete(self):
+        raise
 
-        item=self.ui.main.list.currentItem()
-        nrow=self.ui.main.list.currentRow()-1
+        item=self.ui.list.currentItem()
+        nrow=self.ui.list.currentRow()-1
         bid=item.itemData['id']
         self.table.removeRow({'id':bid})
         self.update()
-        self.ui.main.list.setCurrentRow(nrow)
-        self.ui.show()
+        self.ui.list.setCurrentRow(nrow)
 
-    @register('.u')
-    def update(self):
+    def update(self, mode=None):
 
-        prev=self.app.moder.prev
-        if prev and prev.name=='normal':
-            view=self.app.display.currentView()
-            if view:
-                criteria={'hash': view.model().id()}
-                rows = self.table.getRow(criteria)
-                for a in rows:
-                    p, l, t = tuple(a['position'].split(':'))
-                    a['down']=a['mark']
-                    a['up']=f'# {p}'
-                rows=sorted(
-                        rows, 
-                        key=lambda x: x['position']
-                        )
-                self.ui.main.setList(rows)
+        if mode==self:
+            return
+        if not mode:
+            mode=self.app.moder.current
+        gv=getattr(mode, 'getView', None)
+        if not gv: 
+            return
+        v=gv()
+        if not v or v==self.current:
+            return
+        self.current=v
+        cond={
+              'kind': v.kind(),
+              'hash': v.modelId(),
+             }
+        rs = self.table.getRow(cond)
+        for r in rs:
+            r['view']=v
+            r['up']=r['mark']
+        rs=sorted(
+                rs, key=lambda x: x['position'])
+        self.ui.setList(rs)

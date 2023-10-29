@@ -202,7 +202,13 @@ class Visual(Mode):
             if s: 
                 self.getWord(s, kind='deselect', direction='backward')
 
-    def getWord(self, s, kind='select', direction='forward', word=None):
+    def getWord(
+            self, 
+            s, 
+            kind='select', 
+            direction='forward', 
+            word=None
+            ):
 
         item=s[-1]['item']
         elem=item.element()
