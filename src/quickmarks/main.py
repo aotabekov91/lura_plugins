@@ -9,7 +9,7 @@ class Quickmarks(Plug):
             self, 
             app, 
             position='dock_right',
-            prefix_keys={
+            leader_keys={
                 'command': 'M',
                 'Quickmarks': '<c-.>',
                 },
@@ -20,7 +20,7 @@ class Quickmarks(Plug):
         super().__init__(
                 app=app, 
                 position=position,
-                prefix_keys=prefix_keys,
+                leader_keys=leader_keys,
                 **kwargs) 
         self.setUI()
         self.connect()

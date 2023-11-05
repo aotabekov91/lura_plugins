@@ -9,16 +9,16 @@ class Outline(TreePlug):
             self, 
             app,
             position='dock_left',
-            prefix_keys={'command':'o'},
+            leader_keys={'command':'o'},
             **kwargs): 
 
         super().__init__(
                 app=app, 
                 position=position,
-                prefix_keys=prefix_keys,
+                leader_keys=leader_keys,
                 **kwargs,
                 )
-        self.outlines={}
+        self.cache={}
 
     def setup(self):
 
@@ -63,9 +63,10 @@ class Outline(TreePlug):
 
     def on_viewChanged(self, view):
 
-        outline=self.getData(view)
-        if outline:
-            self.ui.main.tree.setModel(outline)
+        able=getattr(view, 'canOutline', False)
+        if able:
+            d=self.getData(view)
+            self.ui.main.tree.setModel(d)
 
     def on_viewItemChanged(self, view, item):
 
@@ -107,9 +108,9 @@ class Outline(TreePlug):
     def getData(self, view):
 
         if view:
-            model=view.model()
-            dhash=model.id()
-            f=getattr(model, 'loadOutlines', None)
-            if f and not dhash in self.outlines:
-                self.outlines[dhash]=f()
-            return self.outlines.get(dhash, None)
+            m=view.model()
+            mid=m.id()
+            f=getattr(m, 'loadOutlines', None)
+            if f and not mid in self.cache:
+                self.cache[mid]=f()
+            return self.cache.get(mid, None)

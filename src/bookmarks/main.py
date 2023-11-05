@@ -9,7 +9,7 @@ class Bookmarks(Plug):
             self, 
             app, 
             position='dock_right',
-            prefix_keys={
+            leader_keys={
                 'command': 'b',
                 'Bookmarks': '<c-.>',
                 },
@@ -22,7 +22,7 @@ class Bookmarks(Plug):
         super().__init__(
                 app=app, 
                 position=position,
-                prefix_keys=prefix_keys,
+                leader_keys=leader_keys,
                 **kwargs) 
         self.setUI()
         self.connect()

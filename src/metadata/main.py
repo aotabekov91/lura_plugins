@@ -11,14 +11,14 @@ class Metadata(Plug):
             app, 
             *args,
             position='dock_right',
-            prefix_keys={'command': 'm'},
+            leader_keys={'command': 'm'},
             **kwargs):
 
         self.table=Table()
         super().__init__(
                 app=app, 
                 position=position, 
-                prefix_keys=prefix_keys,
+                leader_keys=leader_keys,
                 **kwargs,
                 )
 

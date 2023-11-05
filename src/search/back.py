@@ -20,19 +20,19 @@ class Search(Plug):
                 )
 
         self.index=-1
-        self.view=None
         self.text=None
         self.match=None
         self.matches=[]
         self.setConnect()
+        self.display=self.app.display
 
     def setConnect(self):
 
-        self.bar=self.app.window.bar
-        self.ear.returnPressed.connect(
-                self.startSearch)
-        self.ear.carriageReturnPressed.connect(
-                self.startSearch)
+        listener=self.ear
+        listener.returnPressed.connect(
+                lambda: self.find(jump=True))
+        listener.carriageReturnPressed.connect(
+                lambda: self.find(jump=True))
 
     @register('j')
     def next(self, digit=1): 
@@ -44,37 +44,33 @@ class Search(Plug):
 
     @register('<c-f>')
     def toggleFocus(self): 
-
-        if self.bar.edit.hasFocus():
-            self.app.window.setFocus()
-        else:
-            self.bar.edit.setFocus()
+        self.app.window.bar.edit.setFocus()
 
     def listen(self): 
 
         super().listen()
-        self.connectView()
         self.activateBar()
 
     def activateBar(self):
 
-        self.bar.bottom.show()
-        self.bar.mode.setText('/')
-        self.bar.edit.show()
-        self.bar.edit.setFocus()
+        bar=self.app.window.bar
+        bar.bottom.show()
+        bar.mode.setText('/')
+        bar.edit.show()
+        bar.edit.setFocus()
 
     def delisten(self):
 
-        self.disconnectView()
         super().delisten()
         self.clear()
         self.deactivateBar()
 
     def deactivateBar(self):
 
-        self.bar.bottom.hide()
-        self.bar.edit.clear()
-        self.bar.mode.clear()
+        bar=self.app.window.bar
+        bar.bottom.hide()
+        bar.edit.clear()
+        bar.mode.clear()
 
     def clear(self):
 
@@ -105,12 +101,18 @@ class Search(Plug):
                         found+=[(pnum, r)]
         return found
 
-    def startSearch(self):
+    def find(self, jump=True):
 
         self.clear()
-        self.toggleFocus()
-        t=self.bar.edit.text()
-        if t: self.view.search(t)
+        self.app.window.main.setFocus()
+        text=self.app.window.bar.edit.text()
+        if text:
+            self.text=text
+            view=self.display.currentView()
+            self.matches=self.search(
+                    text, view)
+            if self.matches and jump: 
+                self.jump()
 
     def jump(self, digit=1, match=None):
 
@@ -141,21 +143,8 @@ class Search(Plug):
                 return True
             c=self.app.moder.current
             if c and c.name=='normal':
-                v=c.getView()
-                if hasattr(v, 'canSearch'):
-                    self.view=v
-                    return True
+                return getattr(
+                        c.getView(),
+                        'canSearch', 
+                        False)
         return False
-
-    def on_searchFound(self, view, data):
-        raise
-
-    def connectView(self):
-
-        self.view.searchFound.connect(
-                self.on_searchFound)
-
-    def disconnectView(self):
-
-        self.view.searchFound.disconnect(
-                self.on_searchFound)
