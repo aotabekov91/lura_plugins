@@ -34,14 +34,6 @@ class Search(Plug):
         self.ear.carriageReturnPressed.connect(
                 self.startSearch)
 
-    @register('j')
-    def next(self, digit=1): 
-        self.jump(digit)
-
-    @register('k')
-    def prev(self, digit=1): 
-        self.jump(-digit)
-
     @register('<c-f>')
     def toggleFocus(self): 
 
@@ -56,25 +48,12 @@ class Search(Plug):
         self.connectView()
         self.activateBar()
 
-    def activateBar(self):
-
-        self.bar.bottom.show()
-        self.bar.mode.setText('/')
-        self.bar.edit.show()
-        self.bar.edit.setFocus()
-
     def delisten(self):
 
         self.disconnectView()
         super().delisten()
         self.clear()
         self.deactivateBar()
-
-    def deactivateBar(self):
-
-        self.bar.bottom.hide()
-        self.bar.edit.clear()
-        self.bar.mode.clear()
 
     def clear(self):
 
@@ -93,17 +72,17 @@ class Search(Plug):
         if self.matches:
             self.display.view.updateAll()
 
-    def search(self, text, view, found=[]):
+    # def search(self, text, view, found=[]):
 
-        if view:
-            elems=view.model().elements()
-            for p in elems.values():
-                rects=p.search(text)
-                pnum=p.index()
-                if rects:
-                    for r in rects:
-                        found+=[(pnum, r)]
-        return found
+    #     if view:
+    #         elems=view.model().elements()
+    #         for p in elems.values():
+    #             rects=p.search(text)
+    #             pnum=p.index()
+    #             if rects:
+    #                 for r in rects:
+    #                     found+=[(pnum, r)]
+    #     return found
 
     def startSearch(self):
 
@@ -112,7 +91,15 @@ class Search(Plug):
         t=self.bar.edit.text()
         if t: self.view.search(t)
 
-    def jump(self, digit=1, match=None):
+    @register('j')
+    def next(self, digit=1): 
+        self.jump(digit)
+
+    @register('k')
+    def prev(self, digit=1): 
+        self.jump(-digit)
+
+    def jump(self, digit=1):
 
         if self.matches:
             self.index+=digit
@@ -120,19 +107,11 @@ class Search(Plug):
                 self.index=0
             elif self.index<0:
                 self.index=len(self.matches)-1
-            self.jumpToIndex()
-
-    def jumpToIndex(self):
-
-        if self.matches:
-            p, r = self.matches[self.index]
-            i=self.display.view.item(p)
-            m=i.mapToItem(r)
-            i.setSearched([m])
-            srec=i.mapRectToScene(m)
-            self.display.view.goto(p)
-            self.display.view.centerOn(
-                    0, srec.y())
+            i, r = self.matches[self.index]
+            d, x, y = i.index(), r.x(), r.y()
+            s=i.mapRectToScene(r)
+            self.view.goto(d)
+            self.view.centerOn(s.x(), s.y())
 
     def checkLeader(self, event, pressed):
 
@@ -147,8 +126,13 @@ class Search(Plug):
                     return True
         return False
 
-    def on_searchFound(self, view, data):
-        raise
+    def on_searchFound(self, data):
+
+        initial=False
+        if not self.matches and data:
+            initial=True
+        self.matches+=data
+        if initial: self.jump()
 
     def connectView(self):
 
@@ -159,3 +143,16 @@ class Search(Plug):
 
         self.view.searchFound.disconnect(
                 self.on_searchFound)
+
+    def activateBar(self):
+
+        self.bar.bottom.show()
+        self.bar.mode.setText('/')
+        self.bar.edit.show()
+        self.bar.edit.setFocus()
+
+    def deactivateBar(self):
+
+        self.bar.bottom.hide()
+        self.bar.edit.clear()
+        self.bar.mode.clear()
