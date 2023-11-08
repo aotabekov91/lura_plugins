@@ -1,10 +1,9 @@
-from PyQt5 import QtCore
 from plug.qt import Plug
 from gizmo.utils import register
 
 class Search(Plug):
 
-    special=['return', 'carriage']
+    special=['return']
 
     def __init__(self, 
             *args,
@@ -19,11 +18,11 @@ class Search(Plug):
                 **kwargs,
                 )
 
-        self.index=-1
+        self.m_data=[]
         self.view=None
         self.text=None
         self.match=None
-        self.matches=[]
+        self.m_idx=-1
         self.setConnect()
 
     def setConnect(self):
@@ -31,16 +30,6 @@ class Search(Plug):
         self.bar=self.app.window.bar
         self.ear.returnPressed.connect(
                 self.startSearch)
-        self.ear.carriageReturnPressed.connect(
-                self.startSearch)
-
-    @register('<c-f>')
-    def toggleFocus(self): 
-
-        if self.bar.edit.hasFocus():
-            self.app.window.setFocus()
-        else:
-            self.bar.edit.setFocus()
 
     def listen(self): 
 
@@ -50,46 +39,40 @@ class Search(Plug):
 
     def delisten(self):
 
-        self.disconnectView()
         super().delisten()
-        self.clear()
+        self.disconnectView()
         self.deactivateBar()
+        self.clear()
 
     def clear(self):
 
-        self.erase()
-        self.index=-1
+        self.cleanUp()
+        self.m_data=[]
         self.text=None
         self.match=None
-        self.matches=[]
+        self.m_idx=-1
 
-    def erase(self):
+    def cleanUp(self):
 
-        for m in self.matches:
-            page, rect = m
-            item=self.display.view.item(page)
-            item.setSearched()
-        if self.matches:
-            self.display.view.updateAll()
-
-    # def search(self, text, view, found=[]):
-
-    #     if view:
-    #         elems=view.model().elements()
-    #         for p in elems.values():
-    #             rects=p.search(text)
-    #             pnum=p.index()
-    #             if rects:
-    #                 for r in rects:
-    #                     found+=[(pnum, r)]
-    #     return found
+        for (i, r) in self.m_data:
+            if self.view.check(
+                    'canHighlight', i):
+                i.highlight()
 
     def startSearch(self):
 
         self.clear()
-        self.toggleFocus()
         t=self.bar.edit.text()
         if t: self.view.search(t)
+        self.deactivateBar()
+
+    @register('<c-f>')
+    def toggleFocus(self): 
+
+        if self.bar.edit.hasFocus():
+            self.deactivateBar()
+        else:
+            self.activateBar()
 
     @register('j')
     def next(self, digit=1): 
@@ -101,48 +84,29 @@ class Search(Plug):
 
     def jump(self, digit=1):
 
-        if self.matches:
-            self.index+=digit
-            if self.index>=len(self.matches):
-                self.index=0
-            elif self.index<0:
-                self.index=len(self.matches)-1
-            i, r = self.matches[self.index]
-            d, x, y = i.index(), r.x(), r.y()
-            s=i.mapRectToScene(r)
+        if self.m_data:
+            self.m_idx+=digit
+            if self.m_idx>=len(self.m_data):
+                self.m_idx=0
+            elif self.m_idx<0:
+                self.m_idx=len(self.m_data)-1
+            i, r = self.m_data[self.m_idx]
+            if self.view.check(
+                    'canHighlight', i):
+                i.highlight(r)
+            d = i.index()
             self.view.goto(d)
+            s=i.mapRectToScene(r)
             self.view.centerOn(s.x(), s.y())
 
-    def checkLeader(self, event, pressed):
-
-        if super().checkLeader(event, pressed):
-            if self.ear.listening:
-                return True
-            c=self.app.moder.current
-            if c and c.name=='normal':
-                v=c.getView()
-                if hasattr(v, 'canSearch'):
-                    self.view=v
-                    return True
-        return False
-
-    def on_searchFound(self, data):
+    def update(self, data):
 
         initial=False
-        if not self.matches and data:
+        if not self.m_data and data:
             initial=True
-        self.matches+=data
+        self.m_data+=data
+        # self.view.select(self.m_data)
         if initial: self.jump()
-
-    def connectView(self):
-
-        self.view.searchFound.connect(
-                self.on_searchFound)
-
-    def disconnectView(self):
-
-        self.view.searchFound.disconnect(
-                self.on_searchFound)
 
     def activateBar(self):
 
@@ -156,3 +120,26 @@ class Search(Plug):
         self.bar.bottom.hide()
         self.bar.edit.clear()
         self.bar.mode.clear()
+
+    def connectView(self):
+
+        self.view.searchFound.connect(
+                self.update)
+
+    def disconnectView(self):
+
+        self.view.searchFound.disconnect(
+                self.update)
+
+    def checkLeader(self, event, pressed):
+
+        if super().checkLeader(event, pressed):
+            if self.ear.listening:
+                return True
+            c=self.app.moder.current
+            if c and c.name=='normal':
+                v=c.getView()
+                if hasattr(v, 'canSearch'):
+                    self.view=v
+                    return True
+        return False

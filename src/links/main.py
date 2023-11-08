@@ -1,134 +1,95 @@
-import subprocess
-
-from PyQt5 import QtCore, QtGui
-
 from plug.qt import Plug
 from gizmo.utils import register
+from PyQt5 import QtCore, QtGui
 
 class Links(Plug):
 
-    hintSelected=QtCore.pyqtSignal()
+    linkSelected=QtCore.pyqtSignal()
 
-    def __init__(self,
-                 app,
-                 *args,
-                 listen_leader='<c-l>',
-                 **kwargs):
+    def __init__(
+            self,
+            *args, 
+            listen_leader='<c-l>',
+            leader_keys={
+                'command': 'l',
+                },
+            **kwargs
+            ):
 
         super().__init__(
                 *args,
-                app=app,
+                leader_keys=leader_keys,
                 listen_leader=listen_leader,
                 **kwargs
                 )
-
         self.key=''
+        self.view=None
         self.links=None
+        self.hinting=False
         self.selection=None
-
-    def setup(self):
-
-        super().setup()
-        self.display=self.app.display
-        self.setConnect()
-
-    def setConnect(self):
-
-        self.display.itemPainted.connect(
-                self.paint)
         self.listenerAddKeys=self.ear.addKeys
         self.ear.addKeys=self.ownAddKeys
 
     def ownAddKeys(self, event):
 
-        text=event.text()
-        if text:
-            self.key+=text
-            self.updateHint(self.key)
-            event.accept()
-            return True
-        else:
-            return self.listenerAddKeys(event)
-
-    def updateHint(self, key):
-
-        links={}
-        for i, h in self.links.items():
-            if key==i[:len(key)]: 
-                links[i]=h
-        self.links=links
-        self.display.view.updateAll()
-        if len(self.links)<=1:
-            if len(self.links)==1: 
-                self.open(links[key])
-            self.delistenWanted.emit()
-
-    def open(self, link): 
-
-        if 'url' in link: 
-            cmd=['qutebrowser', link['url']]
-            subprocess.Popen(cmd)
-        elif 'page' in link:
-            y=link['top']
-            page=link['page']
-            self.display.view.goto(
-                    page, changeTop=y)
-
-    def delisten(self): 
-
-        super().delisten()
-        self.key=''
-        self.links=None
-        self.selection=None
+        if self.hinting:
+            t=event.text()
+            if t:
+                self.key+=t
+                self.view.updateHint(self.key)
+                event.accept()
+                return True
+        return self.listenerAddKeys(event)
 
     def listen(self):
 
         super().listen()
-        self.display.view.updateAll()
+        self.view.hintSelected.connect(
+                self.selectHinted)
+        self.view.hintFinished.connect(
+                self.selectHinted)
+        self.hint()
 
-    def generate(self, item):
+    def delisten(self): 
 
-        def number_to_string(n):
-            chars = []
-            for _ in range(len_of_codes):
-                chars.append(alphabet[n % len(alphabet)])
-                n = n // len(alphabet)
-            return "".join(reversed(chars))
+        super().delisten()
+        self.view.hintSelected.disconnect(
+                self.selectHinted)
+        self.view.hintFinished.disconnect(
+                self.selectHinted)
+        self.cleanUp()
 
-        alphabet = 'abcdefghijkmnopqrstuvwxyz'
-        len_of_codes = 2
-        char_to_pos = {}
+    def hint(self, data=None):
 
-        for i in range(len(alphabet)): 
-            char_to_pos[alphabet[i]] = i
-        links=item.element().links()
-        return {number_to_string(i):h  for i, h in enumerate(links)}
+        self.hinting=True
+        citem=self.view.currentItem()
+        links=citem.getLinks()
+        self.view.hint(links)
 
-    def paint(self, painter, options, widget, item, view):
+    def selectHinted(self, l=None):
 
-        if self.ear.listening:
-            if self.links is None: 
-                self.links=self.generate(item)
-            painter.save()
-            for i, link in self.links.items():
-                rect=item.mapToItem(link['boundary'], isUnified=True)
-                page_rect=item.mapToPage(rect, unify=False)
-                link['down']=i
-                link['up']=item.element().find(page_rect)
-                pen=QtGui.QPen(QtGui.QColor(88, 139, 174, 220), 0.0)
-                painter.setPen(pen)
-                painter.drawRect(rect)
-                pen=QtGui.QPen(QtCore.Qt.red, 0.0)
-                painter.setPen(pen)
-                painter.drawText(rect.topLeft(), i)
-            painter.restore()
+        self.hinting=False
+        if l: self.view.openLink(l)
+        self.deactivate()
+
+    def cleanUp(self):
+
+        self.key=''
+        self.view=None
+        self.links=None
+        self.hinting=False
+        self.selection=None
 
     def checkLeader(self, event, pressed):
 
         if super().checkLeader(event, pressed):
             if self.ear.listening:
                 return True
-            current=self.app.moder.current
-            if current and current.name=='normal':
-                return True
+            c=self.app.moder.current
+            if c and c.name=='normal':
+                v=c.getView()
+                cond=['hasLinks', 'canHint']
+                if v and v.check(cond):
+                    self.view=v
+                    return True
         return False
