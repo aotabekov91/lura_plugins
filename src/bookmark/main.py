@@ -4,34 +4,26 @@ from tables import Bookmark as Table
 
 class Bookmark(Plug):
 
+    special=['return']
     bookmarked=QtCore.pyqtSignal()
-    special=['return', 'carriage']
 
     def __init__(
             self, 
-            app, 
             special=special,
             report_keys=False,
             listen_leader='<c-b>',
             **kwargs
             ):
 
-        self.mode=None
-        self.table=Table()
-        self.bar=app.window.bar
         super().__init__(
-                app=app, 
                 special=special,
                 report_keys=report_keys,
                 listen_leader=listen_leader,
                 **kwargs) 
-        self.setConnect()
-
-    def setConnect(self):
-
+        self.view=None
+        self.table=Table()
+        self.bar=self.app.window.bar
         self.ear.returnPressed.connect(
-                self.bookmark)
-        self.ear.carriageReturnPressed.connect(
                 self.bookmark)
 
     def delisten(self):
@@ -43,52 +35,32 @@ class Bookmark(Plug):
     def listen(self):
 
         super().listen()
-        r=self.getBookmark()
-        if r: 
-            t=r[0]['text']
-            self.bar.edit.setText(t)
+        self.getBookmark(edit_bar=True)
         self.bar.bottom.show()
         self.bar.edit.setFocus()
 
-    def getBookmark(self):
+    def getBookmark(self, edit_bar=False):
 
-        v=self.mode.getView()
-        if v:
-            p=v.itemId()
-            i=v.modelId()
-            l = v.getLocation()
-            d={
-               'hash' : i,
-               'page' : p,
-               'position' : l,
-               'kind': v.kind(),
-              }
-            return self.table.getRow(d)
+        loc=self.view.getLocator()
+        r=self.table.getRow(loc)
+        if r and edit_bar: 
+            t=r[0]['text']
+            self.bar.edit.setText(t)
+        return r
 
     def bookmark(self):
 
-        v=self.mode.getView()
-        if v:
-            t=self.bar.edit.text()
-            rows=self.getBookmark()
-            if rows:
-                c={'id': rows[0]['id']}
-                self.table.updateRow(
-                        c, {'text':t})
-            else:
-                p = v.itemId()
-                m = v.modelId()
-                l = v.getLocation()
-                row={
-                     'page': p, 
-                     'text': t, 
-                     'hash': m, 
-                     'title': t, 
-                     'position': l,
-                     'kind': v.kind(), 
-                     }
-                self.table.writeRow(row)
-            self.bookmarked.emit()
+        t=self.bar.edit.text()
+        rows=self.getBookmark()
+        if rows:
+            c={'id': rows[0]['id']}
+            self.table.updateRow(
+                    c, {'text':t})
+        else:
+            loc=self.view.getLocator()
+            loc.update({'text': t, 'title': t})
+            self.table.writeRow(loc)
+        self.bookmarked.emit()
         self.delistenWanted.emit()
 
     def checkLeader(self, e, p):
@@ -96,8 +68,10 @@ class Bookmark(Plug):
         if super().checkLeader(e, p):
             if self.ear.listening:
                 return True
-            m=self.app.moder.current
-            if m and getattr(m, 'getView'):
-                self.mode=m
-                return True
+            c=self.app.moder.current
+            if c and getattr(c, 'getView'):
+                v=c.getView()
+                if v.check('canPosition'):
+                    self.view=v
+                    return True
         return False

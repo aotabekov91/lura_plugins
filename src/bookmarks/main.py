@@ -7,20 +7,18 @@ class Bookmarks(Plug):
 
     def __init__(
             self, 
-            app, 
             position='dock_right',
             leader_keys={
                 'command': 'b',
                 'Bookmarks': '<c-.>',
                 },
-            **kwargs):
+            **kwargs
+            ):
 
-        self.current=None
+        self.view=None
         self.color='#CC885E'
         self.table=Table()
-        self.display=app.display
         super().__init__(
-                app=app, 
                 position=position,
                 leader_keys=leader_keys,
                 **kwargs) 
@@ -32,46 +30,49 @@ class Bookmarks(Plug):
         self.app.moder.modeChanged.connect(
                 self.update)
         self.app.moder.plugsLoaded.connect(
-                self.on_plugsLoaded)
-
-    def on_plugsLoaded(self, plugs):
-
-        b=plugs.get('bookmark', None)
-        if b: 
-            b.bookmarked.connect(self.update)
+                self.setBookmark)
 
     def setUI(self):
 
         w=InputList(widget=UpDownEdit)
         w.returnPressed.connect(self.open)
         w.list.widgetDataChanged.connect(
-                self.on_contentChanged)
+                self.updateContent)
         self.uiman.setUI(w)
+
+    def setBookmark(self, p):
+
+        bplug=p.get('bookmark', None)
+        if bplug:
+            s=bplug.bookmarked
+            s.connect(self.update)
 
     @register('o')
     def open(self):
 
-        i=self.ui.list.currentItem()
-        if i: 
+        l=self.ui.list
+        i=l.currentItem()
+        if i:
             d=i.itemData
             v=d['view']
-            v.open(**d)
+            v.setLocator(d)
 
     @register('d')
     def delete(self):
 
-        crow=self.ui.list.currentRow()-1
+        l=self.ui.list
+        i=l.currentItem()
+        crow=l.currentRow()-1
         nrow=max(0, crow) 
-        i=self.ui.list.currentItem()
-        bid=i.itemData['id']
-        self.table.removeRow({'id':bid})
-        self.update()
-        self.ui.list.setCurrentRow(nrow)
+        idx=i.itemData['id']
+        self.table.removeRow({'id':idx})
+        self.setViewData(self.view)
+        l.setCurrentRow(nrow)
 
-    def setColorStyle(self, ann):
+    def setColorStyle(self, data):
 
         style=f'background-color: {self.color}'
-        ann['up_style']=style
+        data['up_style']=style
 
     @register('f', modes=['command'])
     def setFocus(self):
@@ -80,35 +81,38 @@ class Bookmarks(Plug):
         self.update(p.command.client)
         super().setFocus()
 
-    def update(self, mode=None):
+    def update(self, m=None):
 
-        if mode==self:
+        if not m or not hasattr(m, 'getView'):
             return
-        if not mode:
-            mode=self.app.moder.current
-        gv=getattr(mode, 'getView', None)
-        if not gv: 
+        v=m.getView()
+        if not v.check('canPosition'):
             return
-        v=gv()
-        if not v or v==self.current:
-            return
-        k=v.kind()
-        i=v.modelId()
-        self.current=v
-        c={'hash': i, 'kind': k}
-        rs = self.table.getRow(c)
-        for r in rs:
-            r['view']=v
-            r['down']=r['text']
-            r['up']=f'# {r.get("id")}'
-            self.setColorStyle(r)
-        sfunc=lambda x: (x['page'], x['position'])
-        rs=sorted(rs, key=sfunc)
-        self.ui.setList(rs)
+        self.view=v
+        self.setViewData(v)
 
-    def on_contentChanged(self, w):
+    def setViewData(self, v):
+
+        l=v.getLocator()
+        if l:
+            c={
+              'hash': l['hash'], 
+              'kind': l['kind'],
+              }
+            rs = self.table.getRow(c)
+            for r in rs:
+                r['view']=v
+                r['down']=r['text']
+                r['up']=f'# {r.get("id")}'
+                self.setColorStyle(r)
+            f=lambda x: (x['page'], x['position'])
+            rs=sorted(rs, key=f)
+            self.ui.setList(rs)
+
+    def updateContent(self, w):
         
-        xid=w.data['id']
-        tdata=w.data['down']
+        d=w.data['down']
+        idx=w.data['id']
         self.table.updateRow(
-                {'id': xid}, {'text': tdata})
+                {'id': idx}, 
+                {'text': d})
