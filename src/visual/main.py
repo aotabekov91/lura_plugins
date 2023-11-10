@@ -30,40 +30,32 @@ class Visual(Mode):
                 return True
         return self.listenerAddKeys(event)
 
-    def delisten(self): 
+    def finishHinting(self):
 
-        super().delisten()
+        self.hinting=False
         self.view.hintSelected.disconnect(
                 self.selectHinted)
         self.view.hintFinished.disconnect(
-                self.selectHinted)
+                self.finishHinting)
 
-    def listen(self):
+    def selectHinted(self, data):
 
-        super().listen()
-        self.view.hintSelected.connect(
-                self.selectHinted)
-        self.view.hintFinished.connect(
-                self.selectHinted)
-        if not self.view.selection():
-            self.hint()
-
-    def selectHinted(self, data=None):
-
-        self.hinting=False
-        if data:
-            i=data['item']
-            if not self.jumping:
-                if self.view.check('canSelect'):
-                    self.view.select(i, data)
-            else:
-                self._jump(data)
+        i=data['item']
+        if not self.jumping:
+            if self.view.check('canSelect'):
+                self.view.select(i, data)
+        else:
+            self._jump(data)
 
     @register('f')
     def hint(self):
 
         self.key=''
         self.hinting=True
+        self.view.hintSelected.connect(
+                self.selectHinted)
+        self.view.hintFinished.connect(
+                self.finishHinting)
         self.view.hint()
 
     @register('o')
