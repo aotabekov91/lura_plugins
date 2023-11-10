@@ -8,7 +8,6 @@ class Annotations(Plug):
 
     def __init__(
             self, 
-            app, 
             position='dock_right',
             leader_keys={
                 'command': 'a',
@@ -17,23 +16,58 @@ class Annotations(Plug):
             **kwargs
             ):
 
-        self.current=None
-        self.table=Table()
+        self.func_colors={}
         super().__init__(
-                app=app, 
                 position=position,
                 leader_keys=leader_keys,
                 **kwargs)
+
+        self.cache={}
+        self.view=None
+        self.setColors()
+        self.table=Table()
+        self.setConnect()
         self.setUI()
-        self.connect()
 
-    def connect(self):
+    def setConnect(self):
 
-        self.display=self.app.display
+        self.app.buffer.created.connect(
+                self.connectModel)
         self.app.moder.modeChanged.connect(
                 self.update)
         self.app.moder.plugsLoaded.connect(
-                self.on_plugsLoaded)
+                self.setAnnotatePlug)
+
+    def connectModel(self, m):
+
+        c1=hasattr(m, 'loaded')
+        c2=hasattr(m, 'canAnnotate')
+        if c1 and c2:
+            m.loaded.connect(
+                    self.updateModel)
+
+    def updateModel(self, m):
+
+        d={'hash': m.id(), 'kind': m.kind}
+        rs=self.table.getRow(d)
+        for a in rs: 
+            self.updateAnnotation(a)
+            e=m.element(a['page'])
+            e.setAnnotation(a)
+
+    def updateAnnotation(self, a):
+
+        f=a.get('function', 'Default')
+        c=self.func_colors[f]
+        a['color']=c
+        a['akind']='highlight'
+
+    def setColors(self):
+
+        c=self.colors
+        for k, v in c.items():
+            n, c = v['name'], v['color']
+            self.func_colors[n]=QtGui.QColor(c)
 
     def setUI(self):
 
@@ -45,44 +79,41 @@ class Annotations(Plug):
 
     def setColorStyle(self, ann):
 
-        color=ann['color'].name()
-        style=f'background-color: {color}'
-        ann['up_style']=style
+        c=ann['color'].name()
+        s=f'background-color: {c}'
+        ann['up_style']=s
 
-    def getCompatibleView(self, mode):
+    def update(self, m=None):
 
-        gv=getattr(mode, 'getView', None)
-        if not gv:
-            return
-        v=gv()
-        if not v:
-            return
-        m=v.model()
-        if hasattr(m, 'annotations'):
-            return v
+        if m and hasattr(m, 'getView'):
+            v=m.getView()
+            if v and v.check('canAnnotate'):
+                self.setList(v)
 
-    def update(self, m=None, v=None, force=False):
+    def setList(self, v):
 
-        if not v:
-            v=self.getCompatibleView(m)
-        if not v:
-            return
-        if self.current==v and not force:
-            return
-        self.current=v
-        m=v.model()
-        anns=m.annotations()
-        for a in anns:
-            a['view']=v
-            a['down']=a['content']
-            if a['type']=='native':
-                a['up']='Native'
-                a['down']=a['text']
-                a['up_color']=a['color'] 
-            else:
+        self.view=v
+        if not v in self.cache:
+            self.setViewAnnotations(v)
+        l=self.cache.get(v, [])
+        self.ui.setList(l)
+
+    def setViewAnnotations(self, v):
+
+        l=v.getLocator()
+        if l:
+            d={
+              'kind':l['kind'], 
+              'hash':l['hash'],
+              }
+            dlist=self.table.getRow(d)
+            for a in dlist:
+                a['view']=v
+                a['down']=a['content']
                 a['up']=f'# {a.get("id")}'
+                self.updateAnnotation(a)
                 self.setColorStyle(a)
-        self.ui.setList(anns)
+            self.cache[v]=dlist
 
     @register('o')
     def open(self):
@@ -91,7 +122,7 @@ class Annotations(Plug):
         if i:
             d=i.itemData
             v=d['view']
-            v.open(**d)
+            v.setLocator(d)
 
     @register('d')
     def delete(self):
@@ -113,20 +144,18 @@ class Annotations(Plug):
             self.update(v=v)
             self.ui.list.setCurrentRow(nr)
             
-    def on_plugsLoaded(self, plugs):
+    def setAnnotatePlug(self, plugs):
 
-        aplug=plugs.get(
-                'annotate', None)
-        if aplug:
-            aplug.removed.connect(
-                    self.on_action)
-            aplug.annotated.connect(
-                    self.on_action)
-            aplug.chosen.connect(
-                    self.on_chosen)
+        p=plugs.get('annotate', None)
+        if p:
+            p.chosen.connect(self.on_chosen)
+            p.removed.connect(self.on_action)
+            p.annotated.connect(self.on_action)
 
     def on_action(self):
-        self.update(v=self.current, force=True)
+
+        self.cache.pop(self.view)
+        self.setList(self.view)
 
     def on_chosen(self, a):
 
@@ -140,10 +169,9 @@ class Annotations(Plug):
 
     def on_contentChanged(self, w):
 
+        #todo
         d=w.data
         idx=d['id']
         text=w.textDown()
-        print(idx, text)
         self.table.updateRow(
-                {'id':idx}, 
-                {'content':text})
+                {'id':idx}, {'content':text})
