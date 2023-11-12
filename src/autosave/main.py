@@ -5,55 +5,52 @@ class Autosave(Plug):
 
     def setup(self):
 
+        self.view=None
         super().setup()
         self.table=Table()
-        self.setConnect()
+        self.app.buffer.viewCreated.connect(
+                self.setViewData)
+        self.app.moder.modeChanged.connect(
+                self.updateView)
 
-    def setConnect(self):
+    def updateView(self, mode):
 
-        self.app.display.viewCreated.connect(
-                self.on_viewCreated)
-        self.app.display.positionChanged.connect(
-                self.save)
+        v=mode.getView()
+        if v and v.check('canMove'):
+            self.setView(v)
 
-    def on_viewCreated(self, view):
+    def setView(self, v):
 
-        d=self.get(view)
+        self.reset()
+        self.view=v
+        self.updateViewData(v)
+        self.reset('connect')
+
+    def updateViewData(self, v):
+
+        ul=v.getUniqLocator()
+        if not self.table.getRow(ul):
+            self.table.writeRow(ul)
+
+    def reset(self, kind='disconnect'):
+
+        if not self.view: return
+        f=getattr(self.view.positionChanged, kind)
+        f(self.saveViewData)
+
+    def setViewData(self, v):
+
+        l=v.getUniqLocator()
+        d=self.table.getRow(l)
         if d:
-            idx, x, y = d
-            # view.goto(idx, x, y)
+            print(d)
+            v.setLocator(
+                    d[0], kind='position')
+            self.setView(v)
 
-    def get(self, view):
+    def saveViewData(self):
 
-        data=self.table.getRow(
-                {'hash':view.model().id()})
-        if data:
-            r=data[0]
-            page=int(r['page'])
-            pos=r['position'].split(':')
-            left, top =float(pos[0]), float(pos[1])
-            return page, left, top
-
-    def save(
-            self, 
-            view, 
-            item, 
-            left, 
-            top
-            ):
-
-        top, left=str(top), str(left)
-        idx=view.currentItem().index()
-        data={
-             'page': idx,
-             'position': f'{left}:{top}',
-             }
-        vdata=self.get(view)
-        if vdata:
-            idx=view.model().id()
-            self.table.updateRow(
-                    {'hash':idx}, data)
-        else:
-            data['hash']=view.model().id()
-            self.table.writeRow(
-                    data, uniqueField='hash')
+        ul=self.view.getUniqLocator()
+        pl=self.view.getLocator(
+                kind='position')
+        self.table.updateRow(ul, pl)
