@@ -7,7 +7,6 @@ class Quickmarks(Plug):
 
     def __init__(
             self, 
-            app, 
             position='dock_right',
             leader_keys={
                 'command': 'M',
@@ -15,29 +14,18 @@ class Quickmarks(Plug):
                 },
             **kwargs):
 
-        self.current=None
+        self.cache={}
+        self.view=None
         self.table=Table()
         super().__init__(
-                app=app, 
                 position=position,
                 leader_keys=leader_keys,
                 **kwargs) 
-        self.setUI()
-        self.connect()
-
-    def connect(self):
-
         self.app.moder.modeChanged.connect(
-                self.update)
+                self.updateViewMarks)
         self.app.moder.plugsLoaded.connect(
-                self.on_plugsLoaded)
-
-    def on_plugsLoaded(self, plugs):
-
-        p=plugs.get('quickmark', None)
-        if p: 
-            p.marked.connect(self.update)
-            p.unmarked.connect(self.update)
+                self.setQuickmarkPlug)
+        self.setUI()
 
     def setUI(self):
 
@@ -45,11 +33,25 @@ class Quickmarks(Plug):
         w.returnPressed.connect(self.open)
         self.uiman.setUI(w)
 
+    def setQuickmarkPlug(self, plugs):
+
+        p=plugs.get('quickmark', None)
+        if p: 
+            p.marked.connect(self.resetViewMarks)
+            p.unmarked.connect(self.resetViewMarks)
+
+    def resetViewMarks(self, v=None):
+
+        v=v or self.view
+        self.cache.pop(v, None)
+        self.setViewMarks(v)
+
     @register('f', modes=['command'])
     def setFocus(self):
 
         p=self.app.moder.plugs
-        self.update(p.command.client)
+        self.updateViewMarks(
+                p.command.client)
         super().setFocus()
 
     @register('o')
@@ -57,42 +59,39 @@ class Quickmarks(Plug):
 
         i=self.ui.list.currentItem()
         if i: 
-            d=i.itemData
-            v=d['view']
-            v.open(**d)
+            v=i.itemData['view']
+            v.openLocator(
+                    i.itemData, 
+                    kind='position')
 
     @register('d')
     def delete(self):
-        raise
 
-        item=self.ui.list.currentItem()
-        nrow=self.ui.list.currentRow()-1
-        bid=item.itemData['id']
-        self.table.removeRow({'id':bid})
-        self.update()
-        self.ui.list.setCurrentRow(nrow)
+        i=self.ui.list.currentItem()
+        cr=max(self.ui.list.currentRow()-1, 0)
+        idx=i.itemData['id']
+        self.table.removeRow({'id':idx})
+        self.resetViewMarks()
+        self.ui.list.setCurrentRow(cr)
 
-    def update(self, mode=None):
+    def setViewMarks(self, v):
 
-        if mode==self:
-            return
-        if not mode:
-            mode=self.app.moder.current
-        gv=getattr(mode, 'getView', None)
-        if not gv: 
-            return
-        v=gv()
-        if not v or v==self.current:
-            return
-        self.current=v
-        cond={
-              'kind': v.kind(),
-              'hash': v.modelId(),
-             }
-        rs = self.table.getRow(cond)
-        for r in rs:
-            r['view']=v
-            r['up']=r['mark']
-        rs=sorted(
-                rs, key=lambda x: x['position'])
-        self.ui.setList(rs)
+        if v in self.cache:
+            data=self.cache[v]
+        else:
+            data=[]
+            l=v.getUniqLocator()
+            if l:
+                data = self.table.getRow(l)
+                for r in data:
+                    r['view']=v
+                    r['up']=r['mark']
+                self.cache[v]=data
+        self.ui.setList(data)
+
+    def updateViewMarks(self, mode):
+
+        v=mode.getView()
+        if v and v.check('canPosition'):
+            self.setViewMarks(v)
+            self.view=v
