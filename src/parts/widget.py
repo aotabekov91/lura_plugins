@@ -9,7 +9,6 @@ class PartTree(TreeWidget):
     def __init__(self, *args, **kwargs):
 
         super(PartTree, self).__init__(*args, **kwargs)
-
         self.setModel(QStandardItemModel())
 
     def installData(self, data):
