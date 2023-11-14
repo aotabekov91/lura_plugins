@@ -4,75 +4,78 @@ from gizmo.widget import UpDownEdit, InputList
 
 class Metadata(Plug):
 
-    excludeFields=['id', 'hash', 'url', 'kind']
+    exclude=['id', 'hash', 'url', 'kind']
 
     def __init__(
             self, 
-            app, 
-            *args,
             position='dock_right',
             leader_keys={'command': 'm'},
             **kwargs):
 
+        self.cache={}
         self.table=Table()
         super().__init__(
-                app=app, 
                 position=position, 
                 leader_keys=leader_keys,
                 **kwargs,
                 )
-
-    def setup(self):
-
-        super().setup()
+        self.app.moder.modeChanged.connect(
+                self.updateViewMetadata)
         self.setUI()
-        self.setConnect()
-
-    def setConnect(self):
-
-        self.app.display.viewChanged.connect(
-                self.update)
 
     def setUI(self):
 
-        self.uiman.setUI()
-        w=InputList(
-                widget=UpDownEdit)
+        w=InputList(widget=UpDownEdit)
         w.input.hideLabel()
         w.list.widgetDataChanged.connect(
-                self.on_contentChanged)
-        self.ui.addWidget(
-                w, 'main', main=True)
+                self.updateContent)
+        self.uiman.setUI(w)
 
-    def on_contentChanged(self, widget):
+    def updateViewMetadata(self, mode):
 
-        value=widget.textDown()
-        dhash=widget.data['hash']
-        field=widget.data['field']
-        idx={'hash':dhash}
-        val={field:value}
-        self.table.updateRow(idx, val)
+        v=mode.getView()
+        if v:
+            self.view=v
+            self.checkRowExists(v)
+            self.setViewMetadata(v)
+            self.setFilter()
 
-    def update(self, view, prev):
+    def checkRowExists(self, v):
 
-        view=self.app.display.view
-        if view:
-            dhash=view.model().id()
-            meta=self.table.getRow({'hash':dhash})
-            if meta:
-                dlist=[]
-                for f, v in meta[0].items():
-                    if not f in self.excludeFields: 
-                        dlist+=[{
-                            'up':f.title(), 
-                            'down':v, 
-                            'hash':dhash, 
-                            'field':f
-                            }]
-                self.ui.main.setList(dlist)
-                text=self.ui.main.input.text()
-                if text: 
-                    self.ui.main.list.filter(text)
-            else:
-                self.table.writeRow({'hash':dhash})
-                self.update(view, prev)
+        l=v.getUniqLocator()
+        rs=self.table.getRow(l)
+        if not rs:
+            self.table.writeRow(l)
+            return self.table.getRow(l)
+
+    def setFilter(self):
+
+        t=self.ui.input.text()
+        if t: self.ui.list.filter(t)
+
+    def setViewMetadata(self, v):
+
+        if v in self.cache:
+            data=self.cache[v]
+        else:
+            data, r = [], {}
+            l=v.getUniqLocator()
+            rs=self.table.getRow(l)
+            if rs: r=rs[0]
+            for f, j in r.items():
+                if f in self.exclude: 
+                    continue
+                data+=[{
+                    'field':f,
+                    'view': v,
+                    'down': j,
+                    'up':f.title()
+                    }]
+            self.cache[v]=data
+        self.ui.setList(data)
+
+    def updateContent(self, w):
+
+        l=self.view.getUniqLocator()
+        d={w.data['field']:w.textDown()}
+        self.table.updateRow(l, d)

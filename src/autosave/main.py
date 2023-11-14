@@ -43,7 +43,6 @@ class Autosave(Plug):
         l=v.getUniqLocator()
         d=self.table.getRow(l)
         if d:
-            print(d)
             v.setLocator(
                     d[0], kind='position')
             self.setView(v)

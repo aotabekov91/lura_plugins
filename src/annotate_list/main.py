@@ -11,34 +11,24 @@ class AnnotateList(Plug):
         self.func_colors={}
         super().setup()
         self.app.moder.plugsLoaded.connect(
-                self.on_plugsLoaded)
+                self.setAnnotatePlug)
 
-    def on_plugsLoaded(self, plugs):
+    def setAnnotatePlug(self, plugs):
 
-        self.annotate=plugs.get('annotate', None)
-        if self.annotate:
+        p=plugs.get('annotate', None)
+        if p:
+            p.startedListening.connect(
+                    self.uiman.activate)
+            p.endedListening.connect(
+                    self.uiman.deactivate)
+            self.colors=p.colors
             self.setUI()
-            self.annotate.startedListening.connect(
-                    self.on_startedListening)
-            self.annotate.endedListening.connect(
-                    self.on_endedListening)
-
-    def on_startedListening(self):
-        self.uiman.activate()
-
-    def on_endedListening(self):
-        self.uiman.deactivate()
 
     def setUI(self):
 
         self.uiman.position='overlay'
         self.uiman.setUI(ListWidget())
-        self.setColors()
-
-    def setColors(self):
-
-        clrs=self.annotate.colors
-        for k, v in clrs.items():
+        for k, v in self.colors.items():
             t=f'{v["name"]} [{k}]'
             i=QtGui.QStandardItem(t)
             self.ui.model.appendRow(i)

@@ -24,18 +24,14 @@ class Annotations(Plug):
                 position=position,
                 leader_keys=leader_keys,
                 **kwargs)
-        self.setConnect()
-        self.setColors()
-        self.setUI()
-
-    def setConnect(self):
-
-        self.app.buffer.created.connect(
+        self.app.buffer.modelCreated.connect(
                 self.connectModel)
         self.app.moder.modeChanged.connect(
-                self.updateList)
+                self.updateViewAnnotations)
         self.app.moder.plugsLoaded.connect(
                 self.setAnnotatePlug)
+        self.setColors()
+        self.setUI()
 
     def setColors(self):
 
@@ -49,7 +45,7 @@ class Annotations(Plug):
         w=InputList(widget=UpDownEdit)
         w.returnPressed.connect(self.open)
         w.list.widgetDataChanged.connect(
-                self.on_contentChanged)
+                self.updateContent)
         self.uiman.setUI(w)
 
     def connectModel(self, m):
@@ -57,72 +53,69 @@ class Annotations(Plug):
         c1=hasattr(m, 'loaded')
         c2=hasattr(m, 'canAnnotate')
         if c1 and c2:
-            m.loaded.connect(self.updateModel)
+            m.loaded.connect(self.annotateModel)
 
-    def updateModel(self, model):
+    def annotateModel(self, model):
 
-        l=model.getUniqLocator(kind='annotation')
+        l=model.getUniqLocator(
+                kind='annotation')
         data=self.table.getRow(l)
         for d in data: 
-            self.updateAnnData(d, model)
+            self.updateAnnData(
+                    d, model=model)
             model.setLocator(
-                    data=d, 
-                    kind='annotation')
+                    data=d, kind='annotation')
 
-    def updateList(self, mode=None):
+    def updateViewAnnotations(self, mode):
 
-        if mode and hasattr(mode, 'getView'):
-            v=mode.getView()
-            if v and v.check('canAnnotate'):
-                self.setList(v)
+        v=mode.getView()
+        if v and v.check('canAnnotate'):
+            self.setViewAnnotations(v)
+            self.view=v
 
-    def setList(self, v):
+    def setViewAnnotations(self, v):
 
-        if not v in self.cache:
-            self.cacheAnnotations(v)
-        l=self.cache.get(v, [])
-        self.ui.setList(l)
-        self.view=v
+        if v in self.cache:
+            data=self.cache[v]
+        else:
+            data=[]
+            l=v.getUniqLocator()
+            if l:
+                data=self.table.getRow(l)
+                self.cache[v]=data
+                for d in data:
+                    self.updateAnnData(
+                            d, view=v)
+        self.ui.setList(data)
 
-    def cacheAnnotations(self, v):
+    def updateAnnData(self, d, view=None, model=None):
 
-        m=v.model()
-        l=m.getUniqLocator(kind='annotation')
-        if l:
-            data=self.table.getRow(l)
-            self.cache[v]=data
-            for d in data:
-                self.updateAnnData(d, m)
-                self.updateAnnViewData(d, v)
-
-    def updateAnnData(self, d, m):
-
+        if view:
+            model=view.model()
         f=d.get('function', 'Default')
+        elem=model.getAnnElement(d)
         c=self.func_colors[f]
         d['color']=c
+        d['element']=elem
         d['akind']='highlight'
         d['down']=d['content']
-        d['box']=m.getAnnBox(d)
+        d['box']=model.getAnnBox(d)
         d['up']=f'# {d.get("id")}'
-        d['element']=m.getAnnElement(d)
         d['up_style']=f'background-color: {c.name()}'
+        if view:
+            d['view']=view
+            d['item']=view.item(element=elem)
 
-    def updateAnnViewData(self, d, v):
-
-        i=v.item(element=d['element'])
-        d['view']=v
-        d['item']=i
 
     @register('o')
     def open(self):
 
         i=self.ui.list.currentItem()
-        if not i: return
-        data=i.itemData
-        v=data['view']
-        v.setLocator(
-                data=data, 
-                kind='annotation')
+        if i:
+            v=i.itemData['view']
+            v.openLocator(
+                    i.itemData, 
+                    kind='annotation')
 
     @register('d')
     def delete(self):
@@ -130,13 +123,12 @@ class Annotations(Plug):
         i=self.ui.list.currentItem()
         if not i: return
         d=i.itemData
-        v=i.itemData['view']
+        v=d['view']
         cr=max(self.ui.list.currentRow()-1, 0)
-        loc=self.view.delLocator(
+        l=self.view.delLocator(
                 data=d, kind='annotation')
-        self.table.removeRow(loc)
-        self.cacheAnnotations(v)
-        self.setList(v)
+        self.table.removeRow(l)
+        self.resetViewAnnotations(v)
         self.ui.list.setCurrentRow(cr)
 
     def setAnnotatePlug(self, plugs):
@@ -144,29 +136,27 @@ class Annotations(Plug):
         p=plugs.get('annotate', None)
         if p:
             p.chosen.connect(self.on_viewAnnChosen)
-            p.removed.connect(self.on_viewAnnChanged)
-            p.annotated.connect(self.on_viewAnnChanged)
+            p.removed.connect(self.resetViewAnnotations)
+            p.annotated.connect(self.resetViewAnnotations)
 
-    def on_viewAnnChanged(self):
+    def resetViewAnnotations(self, v=None):
 
-        self.cache.pop(self.view)
-        self.setList(self.view)
+        v=v or self.view
+        self.cache.pop(v, None)
+        self.setViewAnnotations(v)
 
-    def on_viewAnnChosen(self, a):
+    def on_viewAnnChosen(self, d):
 
-        idx=a['aid']
-        d=enumerate(self.ui.list.flist)
-        for j, i in d:
-            if i.get('id', None)!=idx:
+        l=enumerate(self.ui.list.flist)
+        for j, i in l:
+            if i.get('id', None)!=d['id']:
                 continue
             self.ui.list.setCurrentRow(j)
             return i
 
-    def on_contentChanged(self, w):
+    def updateContent(self, w):
 
-        #todo
-        d=w.data
-        idx=d['id']
+        idx=w.data['id']
         text=w.textDown()
         self.table.updateRow(
                 {'id':idx}, {'content':text})

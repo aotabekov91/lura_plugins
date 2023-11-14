@@ -1,10 +1,7 @@
 from plug.qt import Plug
 from functools import partial
 from PyQt5 import QtGui, QtCore
-from gizmo.utils import register
 from tables import Annotation as Table
-
-from fitz import Quad, Point
 
 class Annotate(Plug):
 
@@ -57,8 +54,8 @@ class Annotate(Plug):
             sel['function']=func
             sel['akind']=self.kind
             sel['color']=self.getColor(func)
-            item=sel['item']
-            item.annotate(sel)
+            i=sel['item']
+            i.annotate(sel)
             self.write(sel)
             self.annotated.emit(sel)
         self.delistenWanted.emit()

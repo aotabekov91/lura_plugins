@@ -9,116 +9,78 @@ class Quickmark(Plug):
     marked=QtCore.pyqtSignal()
     unmarked=QtCore.pyqtSignal()
 
-    def __init__(
-            self,
-            app,
-            *args,
-            listen_leader='<c-m>',
-            **kwargs,
-            ):
-
-        self.mode=None
-        self.actor=None
-        self.table = Table() 
-        super().__init__(
-                *args,
-                app=app,
-                listen_leader=listen_leader,
-                **kwargs,
-                )
-
     def setup(self):
 
         super().setup()
+        self.view=None
+        self.functor=None
+        self.table = Table() 
         self.ear.suffix_functor=self.set
 
     def set(self, event):
 
         key=event.text()
-        if key and self.actor: 
-            self.actor(key)
+        if key and self.functor: 
+            self.functor(key)
             return True
-        return False
 
-    def listen(self):
+    @register('m', modes=['normal'])
+    def setMark(self):
 
-        self.actor=None
-        super().listen()
+        if self.checkMode():
+            self.activate()
+            self.functor=self._mark
 
-    @register('m')
-    def mark(self):
-        self.actor=self._mark
+    @register('u', modes=['normal'])
+    def undoMark(self):
 
-    @register('u')
-    def unmark(self):
-        self.actor=self._unmark
+        if self.checkMode():
+            self.activate()
+            self.functor=self._unmark
 
-    @register('U')
-    def unmarkGlobal(self):
+    @register('M', modes=['normal'])
+    def gotoMark(self):
 
-        f=lambda x: self._unmark(x, True)
-        self.actor=f
+        if self.checkMode():
+            self.activate()
+            self.functor=self._goto
 
-    @register('g')
-    def goto(self):
-        self.actor=self._goto
+    def _unmark(self, m):
 
-    @register('G')
-    def gotoGlobal(self):
-
-        f=lambda x: self._goto(x, True)
-        self.actor=f
-
-    def _unmark(self, m, globally=False):
-
-        if m: 
-            v = self.mode.getView()
-            cond={'mark': m}
-            if not globally:
-                cond['kind']=v.kind()
-                cond['page']=v.itemId()
-                cond['hash']=v.modelId(),
-            self.table.removeRow(cond)
+        ul=self.view.getUniqLocator()
+        ul['mark']=m
+        self.table.removeRow(ul)
         self.unmarked.emit()
         self.modeWanted.emit(self.mode)
 
     def _mark(self, m):
 
-        if m: 
-            v = self.mode.getView()
-            data={
-                  'mark':m,
-                  'kind': v.kind(),
-                  'page': v.itemId(),
-                  'hash': v.modelId(), 
-                  'position': v.getLocation(),
-                  }
-            self.table.writeRow(data)
+        ul=self.view.getUniqLocator()
+        pl=self.view.getLocator(kind='position')
+        ul.update(pl)
+        ul['mark']=m
+        self.table.writeRow(ul)
         self.marked.emit()
         self.modeWanted.emit(self.mode)
 
-    def _goto(self, m, globally=False):
+    def _goto(self, m):
 
-        if m:
-            v=self.mode.getView()
-            cond={
-                  'mark': m,
-                  'hash': v.modelId()
-                 }
-            if not globally:
-                cond['kind']=v.kind()
-            rs=self.table.getRow(cond)
-            if rs: v.open(**rs[0])
+        ul=self.view.getUniqLocator()
+        ul['mark']=m
+        rs=self.table.getRow(ul)
+        if rs: 
+            self.view.openLocator(
+                    rs[0], 
+                    kind='position')
         self.jumped.emit()
         self.modeWanted.emit(self.mode)
 
-    def checkLeader(self, event, pressed):
+    def checkMode(self):
 
-        if super().checkLeader(event, pressed):
-            if self.ear.listening:
-                return True
-            m=self.app.moder.current
-            if getattr(m, 'getView', False): 
+        m=self.app.moder.current
+        if m:
+            v=m.getView()
+            if v and v.check('canPosition'):
                 self.mode=m
+                self.view=v
                 return True
-        return False

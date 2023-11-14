@@ -9,7 +9,7 @@ class Quickmarks(Plug):
             self, 
             position='dock_right',
             leader_keys={
-                'command': 'M',
+                'command': '<c-m>',
                 'Quickmarks': '<c-.>',
                 },
             **kwargs):
@@ -43,8 +43,9 @@ class Quickmarks(Plug):
     def resetViewMarks(self, v=None):
 
         v=v or self.view
-        self.cache.pop(v, None)
-        self.setViewMarks(v)
+        if v:
+            self.cache.pop(v, None)
+            self.setViewMarks(v)
 
     @register('f', modes=['command'])
     def setFocus(self):

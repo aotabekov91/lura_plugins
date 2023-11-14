@@ -4,13 +4,12 @@ from tables import Bookmark as Table
 
 class Bookmark(Plug):
 
-    special=['return']
     bookmarked=QtCore.pyqtSignal()
 
     def __init__(
             self, 
-            special=special,
             report_keys=False,
+            special=['return'],
             listen_leader='<c-b>',
             **kwargs
             ):
@@ -41,8 +40,8 @@ class Bookmark(Plug):
 
     def getBookmark(self, edit_bar=False):
 
-        loc=self.view.getLocator()
-        r=self.table.getRow(loc)
+        l=self.view.getLocator(kind='position')
+        r=self.table.getRow(l)
         if r and edit_bar: 
             t=r[0]['text']
             self.bar.edit.setText(t)
@@ -51,15 +50,18 @@ class Bookmark(Plug):
     def bookmark(self):
 
         t=self.bar.edit.text()
-        rows=self.getBookmark()
-        if rows:
-            c={'id': rows[0]['id']}
+        data=self.getBookmark()
+        if data:
+            c={'id': data[0]['id']}
             self.table.updateRow(
                     c, {'text':t})
         else:
-            loc=self.view.getLocator()
-            loc.update({'text': t, 'title': t})
-            self.table.writeRow(loc)
+            l=self.view.getLocator(
+                    kind='position')
+            u=self.view.getUniqLocator()
+            l.update(u)
+            l.update({'text': t, 'title': t})
+            self.table.writeRow(l)
         self.bookmarked.emit()
         self.delistenWanted.emit()
 
@@ -69,7 +71,7 @@ class Bookmark(Plug):
             if self.ear.listening:
                 return True
             c=self.app.moder.current
-            if c and getattr(c, 'getView'):
+            if c:
                 v=c.getView()
                 if v.check('canPosition'):
                     self.view=v
