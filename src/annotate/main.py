@@ -5,26 +5,21 @@ from tables import Annotation as Table
 
 class Annotate(Plug):
 
+    view=None
+    colors={}
+    table=Table()
+    func_colors={}
+    kind='highlight'
+    default_color='cyan'
+    listen_leader='<c-a>'
+
     chosen=QtCore.pyqtSignal(object)
     removed=QtCore.pyqtSignal(object)
     annotated=QtCore.pyqtSignal(object)
 
-    def __init__(
-            self, 
-            listen_leader='<c-a>', 
-            **kwargs
-            ):
+    def setup(self):
 
-        self.view=None
-        self.colors={}
-        self.table=Table()
-        self.func_colors={}
-        self.kind='highlight'
-        self.default_color='cyan'
-        super().__init__(
-                listen_leader=listen_leader,
-                **kwargs,
-                )
+        super().setup()
         self.setColors()
 
     def setColors(self):

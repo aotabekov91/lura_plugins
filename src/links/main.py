@@ -1,45 +1,24 @@
 from plug.qt import Plug
-from gizmo.utils import register
+from gizmo.utils import tag
 from PyQt5 import QtCore, QtGui
 
 class Links(Plug):
 
+    key=''
+    view=None
+    links=None
+    hinting=False
+    selection=None
+    listen_leader='<c-l>'
+    leader_keys={'command': 'l'}
     linkSelected=QtCore.pyqtSignal()
 
-    def __init__(
-            self,
-            *args, 
-            listen_leader='<c-l>',
-            leader_keys={
-                'command': 'l',
-                },
-            **kwargs
-            ):
+    def event_functor(self, e, ear):
 
-        super().__init__(
-                *args,
-                leader_keys=leader_keys,
-                listen_leader=listen_leader,
-                **kwargs
-                )
-        self.key=''
-        self.view=None
-        self.links=None
-        self.hinting=False
-        self.selection=None
-        self.listenerAddKeys=self.ear.addKeys
-        self.ear.addKeys=self.ownAddKeys
-
-    def ownAddKeys(self, event):
-
-        if self.hinting:
-            t=event.text()
-            if t:
-                self.key+=t
-                self.view.updateHint(self.key)
-                event.accept()
-                return True
-        return self.listenerAddKeys(event)
+        if self.hinting and e.text():
+            self.key+=e.text()
+            self.view.updateHint(self.key)
+            return True
 
     def listen(self):
 
@@ -53,6 +32,7 @@ class Links(Plug):
     def delisten(self): 
 
         super().delisten()
+        self.app.earman.clearKeys()
         self.view.hintSelected.disconnect(
                 self.selectHinted)
         self.view.hintFinished.disconnect(
@@ -80,16 +60,12 @@ class Links(Plug):
         self.hinting=False
         self.selection=None
 
-    def checkLeader(self, event, pressed):
+    def checkLeader(self, e, p):
 
-        if super().checkLeader(event, pressed):
-            if self.ear.listening:
+        c=self.app.moder.current
+        if c and c.name=='normal':
+            v=c.getView()
+            cond=['hasLinks', 'canHint']
+            if v and v.check(cond):
+                self.view=v
                 return True
-            c=self.app.moder.current
-            if c and c.name=='normal':
-                v=c.getView()
-                cond=['hasLinks', 'canHint']
-                if v and v.check(cond):
-                    self.view=v
-                    return True
-        return False

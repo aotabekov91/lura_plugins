@@ -1,6 +1,6 @@
 from PyQt5 import QtCore
 from plug.qt import Plug
-from gizmo.utils import register
+from gizmo.utils import tag
 
 class Search(Plug):
 
@@ -34,15 +34,15 @@ class Search(Plug):
         listener.carriageReturnPressed.connect(
                 lambda: self.find(jump=True))
 
-    @register('j')
+    @tag('j')
     def next(self, digit=1): 
         self.jump(digit)
 
-    @register('k')
+    @tag('k')
     def prev(self, digit=1): 
         self.jump(-digit)
 
-    @register('<c-f>')
+    @tag('<c-f>')
     def toggleFocus(self): 
         self.app.window.bar.edit.setFocus()
 

@@ -1,52 +1,35 @@
 from plug.qt import Plug 
-from gizmo.utils import register
+from PyQt5.QtCore import Qt
+from gizmo.utils import tag
 from tables import Hash, Metadata
 from gizmo.widget import UpDown, InputList
 
 class Documents(Plug):
 
-    special=['return', 'carriage']
-
-    def __init__(
-            self, 
-            app, 
-            *args,
-            special=special,
-            position='dock_right',
-            leader_keys={'command': 'd'},
-            **kwargs):
-
-        super(Documents, self).__init__(
-                app=app, 
-                special=special,
-                position=position, 
-                leader_keys=leader_keys,
-                **kwargs
-                )
-
-        self.hash=Hash()
-        self.meta=Metadata()
-        self.setUI()
+    position='dock_right'
+    leader_keys={'command': 'd'}
 
     def setup(self):
 
         super().setup()
-        self.setConnect()
+        self.meta=Metadata()
+        self.hash=Hash()
+        self.setUI()
 
-    def setConnect(self):
+    def event_functor(self, e, ear):
 
-        self.ear.returnPressed.connect(
-                self.open)
-        self.ear.carriageReturnPressed.connect(
-                self.open)
+        enter=[Qt.Return, Qt.Enter]
+        if e.key() in enter: 
+            self.open()
+            ear.clearKeys()
+            return True
 
     def setUI(self):
 
-        self.uiman.setUI()
-        main=InputList(
-                widget=UpDown)
+        self.app.uiman.setUI(self)
+        w=InputList(widget=UpDown)
         self.ui.addWidget(
-                main, 'main', main=True)
+                w, 'main', main=True)
         self.ui.main.input.hideLabel()
 
     def activateUI(self):
@@ -55,7 +38,7 @@ class Documents(Plug):
        self.dlist=self.getList() 
        self.ui.main.setList(self.dlist)
 
-    @register('t', modes=['command'])
+    @tag('t', modes=['command'])
     def toggle(self): super().toggle()
 
     def getList(self):

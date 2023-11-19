@@ -1,5 +1,5 @@
 from plug.qt import Plug 
-from gizmo.utils import register
+from gizmo.utils import tag
 
 class WLookup(Plug):
 
@@ -9,7 +9,7 @@ class WLookup(Plug):
         self.lookup = self.getConnection('PUSH')
         self.lookup.connect(f'tcp://localhost:{self.lookup_port}')
 
-    @register('ll', modes=['command'])
+    @tag('ll', modes=['command'])
     def open(self):
 
         view=self.app.display.view

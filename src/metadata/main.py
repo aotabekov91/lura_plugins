@@ -4,24 +4,18 @@ from gizmo.widget import UpDownEdit, InputList
 
 class Metadata(Plug):
 
+    position='dock_right'
+    leader_keys={'command': 'm'}
     exclude=['id', 'hash', 'url', 'kind']
 
-    def __init__(
-            self, 
-            position='dock_right',
-            leader_keys={'command': 'm'},
-            **kwargs):
+    def setup(self):
 
+        super().setup()
+        self.setUI()
         self.cache={}
         self.table=Table()
-        super().__init__(
-                position=position, 
-                leader_keys=leader_keys,
-                **kwargs,
-                )
         self.app.moder.modeChanged.connect(
-                self.updateViewMetadata)
-        self.setUI()
+                self.updateData)
 
     def setUI(self):
 
@@ -29,12 +23,12 @@ class Metadata(Plug):
         w.input.hideLabel()
         w.list.widgetDataChanged.connect(
                 self.updateContent)
-        self.uiman.setUI(w)
+        self.app.uiman.setUI(self, w)
 
-    def updateViewMetadata(self, mode):
+    def updateData(self, m):
 
-        v=mode.getView()
-        if v:
+        if self.checkProp('hasView', m):
+            v=m.getView()
             self.view=v
             self.checkRowExists(v)
             self.setViewMetadata(v)

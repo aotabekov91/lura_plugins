@@ -1,7 +1,7 @@
 from tables import Part as Table
 
 from plug.qt import Plug 
-from gizmo.utils import register
+from gizmo.utils import tag
 from gizmo.widget import ItemWidget, InputList
 
 from .widget import PartTree
@@ -33,35 +33,27 @@ class Parts(Plug):
         super().setup()
         self.display=self.app.display
 
-    @register('f')
+    @tag('f')
     def toggleFollow(self): 
         self.follow=not self.follow
 
     def setUI(self):
 
-        self.uiman.setUI()
-        tree=PartTree()
-        tree.returnPressed.connect(
-                self.open)
-        tree.itemChanged.connect(
-                self.on_itemChanged)
-        self.ui.addWidget(tree, 'tree')
-        main=InputList(
-                widget=ItemWidget)
-        main.input.hideLabel()
-        main.returnPressed.connect(
-                self.open)
-        self.ui.addWidget(
-                main, 'main', main=True)
-        self.ui.hideWanted.connect(
-                self.deactivate)
+        self.app.uiman.setUI(self)
+        t=PartTree()
+        t.returnPressed.connect(self.open)
+        t.itemChanged.connect(self.on_itemChanged)
+        self.ui.addWidget(t, 'tree')
+        m=InputList(widget=ItemWidget)
+        m.returnPressed.connect(self.open)
+        self.ui.addWidget(m, 'main', main=True)
 
     def on_itemChanged(self, item): 
 
         if self.follow: 
             self.open(item=item)
 
-    @register('tr')
+    @tag('tr')
     def toggleTree(self):
 
         if self.ui.tree.isVisible():
@@ -69,7 +61,7 @@ class Parts(Plug):
         else:
             self.ui.show(self.ui.tree)
 
-    @register('r')
+    @tag('r')
     def refresh(self):
 
         view=self.display.view
@@ -79,7 +71,7 @@ class Parts(Plug):
             if data: 
                 self.ui.tree.installData({'root': data})
 
-    @register('t', modes=['command'])
+    @tag('t', modes=['command'])
     def toggle(self): super().toggle()
 
     def activate(self):
@@ -88,31 +80,31 @@ class Parts(Plug):
         self.toggleTree()
         super().activate()
 
-    @register('sr')
+    @tag('sr')
     def showReference(self): 
         self.setData('reference')
 
-    @register('sa')
+    @tag('sa')
     def showAbstract(self): 
         self.setData('abstract')
 
-    @register('so')
+    @tag('so')
     def showOutline(self): 
         self.setData('section')
 
-    @register('sk')
+    @tag('sk')
     def showKeyword(self): 
         self.setData('keyword')
 
-    @register('ss')
+    @tag('ss')
     def showSummary(self): 
         self.setData('summary')
 
-    @register('sp')
+    @tag('sp')
     def showParagraph(self): 
         self.setData('paragraph')
 
-    @register('sb')
+    @tag('sb')
     def showBibliography(self): 
         self.setData('bibliography')
 
@@ -130,7 +122,7 @@ class Parts(Plug):
             data=sorted(data, key=lambda x: (x['page'], x['y1']))
             self.ui.main.setList(data)
 
-    @register('p')
+    @tag('p')
     def parse(self):
 
         if self.display.view:
@@ -138,11 +130,11 @@ class Parts(Plug):
             self.app.tables.hash.hash(
                     p, force_parse=True)
 
-    @register('o')
+    @tag('o')
     def openAndFocus(self): 
         self.open(focus=True)
 
-    @register('O')
+    @tag('O')
     def open(self, item=None, focus=False):
 
         if item is None:

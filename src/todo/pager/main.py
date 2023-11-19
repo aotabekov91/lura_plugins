@@ -1,5 +1,5 @@
 from plug.qt import Plug
-from gizmo.utils import register
+from gizmo.utils import tag
 
 from .widget import PagerWidget
 
@@ -50,7 +50,7 @@ class Pager(Plug):
         self.ui=PagerWidget(self.app.window.main)
         self.ui.hide()
 
-    @register('p', modes=['normal', 'command'])
+    @tag('p', modes=['normal', 'command'])
     def toggle(self): 
 
         self.ui.updatePosition()

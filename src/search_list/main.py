@@ -1,23 +1,12 @@
 from PyQt5 import QtCore 
 from plug.qt import Plug
-from gizmo.utils import register
+from gizmo.utils import tag
 from gizmo.widget import InputList, UpDown
 
 class SearchList(Plug):
 
-    def __init__(self,
-                 app,
-                 *args,
-                 position='dock_down',
-                 **kwargs):
-
-        self.follow_move=False 
-        super().__init__(
-                *args,
-                app=app,
-                position=position,
-                **kwargs
-                )
+    follow_move=False 
+    position='dock_down'
 
     def setup(self):
 
@@ -40,7 +29,7 @@ class SearchList(Plug):
     def activate(self):
 
         self.find()
-        self.uiman.activate()
+        self.app.uiman.activate(self)
 
     def find(self):
 
@@ -58,21 +47,21 @@ class SearchList(Plug):
 
     def setUI(self):
 
-        self.uiman.setUI()
+        self.app.uiman.setUI(self)
         w=InputList(widget=UpDown)
         w.input.hideLabel()
         self.ui.addWidget(
                 w, 'main', main=True)
         
-    @register('<c-j>', modes=['Search'])
+    @tag('<c-j>', modes=['Search'])
     def next(self): 
         self.ui.main.moveDown()
 
-    @register('<c-k>', modes=['Search'])
+    @tag('<c-k>', modes=['Search'])
     def prev(self): 
         self.ui.main.moveUp()
 
-    @register('<c-l>', modes=['Search'])
+    @tag('<c-l>', modes=['Search'])
     def jump(self, increment=1):
 
         crow=self.ui.main.currentRow()

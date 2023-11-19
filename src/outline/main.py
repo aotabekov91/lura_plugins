@@ -1,6 +1,6 @@
 from PyQt5 import QtCore, QtWidgets
 
-from gizmo.utils import register
+from gizmo.utils import tag
 from plug.qt.plugs import TreePlug
 
 class Outline(TreePlug):
@@ -48,7 +48,7 @@ class Outline(TreePlug):
         super().setUI()
         self.tree=self.ui.main.tree
 
-    @register('o')
+    @tag('o')
     def open(self, *args, **kwargs):
 
         item=self.tree.currentItem()

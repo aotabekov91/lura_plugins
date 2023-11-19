@@ -1,98 +1,69 @@
-from plug.qt import Plug 
-from gizmo.utils import register
-from tables import Quickmark as Table
-from gizmo.widget import UpDownEdit, InputList
+from gizmo.utils import tag
+from tables import Quickmark
+from plug.qt.plugs import render
+from gizmo.vimo import view, model
 
-class Quickmarks(Plug):
+class Quickmarks(render.Render):
 
-    def __init__(
-            self, 
-            position='dock_right',
-            leader_keys={
-                'command': '<c-m>',
-                'Quickmarks': '<c-.>',
-                },
-            **kwargs):
+    leader_keys={
+        'command': 'q',
+        'Quickmarks': '<c-.>'}
+    position='dock_right'
+    model_class=model.StandardTableModel
+    model_class.kind='quickmarks'
+    model_class.table=Quickmark()
 
-        self.cache={}
-        self.view=None
-        self.table=Table()
-        super().__init__(
-                position=position,
-                leader_keys=leader_keys,
-                **kwargs) 
-        self.app.moder.modeChanged.connect(
-                self.updateViewMarks)
-        self.app.moder.plugsLoaded.connect(
-                self.setQuickmarkPlug)
-        self.setUI()
+    def setup(self):
 
-    def setUI(self):
+        super().setup()
+        self.client=None
+        ui=view.ListView()
+        ui.__name__='QuickmarkView'
+        self.app.moder.typeChanged.connect(
+                self.updateView)
+        self.app.uiman.setUI(self, ui)
+        self.view=ui
 
-        w=InputList(widget=UpDownEdit)
-        w.returnPressed.connect(self.open)
-        self.uiman.setUI(w)
+    def getModel(self, source):
 
-    def setQuickmarkPlug(self, plugs):
+        uid=source.getUniqLocator()
+        uid['type']=self.model_class.kind
+        m=self.app.buffer.getModel(uid)
+        if m is None: 
+            l=source.getUniqLocator()
+            m=self.model_class(index=l)
+            self.app.buffer.setModel(uid, m)
+            m.load()
+        return m
 
-        p=plugs.get('quickmark', None)
-        if p: 
-            p.marked.connect(self.resetViewMarks)
-            p.unmarked.connect(self.resetViewMarks)
+    def updateView(self, v):
 
-    def resetViewMarks(self, v=None):
+        if v.check('canLocate'):
+            self.client=v
+            m=self.getModel(v)
+            self.view.setModel(m)
 
-        v=v or self.view
-        if v:
-            self.cache.pop(v, None)
-            self.setViewMarks(v)
-
-    @register('f', modes=['command'])
-    def setFocus(self):
-
-        p=self.app.moder.plugs
-        self.updateViewMarks(
-                p.command.client)
-        super().setFocus()
-
-    @register('o')
+    @tag('o', modes=['normal|QuickmarkView'])
     def open(self):
 
-        i=self.ui.list.currentItem()
-        if i: 
-            v=i.itemData['view']
-            v.openLocator(
-                    i.itemData, 
+        i=self.view.currentItem()
+        v=self.app.moder.type()
+        if i and self.client:
+            e=i.element()
+            self.client.openLocator(
+                    e.data(),
                     kind='position')
 
-    @register('d')
+    @tag('d', modes=['normal|QuickmarkView'])
     def delete(self):
 
-        i=self.ui.list.currentItem()
-        cr=max(self.ui.list.currentRow()-1, 0)
-        idx=i.itemData['id']
-        self.table.removeRow({'id':idx})
-        self.resetViewMarks()
-        self.ui.list.setCurrentRow(cr)
+        idx=self.view.currentIndex()
+        m=self.view.model()
+        m.removeRow(idx.row())
 
-    def setViewMarks(self, v):
+    @tag('f', modes=['command'])
+    def activate(self):
 
-        if v in self.cache:
-            data=self.cache[v]
-        else:
-            data=[]
-            l=v.getUniqLocator()
-            if l:
-                data = self.table.getRow(l)
-                for r in data:
-                    r['view']=v
-                    r['up']=r['mark']
-                self.cache[v]=data
-        self.ui.setList(data)
-
-    def updateViewMarks(self, mode):
-
-        v=mode.getView()
-        if v and v.check('canPosition'):
-            self.setViewMarks(v)
-            self.view=v
+        m=self.app.moder
+        self.setView(self.view)
+        m.typeWanted.emit(self.view)

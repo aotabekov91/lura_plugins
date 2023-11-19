@@ -1,5 +1,5 @@
 from plug.qt import Plug
-from gizmo.utils import register
+from gizmo.utils import tag
 
 class Search(Plug):
 
@@ -66,7 +66,7 @@ class Search(Plug):
         if t: self.view.search(t)
         self.deactivateBar()
 
-    @register('<c-f>')
+    @tag('<c-f>')
     def toggleFocus(self): 
 
         if self.bar.edit.hasFocus():
@@ -74,11 +74,11 @@ class Search(Plug):
         else:
             self.activateBar()
 
-    @register('j')
+    @tag('j')
     def next(self, digit=1): 
         self.jump(digit)
 
-    @register('k')
+    @tag('k')
     def prev(self, digit=1): 
         self.jump(-digit)
 

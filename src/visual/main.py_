@@ -1,6 +1,6 @@
 from PyQt5 import QtCore, QtGui
 
-from gizmo.utils import register
+from gizmo.utils import tag
 from plug.qt.plugs.visual import Visual as Mode
 
 class Visual(Mode):
@@ -71,27 +71,27 @@ class Visual(Mode):
         item.select(selected)
         self.hintSelected.disconnect(self.jump)
 
-    @register('o')
+    @tag('o')
     def gotoStart(self): 
 
         s=self.display.view.selected()
         if s: 
             self.getWord(s, word='first')
 
-    @register('$')
+    @tag('$')
     def gotoEnd(self):
 
         s=self.display.view.selected()
         if s: 
             self.getWord(s, word='last')
 
-    @register('j') 
+    @tag('j') 
     def selectNextRow(self, digit=1):
 
         for i in range(digit):
             self.getRow(direction='next')
         
-    @register('J') 
+    @tag('J') 
     def deselectNextRow(self, digit=1):
 
         for i in range(digit): 
@@ -99,14 +99,14 @@ class Visual(Mode):
                     direction='next', 
                     kind='deselect')
         
-    @register('k') 
+    @tag('k') 
     def selectPrevRow(self, digit=1):
 
         for i in range(digit): 
             self.getRow(
                     direction='prev')
 
-    @register('K') 
+    @tag('K') 
     def deselectPrevRow(self, digit=1):
 
         for i in range(digit): 
@@ -159,7 +159,7 @@ class Visual(Mode):
                         selected=[elem.getRows(edge, end)]
                         if selected: item.select(selected)
 
-    @register('e')
+    @tag('e')
     def jumpSelect(self):
 
         s=self.display.view.selected()
@@ -169,7 +169,7 @@ class Visual(Mode):
                     self.jump)
             self.hint()
 
-    @register('w') 
+    @tag('w') 
     def selectNextWord(self, digit=1):
         
         for d in range(digit):
@@ -177,7 +177,7 @@ class Visual(Mode):
             if s: 
                 self.getWord(s, kind='select')
 
-    @register('W')
+    @tag('W')
     def deselectNextWord(self, digit=1):
 
         for d in range(digit):
@@ -185,7 +185,7 @@ class Visual(Mode):
             if s: 
                 self.getWord(s, kind='deselect')
 
-    @register('b') 
+    @tag('b') 
     def selectPrevWord(self, digit=1):
         
         for d in range(digit):
@@ -193,7 +193,7 @@ class Visual(Mode):
             if s: 
                 self.getWord(s, kind='select', direction='backward')
 
-    @register('B') 
+    @tag('B') 
     def deselectPrevWord(self, digit=1):
         
         for d in range(digit):
@@ -292,7 +292,7 @@ class Visual(Mode):
         if selected: 
             item.select(selected)
 
-    @register('u')
+    @tag('u')
     def updateHint(self, key=''):
 
         hints={}

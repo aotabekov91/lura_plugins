@@ -1,33 +1,27 @@
-from PyQt5 import QtGui
 from plug.qt import Plug
-from gizmo.utils import register
+from gizmo.utils import tag
+from PyQt5 import QtGui, QtCore
 from tables import Annotation as Table
 from gizmo.widget import InputList, UpDownEdit
 
 class Annotations(Plug):
 
-    def __init__(
-            self, 
-            position='dock_right',
-            leader_keys={
-                'command': 'a',
-                'Annotations': '<c-.>'
-                },
-            **kwargs
-            ):
+    cache={}
+    view=None
+    table=Table()
+    func_colors={}
+    position='dock_right'
+    leader_keys={
+        'command': 'a',
+        'Annotations': '<c-.>'}
 
-        self.cache={}
-        self.view=None
-        self.table=Table()
-        self.func_colors={}
-        super().__init__(
-                position=position,
-                leader_keys=leader_keys,
-                **kwargs)
+    def setup(self):
+
+        super().setup()
         self.app.buffer.modelCreated.connect(
                 self.connectModel)
         self.app.moder.modeChanged.connect(
-                self.updateViewAnnotations)
+                self.updateData)
         self.app.moder.plugsLoaded.connect(
                 self.setAnnotatePlug)
         self.setColors()
@@ -40,38 +34,42 @@ class Annotations(Plug):
             n, c = v['name'], v['color']
             self.func_colors[n]=QtGui.QColor(c)
 
+    def event_functor(self, e, ear):
+
+        if e.key()==QtCore.Qt.Key_Return:
+            self.open()
+            ear.clearKeys()
+            return True
+
     def setUI(self):
 
         w=InputList(widget=UpDownEdit)
-        w.returnPressed.connect(self.open)
         w.list.widgetDataChanged.connect(
                 self.updateContent)
-        self.uiman.setUI(w)
+        self.app.uiman.setUI(self, w)
 
     def connectModel(self, m):
 
-        c1=hasattr(m, 'loaded')
-        c2=hasattr(m, 'canAnnotate')
-        if c1 and c2:
+        props=['loaded', 'canAnnotate']
+        if self.checkProp(props, m):
             m.loaded.connect(self.annotateModel)
 
-    def annotateModel(self, model):
+    def annotateModel(self, m):
 
-        l=model.getUniqLocator(
+        l=m.getUniqLocator(
                 kind='annotation')
-        data=self.table.getRow(l)
-        for d in data: 
-            self.updateAnnData(
-                    d, model=model)
-            model.setLocator(
-                    data=d, kind='annotation')
+        rs=self.table.getRow(l)
+        for r in rs: 
+            self.updateAnnData(r, model=m)
+            m.setLocator(r, 'annotation')
 
-    def updateViewAnnotations(self, mode):
+    def updateData(self, mode):
 
-        v=mode.getView()
-        if v and v.check('canAnnotate'):
-            self.setViewAnnotations(v)
-            self.view=v
+        if self.checkProp('hasView', mode):
+            v=mode.getView()
+            if v and v.check('canAnnotate'):
+                self.setViewAnnotations(v)
+                self.view=v
 
     def setViewAnnotations(self, v):
 
@@ -106,8 +104,7 @@ class Annotations(Plug):
             d['view']=view
             d['item']=view.item(element=elem)
 
-
-    @register('o')
+    @tag('o')
     def open(self):
 
         i=self.ui.list.currentItem()
@@ -117,7 +114,7 @@ class Annotations(Plug):
                     i.itemData, 
                     kind='annotation')
 
-    @register('d')
+    @tag('d')
     def delete(self):
 
         i=self.ui.list.currentItem()

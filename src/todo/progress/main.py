@@ -1,5 +1,5 @@
 from plug.qt import Plug
-from gizmo.utils import register
+from gizmo.utils import tag
 from gizmo.widget import InputList
 
 class Progress(Plug):
@@ -26,5 +26,5 @@ class Progress(Plug):
         self.ui.hideWanted.connect(self.deactivate)
         self.ui.installEventFilter(self)
 
-    @register('t', modes=['command']) 
+    @tag('t', modes=['command']) 
     def toggle(self): super().toggle() 

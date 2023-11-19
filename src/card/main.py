@@ -2,7 +2,7 @@ from ankipulator import Submitter
 from plyer import notification as echo 
 
 from plug.qt import Plug
-from gizmo.utils import register
+from gizmo.utils import tag
 from gizmo.widget import InputList, UpDownEdit
 
 class Card(Plug):
@@ -47,7 +47,7 @@ class Card(Plug):
     def setUI(self):
 
         special=['return']
-        self.uiman.setUI()
+        self.app.uiman.setUI(self)
         main=InputList(
                 widget=UpDownEdit,
                 special=special)
@@ -92,7 +92,7 @@ class Card(Plug):
         if not item: return
         return item.widget
 
-    @register('u')
+    @tag('u')
     def update(self):
 
         for d in self.filler.getDecks():
@@ -150,13 +150,13 @@ class Card(Plug):
         else:
             self.toggleDecks()
 
-    @register('Y', modes=['command'])
+    @tag('Y', modes=['command'])
     def yankToField(self, digit=1):
 
         self.yankToFieldJoin(
                 digit=digit, sep='\n')
 
-    @register('y', modes=['command'])
+    @tag('y', modes=['command'])
     def yankToFieldJoin(
             self, 
             sep=' ', 
@@ -176,13 +176,13 @@ class Card(Plug):
             text=f'{wtext}{asep}{text}'
         w.setTextDown(text)
 
-    @register('a', modes=['command'])
+    @tag('a', modes=['command'])
     def appendToField(self, digit=1): 
 
         self.yankToFieldJoin(
                 digit, append=True)
 
-    @register('A', modes=['command'])
+    @tag('A', modes=['command'])
     def appendToNewLine(self, digit=1): 
 
         self.yankToFieldJoin(
@@ -192,7 +192,7 @@ class Card(Plug):
                 sep='\n'
                 )
 
-    @register('f', modes=['command'])
+    @tag('f', modes=['command'])
     def focusField(self, digit=1):
 
         digit-=1
@@ -202,7 +202,7 @@ class Card(Plug):
         w=self.getWidget(digit=digit)
         if w: w.setFocus()
 
-    @register('t', modes=['command'])
+    @tag('t', modes=['command'])
     def toggle(self): 
 
         super().toggle()
@@ -210,7 +210,7 @@ class Card(Plug):
             self.toggleModels()
         self.ui.current.list.setFocus()
 
-    @register('p')
+    @tag('p')
     def togglePin(self):
 
         item=self.ui.main.list.currentItem()
@@ -223,7 +223,7 @@ class Card(Plug):
                 self.pinned.append(
                         fieldName)
 
-    @register('i')
+    @tag('i')
     def toggleInfo(self):
 
         if self.ui.info.isVisible():
@@ -238,7 +238,7 @@ class Card(Plug):
             self.ui.info.setList(info)
             self.ui.show(self.ui.info)
 
-    @register('d')
+    @tag('d')
     def toggleDecks(self):
 
         if self.ui.decks.isVisible():
@@ -246,7 +246,7 @@ class Card(Plug):
         else:
             self.ui.show(self.ui.decks)
 
-    @register('m')
+    @tag('m')
     def toggleModels(self):
 
         if self.ui.models.isVisible():
@@ -255,7 +255,7 @@ class Card(Plug):
             self.ui.show(self.ui.models)
 
 
-    @register('s', modes=['Card', 'command'])
+    @tag('s', modes=['Card', 'command'])
     def submit(self, note=None):
 
         try:
@@ -272,7 +272,7 @@ class Card(Plug):
                 timeout=0.05,
                 )
 
-    @register('C')
+    @tag('C')
     def clear(self, force=False):
 
         d=[]
@@ -287,7 +287,7 @@ class Card(Plug):
                     break
         self.ui.main.setList(d)
 
-    @register('c', modes=['command'])
+    @tag('c', modes=['command'])
     def addCloze(self):
 
 

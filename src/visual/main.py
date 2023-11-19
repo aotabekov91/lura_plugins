@@ -1,6 +1,6 @@
 from PyQt5 import QtCore, QtGui
 
-from gizmo.utils import register
+from gizmo.utils import tag
 from plug.qt.plugs.visual import Visual as Mode
 
 class Visual(Mode):
@@ -47,7 +47,7 @@ class Visual(Mode):
         else:
             self._jump(data)
 
-    @register('f')
+    @tag('f')
     def hint(self):
 
         self.key=''
@@ -58,47 +58,47 @@ class Visual(Mode):
                 self.finishHinting)
         self.view.hint()
 
-    @register('o')
+    @tag('o')
     def gotoStart(self): 
         self.goto(kind='first')
 
-    @register('$')
+    @tag('$')
     def gotoEnd(self):
         self.goto(kind='last')
 
-    @register('j') 
+    @tag('j') 
     def selectDown(self, digit=1):
         self.goto(kind='down', digit=digit)
 
-    @register('k') 
+    @tag('k') 
     def selectUp(self, digit=1):
         self.goto(kind='up', digit=digit)
 
-    @register('J') 
+    @tag('J') 
     def deselectDown(self, digit=1):
         self.goto(kind='cancelDown', digit=digit)
 
-    @register('K') 
+    @tag('K') 
     def deselectUp(self, digit=1):
         self.goto(kind='cancelUp', digit=digit)
 
-    @register('w') 
+    @tag('w') 
     def selectNext(self, digit=1):
         self.goto(kind='next', digit=digit)
         
-    @register('W')
+    @tag('W')
     def deselectNext(self, digit=1):
         self.goto(kind='cancelNext', digit=digit)
 
-    @register('b') 
+    @tag('b') 
     def selectPrev(self, digit=1):
         self.goto(kind='prev', digit=digit)
         
-    @register('B') 
+    @tag('B') 
     def deselectPrev(self, digit=1):
         self.goto(kind='cancelPrev', digit=digit)
 
-    @register('g')
+    @tag('g')
     def jump(self):
 
         self.jumping=True

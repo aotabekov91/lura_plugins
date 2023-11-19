@@ -1,5 +1,5 @@
 from plug.qt import Plug
-from gizmo.utils import register
+from gizmo.utils import tag
 
 class Leaper(Plug):
 
@@ -41,11 +41,11 @@ class Leaper(Plug):
         jumps[index]=data
         self.indices[view]=index+1
 
-    @register('[', modes=['normal'])
+    @tag('[', modes=['normal'])
     def jump_prev(self): 
         self.jump(delta=-1)
 
-    @register(']', modes=['normal'])
+    @tag(']', modes=['normal'])
     def jump_next(self): 
         self.jump(delta=1)
 

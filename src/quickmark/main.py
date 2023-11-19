@@ -1,86 +1,73 @@
 from PyQt5 import QtCore
 from plug.qt import Plug
-from gizmo.utils import register
-from tables import Quickmark as Table
+from gizmo.utils import tag
 
 class Quickmark(Plug):
 
+    functor=None
+    delisten_on_exec=True
     jumped=QtCore.pyqtSignal()
     marked=QtCore.pyqtSignal()
     unmarked=QtCore.pyqtSignal()
 
-    def setup(self):
+    def event_functor(self, e, ear):
 
-        super().setup()
-        self.view=None
-        self.functor=None
-        self.table = Table() 
-        self.ear.suffix_functor=self.set
-
-    def set(self, event):
-
-        key=event.text()
-        if key and self.functor: 
-            self.functor(key)
+        if e.text() and self.functor: 
+            self.functor(e.text())
+            ear.clearKeys()
+            self.deactivate()
             return True
 
-    @register('m', modes=['normal'])
+    def activate(self, functor):
+
+        self.functor=functor
+        super().activate()
+
+    @tag('m', modes=['normal'])
     def setMark(self):
 
         if self.checkMode():
-            self.activate()
-            self.functor=self._mark
+            self.activate(self._mark)
 
-    @register('u', modes=['normal'])
-    def undoMark(self):
-
-        if self.checkMode():
-            self.activate()
-            self.functor=self._unmark
-
-    @register('M', modes=['normal'])
+    @tag('M', modes=['normal'])
     def gotoMark(self):
 
         if self.checkMode():
-            self.activate()
-            self.functor=self._goto
-
-    def _unmark(self, m):
-
-        ul=self.view.getUniqLocator()
-        ul['mark']=m
-        self.table.removeRow(ul)
-        self.unmarked.emit()
-        self.modeWanted.emit(self.mode)
+            self.activate(self._goto)
 
     def _mark(self, m):
 
-        ul=self.view.getUniqLocator()
-        pl=self.view.getLocator(kind='position')
+        v=self.app.moder.type()
+        qm=self.getModel(v)
+        if not qm: return
+        ul=v.getUniqLocator()
+        pl=v.getLocator(kind='position')
         ul.update(pl)
         ul['mark']=m
-        self.table.writeRow(ul)
+        qm.add(ul)
         self.marked.emit()
-        self.modeWanted.emit(self.mode)
 
     def _goto(self, m):
 
-        ul=self.view.getUniqLocator()
+        v=self.app.moder.type()
+        ul=v.getUniqLocator()
         ul['mark']=m
-        rs=self.table.getRow(ul)
-        if rs: 
-            self.view.openLocator(
-                    rs[0], 
-                    kind='position')
+        qm=self.getModel(v)
+        if not qm: return
+        d=qm.get(ul)
+        if not d: return
+        v.openLocator(
+                d=[0], kind='position')
         self.jumped.emit()
-        self.modeWanted.emit(self.mode)
+
+    def getModel(self, v): 
+
+        uid=v.getUniqLocator()
+        uid['type']='quickmarks'
+        return self.app.buffer.getModel(uid)
 
     def checkMode(self):
 
-        m=self.app.moder.current
-        if m:
-            v=m.getView()
-            if v and v.check('canPosition'):
-                self.mode=m
-                self.view=v
-                return True
+        v=self.app.moder.type()
+        if v and v.check('canLocate'):
+            return True

@@ -1,5 +1,5 @@
 from plug.qt import Plug 
-from gizmo.utils import register
+from gizmo.utils import tag
 from tables import Bookmark as Table
 from gizmo.widget import UpDownEdit, InputList
 
@@ -36,7 +36,7 @@ class Bookmarks(Plug):
                 self.openBookmark)
         w.list.widgetDataChanged.connect(
                 self.updateContent)
-        self.uiman.setUI(w)
+        self.app.uiman.setUI(self, w)
 
     def setBookmarkPlug(self, plugs):
 
@@ -51,7 +51,7 @@ class Bookmarks(Plug):
             self.cache.pop(self.view, None)
             self.setViewBookmarks(self.view)
 
-    @register('o')
+    @tag('o')
     def openBookmark(self):
 
         l=self.ui.list
@@ -61,7 +61,7 @@ class Bookmarks(Plug):
             v.openLocator(
                     i.itemData, kind='position')
 
-    @register('d')
+    @tag('d')
     def delete(self):
 
         l=self.ui.list
@@ -72,7 +72,7 @@ class Bookmarks(Plug):
         self.resetViewBookmarks()
         l.setCurrentRow(cr)
 
-    @register('f', modes=['command'])
+    @tag('f', modes=['command'])
     def setFocus(self):
 
         p=self.app.moder.plugs
