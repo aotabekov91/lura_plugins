@@ -1,116 +1,83 @@
-from plug.qt import Plug 
 from gizmo.utils import tag
-from tables import Bookmark as Table
-from gizmo.widget import UpDownEdit, InputList
+from tables import Bookmark
+from plug.qt.plugs.render import Render 
+from gizmo.vimo.model import WTableModel
+from gizmo.vimo.view import ListWidgetView 
 
-class Bookmarks(Plug):
+class Bookmarks(Render):
 
-    def __init__(
-            self, 
-            position='dock_right',
-            leader_keys={
-                'command': 'b',
-                'Bookmarks': '<c-.>',
-                },
-            **kwargs
-            ):
+    cache={}
+    color='#CC885E'
+    position='dock_right'
+    leader_keys={
+        'command': 'b',
+        'normal': '<c-.>'}
+    model_class=WTableModel
+    model_class.kind='bookmarks'
+    model_class.table=Bookmark()
 
-        self.cache={}
-        self.view=None
-        self.color='#CC885E'
-        self.table=Table()
-        super().__init__(
-                position=position,
-                leader_keys=leader_keys,
-                **kwargs) 
-        self.app.moder.modeChanged.connect(
-                self.updateViewBookmarks)
-        self.app.moder.plugsLoaded.connect(
-                self.setBookmarkPlug)
-        self.setUI()
+    def setup(self):
 
-    def setUI(self):
+        super().setup()
+        ui=ListWidgetView(render=self)
+        ui.__class__.__name__='BookmarksView'
+        self.app.moder.typeChanged.connect(
+                self.updateType)
+        self.setupView(ui)
 
-        w=InputList(widget=UpDownEdit)
-        w.returnPressed.connect(
-                self.openBookmark)
-        w.list.widgetDataChanged.connect(
-                self.updateContent)
-        self.app.uiman.setUI(self, w)
+    def getModel(self, source):
 
-    def setBookmarkPlug(self, plugs):
+        uid=source.getUniqLocator()
+        uid['type']=self.model_class.kind
+        m=self.app.buffer.getModel(uid)
+        if m is None: 
+            l=source.getUniqLocator()
+            m=self.model_class(index=l)
+            self.app.buffer.setModel(uid, m)
+            m.load()
+        return m
 
-        p=plugs.get('bookmark', None)
-        if p:
-            p.bookmarked.connect(
-                    self.resetViewBookmarks)
+    def updateType(self, t):
 
-    def resetViewBookmarks(self):
-
-        if self.view:
-            self.cache.pop(self.view, None)
-            self.setViewBookmarks(self.view)
-
-    @tag('o')
-    def openBookmark(self):
-
-        l=self.ui.list
-        i=l.currentItem()
-        if i:
-            v=i.itemData['view']
-            v.openLocator(
-                    i.itemData, kind='position')
-
-    @tag('d')
-    def delete(self):
-
-        l=self.ui.list
-        i=l.currentItem()
-        cr=max(0, l.currentRow()-1)
-        idx=i.itemData['id']
-        self.table.removeRow({'id':idx})
-        self.resetViewBookmarks()
-        l.setCurrentRow(cr)
+        v=t.view
+        if v and v.check('canLocate'):
+            m=self.getModel(v)
+            self.view.setModel(m)
 
     @tag('f', modes=['command'])
-    def setFocus(self):
+    def activate(self):
+        self.setView(self.view)
 
-        p=self.app.moder.plugs
-        self.updateViewBookmarks(
-                p.command.client)
-        super().setFocus()
+    @tag('o', modes=['normal|Bookmarks'])
+    def open(self):
 
-    def updateViewBookmarks(self, mode):
+        i=self.view.currentItem()
+        t=self.app.moder.type()
+        if i and t.view:
+            e=i.element()
+            t.view.openLocator(
+                    e.data(), kind='position')
 
-        v=mode.getView()
-        if v and v.check('canPosition'):
-            self.setViewBookmarks(v)
-            self.view=v
+    @tag('d', modes=['normal|Bookmarks'])
+    def delete(self):
 
-    def setViewBookmarks(self, v):
-
-        if v in self.cache:
-            data=self.cache[v]
-        else:
-            data=[]
-            l=v.getUniqLocator()
-            if l:
-                data = self.table.getRow(l)
-                for r in data:
-                    r['view']=v
-                    r['down']=r['text']
-                    r['up']=f'# {r.get("id")}'
-                    self.setColorStyle(r)
-                self.cache[v]=data
-        self.ui.setList(data)
+        t=self.app.moder.type()
+        m=self.getModel(t.view)
+        idx=self.view.currentIndex()
+        if idx and m:
+            m.removeRow(idx.row())
 
     def setColorStyle(self, d):
 
+        #todo
         style=f'background-color: {self.color}'
         d['up_style']=style
 
     def updateContent(self, w):
         
+        #todo
+        # w.list.widgetDataChanged.connect(
+                # self.updateContent)
         self.table.updateRow(
                 {'id': w.data['id']}, 
                 {'text': w.data['down']})

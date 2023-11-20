@@ -37,27 +37,26 @@ class Quickmark(Plug):
 
     def _mark(self, m):
 
-        v=self.app.moder.type()
-        qm=self.getModel(v)
-        if not qm: return
-        ul=v.getUniqLocator()
-        pl=v.getLocator(kind='position')
+        t=self.app.moder.type()
+        qmodel=self.getModel(t.view)
+        if not qmodel: return
+        ul=t.view.getUniqLocator()
+        pl=t.view.getLocator(kind='position')
         ul.update(pl)
         ul['mark']=m
-        qm.add(ul)
+        qmodel.add(ul)
         self.marked.emit()
 
     def _goto(self, m):
 
-        v=self.app.moder.type()
-        ul=v.getUniqLocator()
-        ul['mark']=m
-        qm=self.getModel(v)
+        t=self.app.moder.type()
+        qm=self.getModel(t.view)
         if not qm: return
-        d=qm.get(ul)
-        if not d: return
-        v.openLocator(
-                d=[0], kind='position')
+        e=qm.find(m, 'mark')
+        if not e: return
+        t.view.openLocator(
+                e.data(), 
+                kind='position')
         self.jumped.emit()
 
     def getModel(self, v): 
@@ -68,6 +67,7 @@ class Quickmark(Plug):
 
     def checkMode(self):
 
-        v=self.app.moder.type()
+        t=self.app.moder.type()
+        v=t.view
         if v and v.check('canLocate'):
             return True

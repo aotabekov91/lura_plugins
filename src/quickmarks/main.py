@@ -1,28 +1,28 @@
 from gizmo.utils import tag
 from tables import Quickmark
-from plug.qt.plugs import render
-from gizmo.vimo import view, model
+from gizmo.vimo.view import ListView
+from plug.qt.plugs.render import Render
 
-class Quickmarks(render.Render):
+from .model import QuickmarkModel
+
+class Quickmarks(Render):
 
     leader_keys={
-        'command': 'q',
-        'Quickmarks': '<c-.>'}
+        'command': 'q', 
+        'normal': '<c-.>'}
     position='dock_right'
-    model_class=model.StandardTableModel
+    model_class=QuickmarkModel
     model_class.kind='quickmarks'
     model_class.table=Quickmark()
 
     def setup(self):
 
         super().setup()
-        self.client=None
-        ui=view.ListView()
-        ui.__name__='QuickmarkView'
+        ui=ListView(render=self)
+        ui.__class__.__name__='QuickmarksView'
         self.app.moder.typeChanged.connect(
-                self.updateView)
-        self.app.uiman.setUI(self, ui)
-        self.view=ui
+                self.updateType)
+        self.setupView(ui)
 
     def getModel(self, source):
 
@@ -36,34 +36,34 @@ class Quickmarks(render.Render):
             m.load()
         return m
 
-    def updateView(self, v):
+    def updateType(self, t):
 
-        if v.check('canLocate'):
-            self.client=v
+        v=t.view
+        if v and v.check('canLocate'):
             m=self.getModel(v)
             self.view.setModel(m)
 
-    @tag('o', modes=['normal|QuickmarkView'])
+    @tag('o', modes=['normal|Quickmarks'])
     def open(self):
 
         i=self.view.currentItem()
-        v=self.app.moder.type()
-        if i and self.client:
+        t=self.app.moder.type()
+        if i and t.view:
             e=i.element()
-            self.client.openLocator(
-                    e.data(),
-                    kind='position')
+            t.view.openLocator(
+                    e.data(), kind='position')
 
-    @tag('d', modes=['normal|QuickmarkView'])
+    @tag('d', modes=['normal|Quickmarks'])
     def delete(self):
 
+        t=self.app.moder.type()
+        m=self.getModel(t.view)
         idx=self.view.currentIndex()
-        m=self.view.model()
-        m.removeRow(idx.row())
+        if idx and m:
+            m.removeRow(idx.row())
 
     @tag('f', modes=['command'])
     def activate(self):
 
-        m=self.app.moder
+        self.activated=True
         self.setView(self.view)
-        m.typeWanted.emit(self.view)
