@@ -6,33 +6,41 @@ from gizmo.vimo.view import ListWidgetView
 
 class Bookmarks(Render):
 
-    cache={}
     color='#CC885E'
-    position='dock_right'
     leader_keys={
         'command': 'b',
         'normal': '<c-.>'}
+    kind='bookmarks'
+    position='dock_right'
+    vname='BookmarksView'
     model_class=WTableModel
-    model_class.kind='bookmarks'
     model_class.table=Bookmark()
+    model_class.widget_map={
+        'id':{'w':'Label', 'p':'0x0x1x1'},
+        'text':{'w':'TextEdit', 'p':'1x0x1x1'}
+        }
 
     def setup(self):
 
         super().setup()
-        ui=ListWidgetView(render=self)
-        ui.__class__.__name__='BookmarksView'
+        view=ListWidgetView(
+                render=self,
+                name=self.vname)
         self.app.moder.typeChanged.connect(
                 self.updateType)
-        self.setupView(ui)
+        self.setupView(view)
 
     def getModel(self, source):
 
         uid=source.getUniqLocator()
-        uid['type']=self.model_class.kind
+        uid['type']=self.kind
         m=self.app.buffer.getModel(uid)
         if m is None: 
             l=source.getUniqLocator()
-            m=self.model_class(index=l)
+            m=self.model_class(
+                    index=l, 
+                    kind=self.kind
+                    )
             self.app.buffer.setModel(uid, m)
             m.load()
         return m
@@ -63,21 +71,7 @@ class Bookmarks(Render):
 
         t=self.app.moder.type()
         m=self.getModel(t.view)
-        idx=self.view.currentIndex()
-        if idx and m:
-            m.removeRow(idx.row())
-
-    def setColorStyle(self, d):
-
-        #todo
-        style=f'background-color: {self.color}'
-        d['up_style']=style
-
-    def updateContent(self, w):
-        
-        #todo
-        # w.list.widgetDataChanged.connect(
-                # self.updateContent)
-        self.table.updateRow(
-                {'id': w.data['id']}, 
-                {'text': w.data['down']})
+        item=self.view.currentItem()
+        if item and m:
+            e=item.element()
+            m.removeElement(e)

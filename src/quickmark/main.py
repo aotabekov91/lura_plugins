@@ -44,7 +44,7 @@ class Quickmark(Plug):
         pl=t.view.getLocator(kind='position')
         ul.update(pl)
         ul['mark']=m
-        qmodel.add(ul)
+        qmodel.addElement(ul)
         self.marked.emit()
 
     def _goto(self, m):
