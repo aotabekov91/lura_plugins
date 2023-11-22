@@ -11,19 +11,19 @@ class Metadata(Plug):
     def setup(self):
 
         super().setup()
-        self.setUI()
+        self.setupUI()
         self.cache={}
         self.table=Table()
         self.app.moder.modeChanged.connect(
                 self.updateData)
 
-    def setUI(self):
+    def setupUI(self):
 
         w=InputList(widget=UpDownEdit)
         w.input.hideLabel()
         w.list.widgetDataChanged.connect(
                 self.updateContent)
-        self.app.uiman.setUI(self, w)
+        self.app.uiman.setupUI(self, w)
 
     def updateData(self, m):
 

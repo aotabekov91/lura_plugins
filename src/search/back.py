@@ -44,7 +44,7 @@ class Search(Plug):
 
     @tag('<c-f>')
     def toggleFocus(self): 
-        self.app.window.bar.edit.setFocus()
+        self.app.ui.bar.edit.setFocus()
 
     def listen(self): 
 
@@ -53,7 +53,7 @@ class Search(Plug):
 
     def activateBar(self):
 
-        bar=self.app.window.bar
+        bar=self.app.ui.bar
         bar.bottom.show()
         bar.mode.setText('/')
         bar.edit.show()
@@ -67,7 +67,7 @@ class Search(Plug):
 
     def deactivateBar(self):
 
-        bar=self.app.window.bar
+        bar=self.app.ui.bar
         bar.bottom.hide()
         bar.edit.clear()
         bar.mode.clear()
@@ -104,8 +104,8 @@ class Search(Plug):
     def find(self, jump=True):
 
         self.clear()
-        self.app.window.main.setFocus()
-        text=self.app.window.bar.edit.text()
+        self.app.ui.main.setFocus()
+        text=self.app.ui.bar.edit.text()
         if text:
             self.text=text
             view=self.display.currentView()

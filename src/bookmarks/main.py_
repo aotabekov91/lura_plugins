@@ -27,16 +27,16 @@ class Bookmarks(Plug):
                 self.updateViewBookmarks)
         self.app.moder.plugsLoaded.connect(
                 self.setBookmarkPlug)
-        self.setUI()
+        self.setupUI()
 
-    def setUI(self):
+    def setupUI(self):
 
         w=InputList(widget=UpDownEdit)
         w.returnPressed.connect(
                 self.openBookmark)
         w.list.widgetDataChanged.connect(
                 self.updateContent)
-        self.app.uiman.setUI(self, w)
+        self.app.uiman.setupUI(self, w)
 
     def setBookmarkPlug(self, plugs):
 

@@ -1,18 +1,16 @@
 from PyQt5 import QtCore
-from plug.qt import Plug
 from gizmo.utils import tag
 
-class Quickmark(Plug):
+class CreateMixin:
 
     functor=None
-    delisten_on_exec=True
     jumped=QtCore.pyqtSignal()
     marked=QtCore.pyqtSignal()
     unmarked=QtCore.pyqtSignal()
 
     def event_functor(self, e, ear):
 
-        if e.text() and self.functor: 
+        if self.functor and e.text():
             self.functor(e.text())
             ear.clearKeys()
             self.deactivate()
@@ -23,22 +21,27 @@ class Quickmark(Plug):
         self.functor=functor
         super().activate()
 
+    def deactivate(self):
+
+        self.functor=None
+        super().deactivate()
+
     @tag('m', modes=['normal'])
     def setMark(self):
 
-        if self.checkMode():
-            self.activate(self._mark)
+        if self.checkView():
+            self.activate(self.mark)
 
-    @tag('M', modes=['normal'])
+    @tag('t', modes=['normal'])
     def gotoMark(self):
 
-        if self.checkMode():
-            self.activate(self._goto)
+        if self.checkView():
+            self.activate(self.goto)
 
-    def _mark(self, m):
+    def mark(self, m):
 
-        t=self.app.moder.type()
-        v=t.view()
+        v=self.checkView()
+        if not v: return
         qm=self.getModel(v)
         if not qm: return
         ul=v.getUniqLocator()
@@ -46,30 +49,18 @@ class Quickmark(Plug):
         ul.update(pl)
         ul['mark']=m
         qm.addElement(ul)
+        self.deactivate()
         self.marked.emit()
 
-    def _goto(self, m):
+    def goto(self, m):
 
-        t=self.app.moder.type()
-        v=t.view()
+        v=self.checkView()
+        if not v: return
         qm=self.getModel(v)
         if not qm: return
-        e=qm.find(m, 'mark')
+        e=qm.findElement(m, by='mark')
         if not e: return
-        v.openLocator(
-                e.data(), 
-                kind='position')
+        k=self.locator_kind
+        v.openLocator(e.data(), k)
         self.jumped.emit()
-
-    def getModel(self, v): 
-
-        uid=v.getUniqLocator()
-        uid['type']='quickmarks'
-        return self.app.buffer.getModel(uid)
-
-    def checkMode(self):
-
-        t=self.app.moder.type()
-        v=t.view()
-        if v and v.check('canLocate'):
-            return True
+        self.deactivate()

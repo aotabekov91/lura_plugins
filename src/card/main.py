@@ -36,7 +36,7 @@ class Card(Plug):
 
         super().setup()
         self.filler=Submitter()
-        self.setUI()
+        self.setupUI()
         self.update()
         self.app.moder.plugsLoaded.connect(
                 self.on_plugsLoaded)
@@ -44,10 +44,10 @@ class Card(Plug):
     def on_plugsLoaded(self, plugs):
         self.input=plugs.get('input', None)
 
-    def setUI(self):
+    def setupUI(self):
 
         special=['return']
-        self.app.uiman.setUI(self)
+        self.app.uiman.setupUI(self)
         main=InputList(
                 widget=UpDownEdit,
                 special=special)

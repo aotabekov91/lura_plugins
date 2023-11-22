@@ -26,7 +26,7 @@ class Parts(Plug):
                 **kwargs)
 
         self.table=Table()
-        self.setUI()
+        self.setupUI()
 
     def setup(self):
 
@@ -37,9 +37,9 @@ class Parts(Plug):
     def toggleFollow(self): 
         self.follow=not self.follow
 
-    def setUI(self):
+    def setupUI(self):
 
-        self.app.uiman.setUI(self)
+        self.app.uiman.setupUI(self)
         t=PartTree()
         t.returnPressed.connect(self.open)
         t.itemChanged.connect(self.on_itemChanged)

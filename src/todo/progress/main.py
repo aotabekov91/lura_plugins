@@ -13,12 +13,12 @@ class Progress(Plug):
                 **kwargs,
                 )
 
-        self.setUI()
+        self.setupUI()
         # TODO: to finish
 
-    def setUI(self):
+    def setupUI(self):
 
-        self.uiman.setUI()
+        self.uiman.setupUI()
 
         self.ui.addWidget(InputList(), 'main', main=True)
         self.ui.main.input.setLabel('Reading list')

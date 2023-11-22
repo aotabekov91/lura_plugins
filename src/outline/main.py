@@ -43,9 +43,9 @@ class Outline(TreePlug):
         idx=self.view.findInOutline(i)
         self.tree.setCurrentIndex(idx)
 
-    def setUI(self):
+    def setupUI(self):
 
-        super().setUI()
+        super().setupUI()
         self.tree=self.ui.main.tree
 
     @tag('o')

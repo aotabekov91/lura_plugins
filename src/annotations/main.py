@@ -25,7 +25,7 @@ class Annotations(Plug):
         self.app.moder.plugsLoaded.connect(
                 self.setAnnotatePlug)
         self.setColors()
-        self.setUI()
+        self.setupUI()
 
     def setColors(self):
 
@@ -41,12 +41,12 @@ class Annotations(Plug):
             ear.clearKeys()
             return True
 
-    def setUI(self):
+    def setupUI(self):
 
         w=InputList(widget=UpDownEdit)
         w.list.widgetDataChanged.connect(
                 self.updateContent)
-        self.app.uiman.setUI(self, w)
+        self.app.uiman.setupUI(self, w)
 
     def connectModel(self, m):
 

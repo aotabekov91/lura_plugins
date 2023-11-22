@@ -25,12 +25,12 @@ class AnnotateList(Plug):
                     lambda: u.activate(self))
             p.endedListening.connect(
                     lambda: u.deactivate(self))
-            self.setUI()
+            self.setupUI()
 
-    def setUI(self):
+    def setupUI(self):
 
         l=ListWidget()
-        self.app.uiman.setUI(self, l)
+        self.app.uiman.setupUI(self, l)
         for k, v in self.colors.items():
             t=f'{v["name"]} [{k}]'
             i=QtGui.QStandardItem(t)

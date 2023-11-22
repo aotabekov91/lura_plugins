@@ -1,75 +1,46 @@
 from gizmo.utils import tag
-from tables import Quickmark
-from plug.qt.plugs.render import Render
-from gizmo.vimo.model import WTableModel
-from gizmo.vimo.view import ListWidgetView
+from tables import Quickmark as Table
+from plug.qt.plugs.render import TableRender
 
-class Quickmarks(Render):
+from .utils import CreateMixin
 
-    leader_keys={
-        'command': 'q', 
-        'normal': '<c-.>'}
+class Quickmarks(
+        CreateMixin,
+        TableRender,
+        ):
+
+    table=Table()
     kind='quickmarks'
-    position='dock_right'
-    vname='QuickmarksView'
-    model_class=WTableModel
-    model_class.table=Quickmark()
-    model_class.widget_map={
-        'mark':{'w':'Label', 'p':'0x0x1x1'},
-        }
+    view_prop='canLocate'
+    locator_kind='position'
+    view_name='QuickmarksView'
+    position={
+            'QuickmarksView': 'dock_right'
+            }
+    leader_keys={
+            'command': 'q', 
+            'normal|QuickmarksView': '<c-.>'
+            }
+    widget_map={
+            'mark':{'w':'Label', 'p':'0x0x1x1'}
+            }
 
-    def setup(self):
-
-        super().setup()
-        view=ListWidgetView(
-                render=self, name=self.vname)
-        self.app.moder.typeChanged.connect(
-                self.updateType)
-        self.setupView(view)
-
-    def getModel(self, source):
-
-        uid=source.getUniqLocator()
-        uid['type']=self.kind
-        m=self.app.buffer.getModel(uid)
-        if m is None: 
-            l=source.getUniqLocator()
-            m=self.model_class(
-                    index=l, kind=self.kind)
-            self.app.buffer.setModel(uid, m)
-            m.load()
-        return m
-
-    def updateType(self, t):
-
-        v=t.view
-        if v and v.check('canLocate'):
-            m=self.getModel(v)
-            self.view.setModel(m)
-
-    @tag('o', modes=['normal|Quickmarks'])
+    @tag('o', modes=['normal|QuickmarksView'])
     def open(self):
+        raise
+        super().open()
 
-        i=self.view.currentItem()
-        t=self.app.moder.type()
-        if i and t.view:
-            e=i.element()
-            t.view.openLocator(
-                    e.data(), 
-                    kind='position')
-
-    @tag('d', modes=['normal|Quickmarks'])
+    @tag('d', modes=['normal|QuickmarksView'])
     def delete(self):
-
-        t=self.app.moder.type()
-        m=self.getModel(t.view)
-        item=self.view.currentItem()
-        if item and m:
-            e=item.element()
-            m.removeElement(e)
+        raise
+        super().delete()
 
     @tag('f', modes=['command'])
-    def activate(self):
+    def focusView(self):
 
-        self.activated=True
-        self.setView(self.view)
+        self.rendering=False
+        super().toggleRender()
+
+    @tag('t', modes=['command'])
+    def toggleRender(self):
+        super().toggleRender()

@@ -14,7 +14,7 @@ class SearchList(Plug):
         self.display=self.app.display
         self.app.moder.plugsLoaded.connect(
                 self.on_plugsLoaded)
-        self.setUI()
+        self.setupUI()
 
     def on_plugsLoaded(self, plugs):
 
@@ -45,9 +45,9 @@ class SearchList(Plug):
                     }]
             self.ui.main.setList(dlist)
 
-    def setUI(self):
+    def setupUI(self):
 
-        self.app.uiman.setUI(self)
+        self.app.uiman.setupUI(self)
         w=InputList(widget=UpDown)
         w.input.hideLabel()
         self.ui.addWidget(

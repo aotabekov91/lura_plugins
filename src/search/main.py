@@ -27,7 +27,7 @@ class Search(Plug):
 
     def setConnect(self):
 
-        self.bar=self.app.window.bar
+        self.bar=self.app.ui.bar
         self.ear.returnPressed.connect(
                 self.startSearch)
 

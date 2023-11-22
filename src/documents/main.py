@@ -14,7 +14,7 @@ class Documents(Plug):
         super().setup()
         self.meta=Metadata()
         self.hash=Hash()
-        self.setUI()
+        self.setupUI()
 
     def event_functor(self, e, ear):
 
@@ -24,9 +24,9 @@ class Documents(Plug):
             ear.clearKeys()
             return True
 
-    def setUI(self):
+    def setupUI(self):
 
-        self.app.uiman.setUI(self)
+        self.app.uiman.setupUI(self)
         w=InputList(widget=UpDown)
         self.ui.addWidget(
                 w, 'main', main=True)
@@ -60,7 +60,7 @@ class Documents(Plug):
             path=self.hash.getPath(
                     item.itemData['hash'])
             if path: 
-                self.app.window.display.open(
+                self.app.ui.display.open(
                         path, how=how)
         if hide: 
             self.delistenWanted.emit()

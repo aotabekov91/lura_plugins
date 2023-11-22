@@ -21,7 +21,7 @@ class Bookmark(Plug):
                 **kwargs) 
         self.view=None
         self.table=Table()
-        self.bar=self.app.window.bar
+        self.bar=self.app.ui.bar
         self.ear.returnPressed.connect(
                 self.bookmark)
 
