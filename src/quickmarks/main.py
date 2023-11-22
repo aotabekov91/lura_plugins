@@ -25,6 +25,9 @@ class Quickmarks(
             'mark':{'w':'Label', 'p':'0x0x1x1'}
             }
 
+    def setType(self, t):
+        pass
+
     @tag('o', modes=['normal|QuickmarksView'])
     def open(self):
         raise
@@ -35,12 +38,12 @@ class Quickmarks(
         raise
         super().delete()
 
-    @tag('f', modes=['command'])
+    # @tag('f', modes=['command'])
     def focusView(self):
 
         self.rendering=False
         super().toggleRender()
 
-    @tag('t', modes=['command'])
+    # @tag('t', modes=['command'])
     def toggleRender(self):
         super().toggleRender()
