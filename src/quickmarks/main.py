@@ -25,9 +25,6 @@ class Quickmarks(
             'mark':{'w':'Label', 'p':'0x0x1x1'}
             }
 
-    def setType(self, t):
-        pass
-
     @tag('o', modes=['normal|QuickmarksView'])
     def open(self):
         raise
