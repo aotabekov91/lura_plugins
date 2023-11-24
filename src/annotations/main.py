@@ -11,7 +11,7 @@ class Annotations(Plug):
     table=Table()
     func_colors={}
     position='dock_right'
-    leader_keys={
+    prefix_keys={
         'command': 'a',
         'Annotations': '<c-.>'}
 
@@ -99,7 +99,7 @@ class Annotations(Plug):
         d['down']=d['content']
         d['box']=model.getAnnBox(d)
         d['up']=f'# {d.get("id")}'
-        d['up_style']=f'background-color: {c.name()}'
+        d['up_style']=f'background-color: {c.name}'
         if view:
             d['view']=view
             d['item']=view.item(element=elem)

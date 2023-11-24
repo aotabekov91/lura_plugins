@@ -7,7 +7,7 @@ from gizmo.widget import UpDown, InputList
 class Documents(Plug):
 
     position='dock_right'
-    leader_keys={'command': 'd'}
+    prefix_keys={'command': 'd'}
 
     def setup(self):
 

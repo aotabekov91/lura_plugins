@@ -8,7 +8,7 @@ class Bookmarks(Plug):
     def __init__(
             self, 
             position='dock_right',
-            leader_keys={
+            prefix_keys={
                 'command': 'b',
                 'Bookmarks': '<c-.>',
                 },
@@ -21,7 +21,7 @@ class Bookmarks(Plug):
         self.table=Table()
         super().__init__(
                 position=position,
-                leader_keys=leader_keys,
+                prefix_keys=prefix_keys,
                 **kwargs) 
         self.app.moder.modeChanged.connect(
                 self.updateViewBookmarks)

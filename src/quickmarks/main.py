@@ -17,7 +17,7 @@ class Quickmarks(
     position={
             'QuickmarksView': 'dock_right'
             }
-    leader_keys={
+    prefix_keys={
             'command': 'q', 
             'normal|QuickmarksView': '<c-.>'
             }

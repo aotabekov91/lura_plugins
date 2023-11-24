@@ -10,7 +10,7 @@ class Links(Plug):
     hinting=False
     selection=None
     listen_leader='<c-l>'
-    leader_keys={'command': 'l'}
+    prefix_keys={'command': 'l'}
     linkSelected=QtCore.pyqtSignal()
 
     def event_functor(self, e, ear):

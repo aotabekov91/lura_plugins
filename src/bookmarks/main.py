@@ -4,7 +4,7 @@ from plug.qt.plugs.render import TableRender
 
 class Bookmarks(TableRender):
 
-    leader_keys={
+    prefix_keys={
         'command': 'b',
         'normal': '<c-.>'}
     table=Table()

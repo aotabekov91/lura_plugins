@@ -37,7 +37,6 @@ class QuickmarksView(Render):
 
     def checkView(self, t=None):
 
-        t = t or self.app.moder.type()
-        obj=t.view()
+        obj = t or self.app.handler.type()
         if obj and obj.check(self.view_prop):
             return obj

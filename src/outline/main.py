@@ -8,7 +8,7 @@ class Outline(TreePlug):
     def __init__(
             self, 
             position='dock_left',
-            leader_keys={
+            prefix_keys={
                 'command': 'o',
                 'Outline': '<c-.>',
                 },
@@ -16,7 +16,7 @@ class Outline(TreePlug):
 
         super().__init__(
                 position=position,
-                leader_keys=leader_keys,
+                prefix_keys=prefix_keys,
                 **kwargs,
                 )
         self.app.moder.modeChanged.connect(

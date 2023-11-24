@@ -5,7 +5,7 @@ from gizmo.widget import UpDownEdit, InputList
 class Metadata(Plug):
 
     position='dock_right'
-    leader_keys={'command': 'm'}
+    prefix_keys={'command': 'm'}
     exclude=['id', 'hash', 'url', 'kind']
 
     def setup(self):

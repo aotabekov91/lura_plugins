@@ -11,7 +11,7 @@ class Card(Plug):
             self, 
             app, 
             position='dock_right', 
-            leader_keys={
+            prefix_keys={
                 'command': 'c', 
                 'Card': '<c-.>', 
                 }, 
@@ -28,7 +28,7 @@ class Card(Plug):
         super(Card, self).__init__(
                 app=app,
                 position=position,
-                leader_keys=leader_keys,
+                prefix_keys=prefix_keys,
                 **kwargs
                 )
 

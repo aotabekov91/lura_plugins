@@ -37,8 +37,7 @@ class Quickmark(Plug):
 
     def _mark(self, m):
 
-        t=self.app.moder.type()
-        v=t.view()
+        v=self.app.handler.type()
         qm=self.getModel(v)
         if not qm: return
         ul=v.getUniqLocator()
@@ -50,8 +49,7 @@ class Quickmark(Plug):
 
     def _goto(self, m):
 
-        t=self.app.moder.type()
-        v=t.view()
+        v=self.app.handler.type()
         qm=self.getModel(v)
         if not qm: return
         e=qm.find(m, 'mark')
@@ -69,7 +67,6 @@ class Quickmark(Plug):
 
     def checkMode(self):
 
-        t=self.app.moder.type()
-        v=t.view()
+        v=self.app.handler.type()
         if v and v.check('canLocate'):
             return True
