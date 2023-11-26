@@ -17,8 +17,7 @@ class Quickmark(Plug):
 
         if e.text() and self.functor: 
             self.functor(e.text())
-            # ear.clearKeys()
-            self.deactivate()
+            self.octivate()
             return True
 
     def activate(self, functor):
@@ -26,57 +25,56 @@ class Quickmark(Plug):
         self.functor=functor
         super().activate()
 
-    def deactivate(self):
+    def octivate(self):
 
         self.functor=None
-        super().deactivate()
+        super().octivate()
 
     @tag('m', modes=['normal'])
     def setMark(self):
 
-        if self.checkMode():
+        if self.checkType():
             self.activate(self.mark)
 
-    @tag('t', modes=['normal'])
+    @tag('M', modes=['normal'])
     def gotoMark(self):
 
-        if self.checkMode():
+        if self.checkType():
             self.activate(self.goto)
 
     def mark(self, m):
 
-        v=self.app.handler.type()
-        qm=self.getModel(v)
-        if qm:
-            ul=v.getUniqLocator()
-            pl=v.getLocator(kind='position')
+        t, tm=self.getModel()
+        if tm:
+            ul=t.getUniqLocator()
+            pl=t.getLocator(kind='position')
             ul.update(pl)
             ul['mark']=m
-            qm.addElement(ul)
+            tm.addElement(ul)
             self.marked.emit()
 
     def goto(self, m):
 
-        t=self.app.handler.type()
-        qm=self.getModel(t)
-        if not qm: return
-        e=qm.find(m, by='mark')
-        if e:
-            d=e.data()
-            t.openLocator(d, kind='position')
-            self.jumped.emit()
+        t, tm=self.getModel()
+        if not tm: return
+        e=tm.findElement(m, by='mark')
+        if not e: return
+        d=e.data()
+        t.openLocator(d, kind='position')
+        self.jumped.emit()
 
-    def getModel(self, t):
+    def getModel(self, t=None):
 
+        t=t or self.app.handler.type()
         if not t: return
         if not t.model().isType: return
         b=self.app.buffer
         n=self.model_name
         s=self.source_name
         l=t.getUniqLocator()
-        return b.getModel((l, n, s))
+        return t, b.getModel((l, n, s))
 
-    def checkMode(self):
+    def checkType(self):
 
         p=self.check_props
         t=self.app.handler.type()

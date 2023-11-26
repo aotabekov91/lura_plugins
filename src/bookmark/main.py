@@ -1,79 +1,86 @@
-from PyQt5 import QtCore
 from plug.qt import Plug 
-from tables import Bookmark as Table
+from gizmo.utils import tag
+from PyQt5.QtCore import pyqtSignal, Qt
 
 class Bookmark(Plug):
 
-    bookmarked=QtCore.pyqtSignal()
+    isMode=True
+    special=['return']
+    model_name='Bookmark'
+    source_name='kind=table;'
+    check_props=['canLocate']
+    bookmarked=pyqtSignal()
 
-    def __init__(
-            self, 
-            report_keys=False,
-            special=['return'],
-            listen_leader='<c-b>',
-            **kwargs
-            ):
+    def event_functor(self, e, ear):
 
-        super().__init__(
-                special=special,
-                report_keys=report_keys,
-                listen_leader=listen_leader,
-                **kwargs) 
-        self.view=None
-        self.table=Table()
-        self.bar=self.app.ui.bar
-        self.ear.returnPressed.connect(
-                self.bookmark)
+        m=[Qt.Key_Return, Qt.Key_Enter]
+        if e.key() in m:
+            self.saveBookmark()
+            self.octivate()
+            return True
 
-    def delisten(self):
+    def octivateBar(self):
 
-        super().delisten()
-        self.bar.bottom.hide()
-        self.bar.edit.clear()
+        self.app.ui.bar.bottom.hide()
+        self.app.ui.bar.edit.clear()
 
-    def listen(self):
+    def activateBar(self):
 
-        super().listen()
-        self.getBookmark(edit_bar=True)
-        self.bar.bottom.show()
-        self.bar.edit.setFocus()
+        self.app.ui.bar.bottom.show()
+        self.app.ui.bar.edit.setFocus()
 
-    def getBookmark(self, edit_bar=False):
+    def activate(self):
 
-        l=self.view.getLocator(kind='position')
-        r=self.table.getRow(l)
-        if r and edit_bar: 
-            t=r[0]['text']
-            self.bar.edit.setText(t)
-        return r
+        super().activate()
+        self.activateBar()
+        self.setBookmark()
 
+    def octivate(self):
+
+        super().octivate()
+        self.octivateBar()
+
+    def setBookmark(self):
+
+        t, tm=self.getModel()
+        if not tm: return 
+        l=t.getLocator(kind='position')
+        p=l['position']
+        e=tm.findElement(p, by='position')
+        if e:
+            self.app.ui.bar.edit.setText(
+                    e.data('text'))
+
+    @tag('<c-b>', modes=['normal'])
     def bookmark(self):
 
-        t=self.bar.edit.text()
-        data=self.getBookmark()
-        if data:
-            c={'id': data[0]['id']}
-            self.table.updateRow(
-                    c, {'text':t})
-        else:
-            l=self.view.getLocator(
-                    kind='position')
-            u=self.view.getUniqLocator()
-            l.update(u)
-            l.update({'text': t, 'title': t})
-            self.table.writeRow(l)
+        if self.checkType():
+            self.activate()
+
+    def saveBookmark(self):
+
+        text=self.app.ui.bar.edit.text()
+        t, tm = self.getModel()
+        ul=t.getUniqLocator({'text': text})
+        pl=t.getLocator(kind='position')
+        ul.update(pl)
+        tm.addElement(ul)
         self.bookmarked.emit()
-        self.delistenWanted.emit()
+        self.octivate()
 
-    def checkLeader(self, e, p):
+    def getModel(self, t=None):
 
-        if super().checkLeader(e, p):
-            if self.ear.listening:
-                return True
-            c=self.app.moder.current
-            if c:
-                v=c.getView()
-                if v.check('canPosition'):
-                    self.view=v
-                    return True
-        return False
+        t=t or self.app.handler.type()
+        if not t: return
+        if not t.model().isType: return
+        b=self.app.buffer
+        n=self.model_name
+        s=self.source_name
+        l=t.getUniqLocator()
+        return t, b.getModel((l, n, s))
+
+    def checkType(self):
+
+        p=self.check_props
+        t=self.app.handler.type()
+        return self.checkProp(p, t)
