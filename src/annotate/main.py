@@ -1,7 +1,9 @@
 from plug.qt import Plug
 from functools import partial
-from PyQt5 import QtGui, QtCore
 from tables import Annotation as Table
+from PyQt5 import QtGui, QtCore, QtWidgets
+
+from .widget import AList
 
 class Annotate(Plug):
 
@@ -11,11 +13,26 @@ class Annotate(Plug):
     kind='highlight'
     default_color='cyan'
     listen_leader='<c-a>'
+    position={'AList' : 'overlay'}
+
+    def setupUI(self):
+
+        self.ui=AList(
+                parent=self.app.display)
+        self.app.uiman.setupUI(
+                self, self.ui, 'AList')
+        m=QtGui.QStandardItemModel()
+        for k, v in self.colors.items():
+            t=f'{v["name"]} [{k}]'
+            i=QtGui.QStandardItem(t)
+            m.appendRow(i)
+        self.ui.setModel(m)
 
     def setup(self):
 
         super().setup()
         self.setColors()
+        self.setupUI()
         self.app.buffer.modelLoaded.connect(
                 self.annotateModel)
         self.default_color=QtGui.QColor(

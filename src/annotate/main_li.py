@@ -1,7 +1,7 @@
 from PyQt5 import QtGui
 from plug.qt import Plug
 
-from .widget import ListWidget
+from .widget import AList
 
 class AnnotateList(Plug):
 
@@ -29,7 +29,7 @@ class AnnotateList(Plug):
 
     def setupUI(self):
 
-        l=ListWidget()
+        l=AList()
         self.app.uiman.setupUI(self, l)
         for k, v in self.colors.items():
             t=f'{v["name"]} [{k}]'
