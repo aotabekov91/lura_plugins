@@ -1,29 +1,22 @@
-from PyQt5 import QtCore, QtGui
-
 from gizmo.utils import tag
+from PyQt5 import QtCore, QtGui
 from plug.qt.plugs.visual import Visual as Mode
 
 class Visual(Mode):
 
-    key=''
-    jumping=False
-    hinting=False
-    seletion=None
-    hintSelected=QtCore.pyqtSignal()
+    def event_functor(self, e, ear):
 
-    def addOwnKeys(self, event):
-
-        if self.hinting:
-            if event.text():
-                self.key+=event.text()
-                self.view.updateHint(self.key)
-                event.accept()
-                return True
-        return self.listenerAddKeys(event)
+        t=e.text()
+        sm=self.submode()
+        c = sm in ['Hint', 'Jump']
+        if c and t: 
+            self.key+=t
+            self.view.updateHint(self.key)
+            return True
+        return False
 
     def finishHinting(self):
 
-        self.hinting=False
         self.view.hintSelected.disconnect(
                 self.selectHinted)
         self.view.hintFinished.disconnect(
@@ -32,83 +25,101 @@ class Visual(Mode):
     def selectHinted(self, data):
 
         i=data['item']
-        if not self.jumping:
-            if self.view.check('canSelect'):
-                self.view.select(i, data)
-        else:
-            self._jump(data)
+        sm=self.submode()
+        if sm=='Jump': 
+            self.jump(data)
+        elif sm=='Hint':
+            self.view.select(i, data)
 
-    @tag('f')
-    def hint(self):
+    def activate(self):
+
+        super().activate()
+        self.setSubmode('Select')
+        
+    def octivate(self):
+
+        super().octivate()
+        self.setSubmode()
+
+    @tag('<c-j>', modes=['visual']) 
+    def activateJump(self):
+        self.setSubmode('Jump')
+
+    @tag('<c-h>', modes=['visual']) 
+    def activateHint(self):
+        self.setSubmode('Hint')
+
+    @tag('<c-s>', modes=['visual']) 
+    def activateSelect(self):
+        self.setSubmode('Select')
+
+    @tag('w', modes=['visual[Jump]']) 
+    def jumpWord(self):
+        self.hintWord()
+
+    @tag('w', modes=['visual[Hint]'])
+    def hintWord(self):
 
         self.key=''
-        self.hinting=True
         self.view.hintSelected.connect(
                 self.selectHinted)
         self.view.hintFinished.connect(
                 self.finishHinting)
-        self.view.hint()
+        self.view.hint(kind='words')
 
-    @tag('o')
+    @tag('o', modes=['visual[Select]'])
     def gotoStart(self): 
         self.goto(kind='first')
 
-    @tag('$')
+    @tag('$', modes=['visual[Select]'])
     def gotoEnd(self):
         self.goto(kind='last')
 
-    @tag('j') 
+    @tag('j', modes=['visual[Select]']) 
     def selectDown(self, digit=1):
         self.goto(kind='down', digit=digit)
 
-    @tag('k') 
+    @tag('k', modes=['visual[Select]']) 
     def selectUp(self, digit=1):
         self.goto(kind='up', digit=digit)
 
-    @tag('J') 
+    @tag('J', modes=['visual[Select]']) 
     def deselectDown(self, digit=1):
         self.goto(kind='cancelDown', digit=digit)
 
-    @tag('K') 
+    @tag('K', modes=['visual[Select]']) 
     def deselectUp(self, digit=1):
         self.goto(kind='cancelUp', digit=digit)
 
-    @tag('w') 
+    @tag('w', modes=['visual[Select]']) 
     def selectNext(self, digit=1):
         self.goto(kind='next', digit=digit)
         
-    @tag('W')
+    @tag('W', modes=['visual[Select]'])
     def deselectNext(self, digit=1):
         self.goto(kind='cancelNext', digit=digit)
 
-    @tag('b') 
+    @tag('b', modes=['visual[Select]']) 
     def selectPrev(self, digit=1):
         self.goto(kind='prev', digit=digit)
         
-    @tag('B') 
+    @tag('B', modes=['visual[Select]']) 
     def deselectPrev(self, digit=1):
         self.goto(kind='cancelPrev', digit=digit)
 
-    @tag('g')
-    def jump(self):
+    def jump(self, data):
 
-        self.jumping=True
-        self.hint()
-
-    def _jump(self, sel):
-
-        self.jumping=False
-        item=sel['item']
-        e=item.element()
+        i=data['item']
+        e=i.element()
         c=self.view.selection()
-        e.jumpToBlock(c, sel)
+        e.jumpToBlock(c, data)
         
     def goto(self, kind, digit=1):
 
         for i in range(digit):
-            sel=self.view.selection()
-            if sel:
-                item=sel['item']
-                e=item.element()
-                e.updateBlock(kind, sel)
-                item.update()
+            data=self.view.selection()
+            if data:
+                i=data['item']
+                e=i.element()
+                e.updateBlock(kind, data)
+                i.update()
