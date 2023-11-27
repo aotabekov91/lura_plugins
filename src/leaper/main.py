@@ -5,31 +5,43 @@ class Leaper(Plug):
 
     def setup(self):
 
-        super().setup()
         self.jumps={}
         self.indices={}
-        self.setConnect()
-
-    def setConnect(self):
-
-        self.display=self.app.display
-        self.display.itemChanged.connect(
-                self.on_itemChanged)
+        super().setup()
+        self.app.handler.viewChanged.connect(
+                self.resetView)
 
     def setDisconnect(self):
 
         self.display.itemChanged.disconnect(
                 self.on_itemChanged)
 
-    def on_itemChanged(self, view, item):
+    def resetView(self, v):
 
-        if not view in self.jumps:
-            self.jumps[view]={}
-            self.indices[view]=0
+        c1=self.checkProp('canMove', v)
+        c2=self.checkProp('positionChanged', v)
+        if c1 and c2:
+            self.reconnect('disconnect')
+            self.view=v
+            self.reconnect()
 
-        jumps=self.jumps.get(view)
-        index=self.indices.get(view)
-        idx=view.item().index()
+    def reconnect(self, kind='connect'):
+
+        v = self.view
+        if not v: return
+        f=getattr(v.positionChanged, kind)
+        f(self.saveState)
+
+    def saveState(self):
+
+        v=self.view
+        if not v in self.jumps:
+            self.jumps[v]={}
+            self.indices[v]=0
+
+        jumps=self.jumps.get(v)
+        index=self.indices.get(v)
+        idx=v.item().index()
         data=(idx, view.getPosition())
 
         idx_data=jumps.get(index, None)
@@ -62,7 +74,6 @@ class Leaper(Plug):
             if data:
                 page, (top, left)= data 
                 self.indices[view]=current
-
                 self.setDisconnect()
                 view.goto(page, left, top) 
                 self.setConnect()

@@ -1,85 +1,86 @@
 from ankipulator import Submitter
-from PyQt5 import QtWidgets, QtGui
 from plyer import notification as echo 
 
 from plug.qt import Plug
 from gizmo.utils import tag
-from gizmo.vimo.model import SModel
-from gizmo.vimo.view import ListView
-from gizmo.widget import StackedWidget
+from gizmo.widget import InputList, UpDownEdit
 
 class Card(Plug):
 
-    anki=Submitter()
-    field_color='#AC33EF'
-    listen_leader='<c-e>'
-    position={'ui': 'dock_right'}
-    prefix_keys={'command': 'c', 'Card': '<c-.>'} 
+    def __init__(
+            self, 
+            app, 
+            position='dock_right', 
+            prefix_keys={
+                'command': 'c', 
+                'Card': '<c-.>', 
+                }, 
+            **kwargs
+            ):
+
+        self.decks=[]
+        self.models=[]
+        self.fields={}
+        self.pinned=[]
+        self.deck=None
+        self.model=None
+        self.field_color='#AC33EF'
+        super(Card, self).__init__(
+                app=app,
+                position=position,
+                prefix_keys=prefix_keys,
+                **kwargs
+                )
 
     def setup(self):
 
         super().setup()
-        self.m_decks=[]
-        self.m_models=[]
-        self.fields={}
-        self.pinned=[]
-        self.m_deck=None
-        self.m_model=None
-        self.setData()
+        self.filler=Submitter()
         self.setupUI()
+        self.update()
+        self.app.moder.plugsLoaded.connect(
+                self.on_plugsLoaded)
+
+    def on_plugsLoaded(self, plugs):
+        self.input=plugs.get('input', None)
 
     def setupUI(self):
 
-        raise
-        self.ui=StackedWidget()
-        self.decks_view=ListView()
-        self.decks_view.setModel(self.m_decks)
-        self.ui.addWidget(self.decks_view, 'decks')
-        self.app.uiman.setupUI(self, self.ui)
-
-    @tag('d', modes=['command'])
-    def activate(self):
-
-        super().activate()
-        self.ui.show(self.ui.decks)
-        self.app.handler.setView(self.ui.decks)
-
-        # main=InputList(
-        #         widget=UpDownEdit,
-        #         special=special)
-        # main.input.setLabel('Card')
-        # main.returnPressed.connect(
-        #         self.submit)
-        # main.list.widgetDataChanged.connect(
-        #         self.on_contentChanged)
-        # self.ui.addWidget(
-        #         main, 'main', main=True)
-
-        # decks=InputList(
-        #         special=special)
-        # decks.input.setLabel(
-        #         'Decks')
-        # decks.returnPressed.connect(
-        #         self.on_decksReturnPressed)
-        # self.ui.addWidget(
-        #         decks , 'decks')
-
-        # models=InputList(
-        #         special=special)
-        # models.input.setLabel('Models')
-        # models.returnPressed.connect(
-        #         self.on_modelsReturnPressed)
-        # self.ui.addWidget(
-        #         models, 'models')
-
-        # info=InputList(
-        #         widget=UpDownEdit,
-        #         special=special)
-        # info.input.setLabel('Info')
-        # info.returnPressed.connect(
-        #         self.on_modelsReturnPressed)
-        # self.ui.addWidget(
-        #         info, 'info')
+        special=['return']
+        self.app.uiman.setupUI(self)
+        main=InputList(
+                widget=UpDownEdit,
+                special=special)
+        main.input.setLabel('Card')
+        main.returnPressed.connect(
+                self.submit)
+        main.list.widgetDataChanged.connect(
+                self.on_contentChanged)
+        self.ui.addWidget(
+                main, 'main', main=True)
+        decks=InputList(
+                special=special)
+        decks.input.setLabel(
+                'Decks')
+        decks.returnPressed.connect(
+                self.on_decksReturnPressed)
+        self.ui.addWidget(
+                decks , 'decks')
+        models=InputList(
+                special=special)
+        models.input.setLabel('Models')
+        models.returnPressed.connect(
+                self.on_modelsReturnPressed)
+        self.ui.addWidget(
+                models, 'models')
+        info=InputList(
+                widget=UpDownEdit,
+                special=special)
+        info.input.setLabel('Info')
+        info.returnPressed.connect(
+                self.on_modelsReturnPressed)
+        self.ui.addWidget(
+                info, 'info')
 
     def getWidget(self, digit=None):
 
@@ -91,23 +92,21 @@ class Card(Plug):
         if not item: return
         return item.widget
 
-    def setData(self):
+    @tag('u')
+    def update(self):
 
-        self.m_decks=SModel()
-        for d in self.anki.getDecks():
-            i=QtGui.QStandardItem(d.name)
-            i.itemData=d.id
-            self.m_decks.appendRow(i)
-            # d={'up':d.name, 'id':d.id}
-            # self.m_decks+=[d]
-
-        # models=self.anki.getModels()
-        # for m, flds in models.items():
-        #     self.fields[m]=flds
-        #     m={'up':m}
-        #     self.m_models+=[m]
-        # self.ui.decks.setList(self.m_decks)
-        # self.ui.models.setList(self.m_models)
+        for d in self.filler.getDecks():
+            d={'up':d.name, 'id':d.id}
+            self.decks+=[d]
+        models=self.filler.getModels()
+        for m, flds in models.items():
+            self.fields[m]=flds
+            m={'up':m}
+            self.models+=[m]
+        self.ui.decks.setList(
+                self.decks)
+        self.ui.models.setList(
+                self.models)
 
     def on_contentChanged(self, widget):
 
@@ -122,7 +121,7 @@ class Card(Plug):
 
         item=self.ui.decks.list.currentItem()
         if item:
-            self.m_deck=item.itemData['up']
+            self.deck=item.itemData['up']
             self.ui.show()
 
     def on_modelsReturnPressed(self):
@@ -134,9 +133,9 @@ class Card(Plug):
 
     def setModel(self, model):
 
-        self.m_model=model
+        self.model=model
         flds=self.fields.get(
-                self.m_model, {})
+                self.model, {})
         data=[]
         for f in flds:
             data+=[{
@@ -146,7 +145,7 @@ class Card(Plug):
               'down': ''
               }]
         self.ui.main.setList(data)
-        if self.m_deck:
+        if self.deck:
             self.ui.show()
         else:
             self.toggleDecks()
@@ -203,6 +202,14 @@ class Card(Plug):
         w=self.getWidget(digit=digit)
         if w: w.setFocus()
 
+    @tag('t', modes=['command'])
+    def toggle(self): 
+
+        super().toggle()
+        if not self.model:
+            self.toggleModels()
+        self.ui.current.list.setFocus()
+
     @tag('p')
     def togglePin(self):
 
@@ -223,8 +230,8 @@ class Card(Plug):
             self.ui.show(self.ui.main)
         else:
             info=[
-                 {'up':'Model', 'down': self.m_model}, 
-                 {'up':'Deck', 'down': self.m_deck},
+                 {'up':'Model', 'down': self.model}, 
+                 {'up':'Deck', 'down': self.deck},
                  ]
             for p in self.pinned: 
                 info+=[{'up': 'Pinned', 'down':p}]
@@ -233,18 +240,20 @@ class Card(Plug):
 
     @tag('d')
     def toggleDecks(self):
-        self.toggleUI(self.ui.decks)
+
+        if self.ui.decks.isVisible():
+            self.ui.show(self.ui.main)
+        else:
+            self.ui.show(self.ui.decks)
 
     @tag('m')
     def toggleModels(self):
-        self.toggleUI(self.ui.models)
 
-    def toggleUI(self, ui):
-
-        if not ui.isVisible():
-            self.ui.show(ui)
+        if self.ui.models.isVisible():
+            self.ui.show(self.ui.main)
         else:
-            self.ui.show()
+            self.ui.show(self.ui.models)
+
 
     @tag('s', modes=['Card', 'command'])
     def submit(self, note=None):
@@ -252,7 +261,7 @@ class Card(Plug):
         try:
             if not note:
                 note=self.createNote()
-            self.anki.addNotes(note)
+            self.filler.addNotes(note)
             self.clear()
             msg='Submitted to Anki'
         except:
@@ -267,7 +276,7 @@ class Card(Plug):
     def clear(self, force=False):
 
         d=[]
-        for f in self.fields[self.m_model]:
+        for f in self.fields[self.model]:
             if force or not f in self.pinned: 
                 d+=[{'up':f, 'down':''}]
             else:
@@ -281,8 +290,16 @@ class Card(Plug):
     @tag('c', modes=['command'])
     def addCloze(self):
 
-        self.activate()
-        self.setModel('Cloze')
+
+        if self.deck and self.input:
+            self.input.follow=False
+            self.input.getter=self.getSelected
+            self.input.activate()
+            self.input.setRatio(w=0.6, h=0.3)
+            self.input.setter=self.createCloze
+        else:
+            self.activate()
+            self.setModel('Cloze')
 
     def getSelected(self, sep=' '):
 
@@ -313,9 +330,9 @@ class Card(Plug):
             ):
 
         if not deck:
-            deck=self.m_deck
+            deck=self.deck
         if not model:
-            model=self.m_model
+            model=self.model
         if not fields:
             d=self.ui.main.list.dlist
             for f in d: 
