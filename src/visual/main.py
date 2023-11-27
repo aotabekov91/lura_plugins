@@ -31,14 +31,14 @@ class Visual(Mode):
         elif sm=='Hint':
             self.view.select(i, data)
 
-    def activate(self):
+    def listen(self):
 
-        super().activate()
+        super().listen()
         self.setSubmode('Select')
         
-    def octivate(self):
+    def delisten(self):
 
-        super().octivate()
+        super().delisten()
         self.setSubmode()
 
     @tag('<c-j>', modes=['visual']) 

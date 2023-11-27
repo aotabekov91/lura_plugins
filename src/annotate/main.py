@@ -6,33 +6,46 @@ from tables import Annotation as Table
 class Annotate(Plug):
 
     colors={}
-    fcolors={}
     isMode=True
-    dcolor='cyan'
+    func_colors={}
     kind='highlight'
+    default_color='cyan'
     listen_leader='<c-a>'
-
-    chosen=QtCore.pyqtSignal(object)
-    removed=QtCore.pyqtSignal(object)
-    annotated=QtCore.pyqtSignal(object)
 
     def setup(self):
 
-        raise
         super().setup()
         self.setColors()
         self.app.buffer.modelLoaded.connect(
                 self.annotateModel)
-        self.dcolor=QtGui.QColor(self.dcolor)
+        self.default_color=QtGui.QColor(
+                self.default_color)
+
+    def remove(self, e):
+
+        d=e.data()
+        v=self.app.handler.type()
+        v.delLocator(data=d, kind='annotation')
+
+    def getTable(self, o=None):
+
+        n='Annotation'
+        s='kind=table;'
+        o=o or self.app.handler.type()
+        u=o.getUniqLocator()
+        return o, self.app.buffer.getModel((u,n,s))
 
     def annotateModel(self, m):
 
         if self.checkProp('canAnnotate', m):
-            l=m.getUniqLocator(kind='annotation')
-            # rs=self.table.getRow(l)
-            # for r in rs: 
-            #     self.updateAnnData(r, model=m)
-            #     m.setLocator(r, 'annotation')
+            m, t = self.getTable(m)
+            if not t: return
+            t.elementRemoved.connect(self.remove)
+            for e in t.elements().values():
+                d=e.data()
+                f=d.get('function', 'Default')
+                d['color']=self.func_colors[f]
+                m.setLocator(d, 'annotation')
 
     def setColors(self):
 
@@ -40,35 +53,31 @@ class Annotate(Plug):
             n, c=v['name'], v['color']
             f=partial(self.annotate, func=n)
             f.key, f.modes=f'{k}', []
-            self.fcolors[n]=QtGui.QColor(c)
+            self.func_colors[n]=QtGui.QColor(c)
             setattr(self, f'annotateIn{n}', f)
-            # self.actions[(self.name, n)]=f
-        # self.app.moder.save(self, self.actions)
 
-    def annotate(self, func, sel=None):
+    def annotate(self, func, s=None):
 
         v=self.app.handler.type()
-        sel = sel or v.selection()
-        if sel:
-            sel['function']=func
-            sel['akind']=self.kind
-            c=self.fcolors.get(
-                    func, self.dcolor)
-            sel['color']=c
-            i=sel['item']
-            i.annotate(sel)
-            self.write(sel)
-            self.annotated.emit(sel)
-        self.delistenWanted.emit()
+        s = s or v.selection()
+        if not s: self.octivate()
+        s['function']=func
+        s['akind']=self.kind
+        c=self.func_colors.get(
+                func, self.default_color)
+        s['color']=c
+        i=s['item']
+        i.annotate(s)
+        self.write(s)
+        self.octivate()
 
-    def write(self, sel):
+    def write(self, s):
 
-        v=self.app.handler.type()
-        l=v.getLocator(
-                data=sel, kind='annotation')
-        self.table.writeRow(l)
+        v, t = self.getTable()
+        l=v.getLocator(s, 'annotation')
+        t.addElement(l)
 
     def checkLeader(self, e, p):
 
-        v=self.app.handler.view()
+        v=self.app.handler.type()
         return self.checkProp('canAnnotate', v)
