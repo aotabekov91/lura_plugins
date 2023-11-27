@@ -24,7 +24,7 @@ class SearchList(Plug):
             ear.returnPressed.connect(
                     self.activate)
             self.search.endedListening.connect(
-                    self.deactivate)
+                    self.octivate)
 
     def activate(self):
 

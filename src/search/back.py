@@ -63,7 +63,7 @@ class Search(Plug):
 
         super().delisten()
         self.clear()
-        self.deactivateBar()
+        self.octivateBar()
 
     def deactivateBar(self):
 

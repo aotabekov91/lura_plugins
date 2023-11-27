@@ -5,20 +5,11 @@ from plug.qt.plugs.visual import Visual as Mode
 
 class Visual(Mode):
 
+    key=''
+    jumping=False
+    hinting=False
+    seletion=None
     hintSelected=QtCore.pyqtSignal()
-
-    def __init__(
-            self, *args, **kwargs):
-
-        self.key=''
-        self.s=None
-        self.view=None
-        self.jumping=False
-        self.hinting=False
-        super().__init__(
-                *args, **kwargs)
-        self.listenerAddKeys=self.ear.addKeys
-        self.ear.addKeys=self.addOwnKeys
 
     def addOwnKeys(self, event):
 
@@ -121,16 +112,3 @@ class Visual(Mode):
                 e=item.element()
                 e.updateBlock(kind, sel)
                 item.update()
-
-    def checkLeader(self, event, pressed):
-
-        if super().checkLeader(event, pressed):
-            if self.ear.listening:
-                return True
-            m=self.app.moder.current
-            if m and m.name=='normal':
-                v=m.getView()
-                if v.check('canHint'):
-                    self.view=v
-                    return True
-        return False

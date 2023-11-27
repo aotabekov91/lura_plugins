@@ -41,7 +41,7 @@ class Search(Plug):
 
         super().delisten()
         self.disconnectView()
-        self.deactivateBar()
+        self.octivateBar()
         self.clear()
 
     def clear(self):
@@ -64,13 +64,13 @@ class Search(Plug):
         self.clear()
         t=self.bar.edit.text()
         if t: self.view.search(t)
-        self.deactivateBar()
+        self.octivateBar()
 
     @tag('<c-f>')
     def toggleFocus(self): 
 
         if self.bar.edit.hasFocus():
-            self.deactivateBar()
+            self.octivateBar()
         else:
             self.activateBar()
 

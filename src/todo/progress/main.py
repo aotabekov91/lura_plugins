@@ -23,7 +23,7 @@ class Progress(Plug):
         self.ui.addWidget(InputList(), 'main', main=True)
         self.ui.main.input.setLabel('Reading list')
 
-        self.ui.hideWanted.connect(self.deactivate)
+        self.ui.hideWanted.connect(self.octivate)
         self.ui.installEventFilter(self)
 
     @tag('t', modes=['command']) 

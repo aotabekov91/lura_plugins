@@ -4,68 +4,46 @@ from PyQt5 import QtCore, QtGui
 
 class Links(Plug):
 
-    key=''
-    view=None
-    links=None
-    hinting=False
-    selection=None
+    isMode=True
     listen_leader='<c-l>'
-    prefix_keys={'command': 'l'}
-    linkSelected=QtCore.pyqtSignal()
 
     def event_functor(self, e, ear):
 
-        if self.hinting and e.text():
+        if e.text():
             self.key+=e.text()
             self.view.updateHint(self.key)
             return True
 
-    def listen(self):
-
-        super().listen()
-        self.view.hintSelected.connect(
-                self.selectHinted)
-        self.view.hintFinished.connect(
-                self.selectHinted)
+    def activate(self):
+        
+        super().activate()
+        self.view.hintSelected.connect(self.selectHinted)
+        self.view.hintFinished.connect(self.selectHinted)
         self.hint()
 
-    def delisten(self): 
+    def octivate(self): 
 
-        super().delisten()
-        self.app.earman.clearKeys()
-        self.view.hintSelected.disconnect(
-                self.selectHinted)
-        self.view.hintFinished.disconnect(
-                self.selectHinted)
-        self.cleanUp()
+        super().octivate()
+        self.view.hintSelected.disconnect(self.selectHinted)
+        self.view.hintFinished.disconnect(self.selectHinted)
 
     def hint(self, data=None):
 
-        self.hinting=True
-        citem=self.view.currentItem()
-        links=citem.getLinks()
-        self.view.hint(links)
+        l=[]
+        for i in self.view.visibleItems():
+            l+=i.getLinks()
+        if l: self.view.hint(l)
 
     def selectHinted(self, l=None):
 
-        self.hinting=False
         if l: self.view.openLink(l)
-        self.deactivate()
-
-    def cleanUp(self):
-
-        self.key=''
-        self.view=None
-        self.links=None
-        self.hinting=False
-        self.selection=None
+        self.octivate()
 
     def checkLeader(self, e, p):
 
-        c=self.app.moder.current
-        if c and c.name=='normal':
-            v=c.getView()
-            cond=['hasLinks', 'canHint']
-            if v and v.check(cond):
-                self.view=v
-                return True
+        v=self.app.handler.view()
+        c=['hasLinks', 'canHint']
+        if v and self.checkProp(c, v):
+            self.key=''
+            self.view=v
+            return True

@@ -5,12 +5,11 @@ from tables import Annotation as Table
 
 class Annotate(Plug):
 
-    view=None
     colors={}
-    table=Table()
-    func_colors={}
+    fcolors={}
+    isMode=True
+    dcolor='cyan'
     kind='highlight'
-    default_color='cyan'
     listen_leader='<c-a>'
 
     chosen=QtCore.pyqtSignal(object)
@@ -21,34 +20,40 @@ class Annotate(Plug):
 
         super().setup()
         self.setColors()
+        self.app.buffer.modelLoaded.connect(
+                self.annotateModel)
+        self.dcolor=QtGui.QColor(self.dcolor)
+
+    def annotateModel(self, m):
+
+        if self.checkProp('canAnnotate', m):
+            l=m.getUniqLocator(kind='annotation')
+            # rs=self.table.getRow(l)
+            # for r in rs: 
+            #     self.updateAnnData(r, model=m)
+            #     m.setLocator(r, 'annotation')
 
     def setColors(self):
 
-        c=self.colors
-        for k, v in c.items():
+        for k, v in self.colors.items():
             n, c=v['name'], v['color']
             f=partial(self.annotate, func=n)
             f.key, f.modes=f'{k}', []
-            self.func_colors[n]=QtGui.QColor(c)
-            self.actions[(self.name, n)]=f
-        self.app.moder.save(
-                self, self.actions)
-        self.default_color=QtGui.QColor(
-                self.default_color)
-
-    def getColor(self, func):
-
-        return self.func_colors.get(
-                func, self.default_color)
+            self.fcolors[n]=QtGui.QColor(c)
+            setattr(self, f'annotateIn{n}', f)
+            # self.actions[(self.name, n)]=f
+        # self.app.moder.save(self, self.actions)
 
     def annotate(self, func, sel=None):
 
-        if not sel:
-            sel=self.view.selection()
+        v=self.app.handler.type()
+        sel = sel or v.selection()
         if sel:
             sel['function']=func
             sel['akind']=self.kind
-            sel['color']=self.getColor(func)
+            c=self.fcolors.get(
+                    func, self.dcolor)
+            sel['color']=c
             i=sel['item']
             i.annotate(sel)
             self.write(sel)
@@ -57,19 +62,12 @@ class Annotate(Plug):
 
     def write(self, sel):
 
-        loc=self.view.getLocator(
+        v=self.app.handler.type()
+        l=v.getLocator(
                 data=sel, kind='annotation')
-        self.table.writeRow(loc)
+        self.table.writeRow(l)
 
-    def checkLeader(self, event, pressed):
+    def checkLeader(self, e, p):
 
-        if super().checkLeader(event, pressed):
-            if self.ear.listening: 
-                return True
-            c=self.app.moder.current
-            if c and hasattr(c, 'getView'):
-                v=c.getView()
-                if v.check('canAnnotate'):
-                    self.view=v
-                    return True
-        return False
+        t=self.app.handler.type()
+        return self.checkProp('canAnnotate', t)
