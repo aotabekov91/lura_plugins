@@ -3,53 +3,46 @@ from tables import Autosave as Table
 
 class Autosave(Plug):
 
+    table=Table()
+
     def setup(self):
 
         self.view=None
         super().setup()
-        self.table=Table()
         self.app.buffer.viewCreated.connect(
                 self.setViewData)
-        self.app.moder.modeChanged.connect(
+        self.app.handler.viewChanged.connect(
                 self.updateView)
 
-    def updateView(self, mode):
+    def setViewData(self, v):
 
-        v=mode.getView()
-        if v and v.check('canMove'):
+        if self.checkProp('canLocate', v):
+            l=v.getUniqLocator()
+            d=self.table.getRow(l)
+            if not d: return
+            v.setLocator(d[0], kind='position')
+
+    def updateView(self, v):
+
+        if self.checkProp('canLocate', v):
             self.setView(v)
 
     def setView(self, v):
 
-        self.reset()
+        self.reconnect('disconnect')
         self.view=v
-        self.updateViewData(v)
-        self.reset('connect')
+        self.reconnect()
 
-    def updateViewData(self, v):
+    def reconnect(self, kind='connect'):
 
-        ul=v.getUniqLocator()
-        if not self.table.getRow(ul):
-            self.table.writeRow(ul)
+        v = self.view
+        if not v: return
+        f=getattr(v.positionChanged, kind)
+        f(self.saveState)
 
-    def reset(self, kind='disconnect'):
+    def saveState(self):
 
-        if not self.view: return
-        f=getattr(self.view.positionChanged, kind)
-        f(self.saveViewData)
-
-    def setViewData(self, v):
-
-        l=v.getUniqLocator()
-        d=self.table.getRow(l)
-        if d:
-            v.setLocator(
-                    d[0], kind='position')
-            self.setView(v)
-
-    def saveViewData(self):
-
-        ul=self.view.getUniqLocator()
-        pl=self.view.getLocator(
-                kind='position')
-        self.table.updateRow(ul, pl)
+        l=self.view.getUniqLocator()
+        p=self.view.getLocator(
+                kind='position', data=l)
+        self.table.writeRow(l)
