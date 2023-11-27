@@ -18,6 +18,7 @@ class Annotate(Plug):
 
     def setup(self):
 
+        raise
         super().setup()
         self.setColors()
         self.app.buffer.modelLoaded.connect(
@@ -69,5 +70,5 @@ class Annotate(Plug):
 
     def checkLeader(self, e, p):
 
-        t=self.app.handler.type()
-        return self.checkProp('canAnnotate', t)
+        v=self.app.handler.view()
+        return self.checkProp('canAnnotate', v)
