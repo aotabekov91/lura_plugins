@@ -1,5 +1,4 @@
 from gizmo.utils import tag
-from PyQt5 import QtCore, QtGui
 from plug.qt.plugs.visual import Visual as Mode
 
 class Visual(Mode):
