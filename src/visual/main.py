@@ -68,43 +68,43 @@ class Visual(Mode):
 
     @tag('o', modes=['visual[Select]'])
     def gotoStart(self): 
-        self.goto(kind='first')
+        self.go(kind='first')
 
     @tag('$', modes=['visual[Select]'])
     def gotoEnd(self):
-        self.goto(kind='last')
+        self.go(kind='last')
 
     @tag('j', modes=['visual[Select]']) 
     def selectDown(self, digit=1):
-        self.goto(kind='down', digit=digit)
+        self.go(kind='down', digit=digit)
 
     @tag('k', modes=['visual[Select]']) 
     def selectUp(self, digit=1):
-        self.goto(kind='up', digit=digit)
+        self.go(kind='up', digit=digit)
 
     @tag('J', modes=['visual[Select]']) 
     def deselectDown(self, digit=1):
-        self.goto(kind='cancelDown', digit=digit)
+        self.go(kind='cancelDown', digit=digit)
 
     @tag('K', modes=['visual[Select]']) 
     def deselectUp(self, digit=1):
-        self.goto(kind='cancelUp', digit=digit)
+        self.go(kind='cancelUp', digit=digit)
 
     @tag('w', modes=['visual[Select]']) 
     def selectNext(self, digit=1):
-        self.goto(kind='next', digit=digit)
+        self.go(kind='next', digit=digit)
         
     @tag('W', modes=['visual[Select]'])
     def deselectNext(self, digit=1):
-        self.goto(kind='cancelNext', digit=digit)
+        self.go(kind='cancelNext', digit=digit)
 
     @tag('b', modes=['visual[Select]']) 
     def selectPrev(self, digit=1):
-        self.goto(kind='prev', digit=digit)
+        self.go(kind='prev', digit=digit)
         
     @tag('B', modes=['visual[Select]']) 
     def deselectPrev(self, digit=1):
-        self.goto(kind='cancelPrev', digit=digit)
+        self.go(kind='cancelPrev', digit=digit)
 
     def jump(self, data):
 

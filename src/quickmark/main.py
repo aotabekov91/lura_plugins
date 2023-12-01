@@ -40,7 +40,7 @@ class Quickmark(Plug):
     def gotoMark(self):
 
         if self.checkType():
-            self.activate(self.goto)
+            self.activate(self.goTo)
 
     def mark(self, m):
 
@@ -53,7 +53,7 @@ class Quickmark(Plug):
             tm.addElement(ul)
             self.marked.emit()
 
-    def goto(self, m):
+    def goTo(self, m):
 
         t, tm=self.getModel()
         if not tm: return
