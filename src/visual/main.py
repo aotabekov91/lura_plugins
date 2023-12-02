@@ -1,44 +1,75 @@
 from gizmo.utils import tag
-from plug.qt.plugs.visual import Visual as Mode
+from plug.qt.plugs import visual
 
-class Visual(Mode):
+class Visual(visual.Visual):
 
     def event_functor(self, e, ear):
 
         t=e.text()
         sm=self.submode()
-        c = sm in ['Hint', 'Jump']
-        if c and t: 
+        if sm in ['Hint', 'Jump'] and t: 
             self.key+=t
             self.view.updateHint(self.key)
             return True
-        return False
 
     def finishHinting(self):
 
+        self.setSubmode('Select')
+        self.app.earman.clearKeys()
         self.view.hintSelected.disconnect(
                 self.selectHinted)
         self.view.hintFinished.disconnect(
                 self.finishHinting)
 
-    def selectHinted(self, data):
+    def selectHinted(self, sel):
 
-        i=data['item']
+        i=sel['item']
         sm=self.submode()
         if sm=='Jump': 
-            self.jump(data)
+            self.jump(sel)
         elif sm=='Hint':
-            self.view.select(i, data)
+            self.view.select(i, sel)
 
-    def listen(self):
+    def activate(self):
 
-        super().listen()
-        self.setSubmode('Select')
+        super().activate()
+        if not self.view.selection():
+            self.hintWord()
+            self.setSubmode('Hint')
+        else:
+            self.setSubmode('Select')
         
-    def delisten(self):
+    def octivate(self):
 
-        super().delisten()
+        super().octivate()
         self.setSubmode()
+
+    @tag('w', modes=['visual[Hint]'])
+    def hintWord(self):
+
+        self.key=''
+        self.view.hintSelected.connect(
+                self.selectHinted)
+        self.view.hintFinished.connect(
+                self.finishHinting)
+        self.view.hint(kind='words')
+
+    def jump(self, data):
+
+        i=data['item']
+        e=i.element()
+        c=self.view.selection()
+        e.jumpToBlock(c, data)
+        
+    def goTo(self, kind, digit=1):
+
+        for i in range(digit):
+            s=self.view.selection()
+            if not s: return
+            i=s['item']
+            e=i.element()
+            e.updateBlock(kind, s)
+            i.update()
 
     @tag('<c-j>', modes=['visual']) 
     def activateJump(self):
@@ -56,69 +87,42 @@ class Visual(Mode):
     def jumpWord(self):
         self.hintWord()
 
-    @tag('w', modes=['visual[Hint]'])
-    def hintWord(self):
-
-        self.key=''
-        self.view.hintSelected.connect(
-                self.selectHinted)
-        self.view.hintFinished.connect(
-                self.finishHinting)
-        self.view.hint(kind='words')
-
     @tag('o', modes=['visual[Select]'])
     def gotoStart(self): 
-        self.go(kind='first')
+        self.goTo(kind='first')
 
     @tag('$', modes=['visual[Select]'])
     def gotoEnd(self):
-        self.go(kind='last')
+        self.goTo(kind='last')
 
     @tag('j', modes=['visual[Select]']) 
     def selectDown(self, digit=1):
-        self.go(kind='down', digit=digit)
+        self.goTo(kind='down', digit=digit)
 
     @tag('k', modes=['visual[Select]']) 
     def selectUp(self, digit=1):
-        self.go(kind='up', digit=digit)
+        self.goTo(kind='up', digit=digit)
 
     @tag('J', modes=['visual[Select]']) 
     def deselectDown(self, digit=1):
-        self.go(kind='cancelDown', digit=digit)
+        self.goTo(kind='cancelDown', digit=digit)
 
     @tag('K', modes=['visual[Select]']) 
     def deselectUp(self, digit=1):
-        self.go(kind='cancelUp', digit=digit)
+        self.goTo(kind='cancelUp', digit=digit)
 
     @tag('w', modes=['visual[Select]']) 
     def selectNext(self, digit=1):
-        self.go(kind='next', digit=digit)
+        self.goTo(kind='next', digit=digit)
         
     @tag('W', modes=['visual[Select]'])
     def deselectNext(self, digit=1):
-        self.go(kind='cancelNext', digit=digit)
+        self.goTo(kind='cancelNext', digit=digit)
 
     @tag('b', modes=['visual[Select]']) 
     def selectPrev(self, digit=1):
-        self.go(kind='prev', digit=digit)
+        self.goTo(kind='prev', digit=digit)
         
     @tag('B', modes=['visual[Select]']) 
     def deselectPrev(self, digit=1):
-        self.go(kind='cancelPrev', digit=digit)
-
-    def jump(self, data):
-
-        i=data['item']
-        e=i.element()
-        c=self.view.selection()
-        e.jumpToBlock(c, data)
-        
-    def goto(self, kind, digit=1):
-
-        for i in range(digit):
-            data=self.view.selection()
-            if data:
-                i=data['item']
-                e=i.element()
-                e.updateBlock(kind, data)
-                i.update()
+        self.goTo(kind='cancelPrev', digit=digit)
