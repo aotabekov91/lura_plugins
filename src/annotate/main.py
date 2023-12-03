@@ -1,4 +1,5 @@
 from plug.qt import Plug
+from gizmo.utils import tag
 from functools import partial
 from tables import Annotation as Table
 from PyQt5 import QtGui, QtCore, QtWidgets
@@ -28,11 +29,26 @@ class Annotate(Plug):
             m.appendRow(i)
         self.ui.setModel(m)
 
+    def event_functor(self, e, ear):
+
+        t=e.text()
+        f=self.actions.get(t, None)
+        if f: f()
+
+    def setColors(self):
+
+        for k, v in self.colors.items():
+            n, c=v['name'], v['color']
+            f=partial(self.annotate, func=n)
+            self.actions[k]=f
+            self.func_colors[n]=QtGui.QColor(c)
+
     def setup(self):
 
         super().setup()
-        self.setColors()
         self.setupUI()
+        self.actions={}
+        self.setColors()
         self.app.buffer.modelLoaded.connect(
                 self.annotateModel)
         self.default_color=QtGui.QColor(
@@ -63,15 +79,6 @@ class Annotate(Plug):
                 f=d.get('function', 'Default')
                 d['color']=self.func_colors[f]
                 m.setLocator(d, 'annotation')
-
-    def setColors(self):
-
-        for k, v in self.colors.items():
-            n, c=v['name'], v['color']
-            f=partial(self.annotate, func=n)
-            f.key, f.modes=f'{k}', []
-            self.func_colors[n]=QtGui.QColor(c)
-            setattr(self, f'annotateIn{n}', f)
 
     def annotate(self, func, s=None):
 
