@@ -7,7 +7,7 @@ class OutlineView(TreeView):
     def toggle(self):
         super().toggle()
 
-    @tag('o', modes=['normal|OutlineView'])
+    @tag('o', modes=['normal|^own'])
     def open(self, *args, **kwargs):
 
         i=self.currentItem()
