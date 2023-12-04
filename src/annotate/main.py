@@ -71,6 +71,8 @@ class Annotate(Plug):
     def annotateModel(self, m):
 
         if self.checkProp('canAnnotate', m):
+            if self.checkProp('isAnnotated', m):
+                return
             m, t = self.getTable(m)
             if not t: return
             t.elementRemoved.connect(self.remove)
@@ -79,6 +81,7 @@ class Annotate(Plug):
                 f=d.get('function', 'Default')
                 d['color']=self.func_colors[f]
                 m.setLocator(d, 'annotation')
+                m.isAnnotated=True
 
     def annotate(self, func, s=None):
 
