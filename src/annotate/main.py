@@ -49,10 +49,10 @@ class Annotate(Plug):
         self.setupUI()
         self.actions={}
         self.setColors()
-        self.app.buffer.modelLoaded.connect(
-                self.annotateModel)
         self.default_color=QtGui.QColor(
                 self.default_color)
+        self.app.handler.modelLoaded.connect(
+                self.annotateModel)
 
     def remove(self, e):
 

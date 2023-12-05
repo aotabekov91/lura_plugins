@@ -9,8 +9,7 @@ class Leaper(Plug):
 
         super().setup()
         self.m_jumps={}
-        b=self.app.buffer
-        b.viewCreated.connect(
+        self.app.handler.viewCreated.connect(
                 self.setView)
 
     def setView(self, v):

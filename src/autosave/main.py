@@ -9,7 +9,7 @@ class Autosave(Plug):
 
         self.view=None
         super().setup()
-        self.app.buffer.viewCreated.connect(
+        self.app.handler.viewCreated.connect(
                 self.setViewData)
         self.app.handler.viewChanged.connect(
                 self.updateView)

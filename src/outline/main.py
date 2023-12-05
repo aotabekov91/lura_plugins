@@ -20,7 +20,8 @@ class Outline(Plug):
 
     def updateView(self, v):
 
-        vm=v.model()
-        if self.checkProp('hasOutline', vm):
-            m=vm.getOutline()
-            self.app.handler.getView(m)
+        if v:
+            vm=v.model()
+            if self.checkProp('hasOutline', vm):
+                m=vm.getOutline()
+                self.app.handler.getView(m)
