@@ -6,8 +6,9 @@ class Quickmark(Plug):
 
     isMode=True
     functor=None
+    name='Quickmark'
+    source='kind=table;'
     model_name='Quickmark'
-    source_name='kind=table;'
     check_props=['canLocate']
     jumped=QtCore.pyqtSignal()
     marked=QtCore.pyqtSignal()
@@ -45,6 +46,7 @@ class Quickmark(Plug):
     def mark(self, m):
 
         t, tm=self.getModel()
+        print(t, tm)
         if tm:
             ul=t.getUniqLocator()
             pl=t.getLocator(kind='position')
@@ -68,11 +70,10 @@ class Quickmark(Plug):
         t=t or self.app.handler.type()
         if not t: return
         if not t.model().isType: return
-        b=self.app.buffer
-        n=self.model_name
-        s=self.source_name
-        l=t.getUniqLocator()
-        return t, b.getModel((l, n, s))
+        return t, self.app.handler.getModel(
+                name=self.name,
+                source=self.source,
+                index=t.getUniqLocator())
 
     def checkType(self):
 
