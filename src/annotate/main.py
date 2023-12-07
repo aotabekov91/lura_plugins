@@ -1,5 +1,4 @@
 from plug.qt import Plug
-from gizmo.utils import tag
 from functools import partial
 from tables import Annotation as Table
 from PyQt5 import QtGui, QtCore, QtWidgets
@@ -12,6 +11,8 @@ class Annotate(Plug):
     isMode=True
     func_colors={}
     kind='highlight'
+    name='Annotation'
+    source='kind=table;'
     default_color='cyan'
     listen_leader='<c-a>'
     position={'AList' : 'overlay'}
@@ -60,20 +61,20 @@ class Annotate(Plug):
         v=self.app.handler.type()
         v.delLocator(data=d, kind='annotation')
 
-    def getTable(self, o=None):
+    def getModel(self, t=None):
 
-        n='Annotation'
-        s='kind=table;'
-        o=o or self.app.handler.type()
-        u=o.getUniqLocator()
-        return o, self.app.buffer.getModel((u,n,s))
+        t=t or self.app.handler.type()
+        return t, self.app.handler.getModel(
+                name=self.name,
+                source=self.source,
+                index=t.getUniqLocator())
 
     def annotateModel(self, m):
 
         if self.checkProp('canAnnotate', m):
             if self.checkProp('isAnnotated', m):
                 return
-            m, t = self.getTable(m)
+            m, t = self.getModel(m)
             if not t: return
             t.elementRemoved.connect(self.remove)
             for e in t.elements().values():
@@ -100,7 +101,7 @@ class Annotate(Plug):
 
     def write(self, s):
 
-        v, t = self.getTable()
+        v, t = self.getModel()
         l=v.getLocator(s, 'annotation')
         t.addElement(l)
 

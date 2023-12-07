@@ -6,8 +6,8 @@ class Bookmark(Plug):
 
     isMode=True
     special=['return']
-    model_name='Bookmark'
-    source_name='kind=table;'
+    name='Bookmark'
+    source='kind=table;'
     check_props=['canLocate']
     bookmarked=pyqtSignal()
 
@@ -73,11 +73,10 @@ class Bookmark(Plug):
         t=t or self.app.handler.type()
         if not t: return
         if not t.model().isType: return
-        b=self.app.buffer
-        n=self.model_name
-        s=self.source_name
-        l=t.getUniqLocator()
-        return t, b.getModel((l, n, s))
+        return t, self.app.handler.getModel(
+                name=self.name,
+                source=self.source,
+                index=t.getUniqLocator())
 
     def checkType(self):
 
